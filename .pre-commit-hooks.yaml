@@ -1,0 +1,7 @@
+- id: beancount-format
+  name: beancount-format
+  description: format beancount code
+  entry: beancount-format
+  language: python
+  pass_filenames: true
+  files: ^.*.bean$
