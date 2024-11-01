@@ -1,5 +1,13 @@
 format beancount
 
+# install
+
+```shell
+pip install beancount-format
+
+beancount-format ./beans/
+```
+
 as pre-commit hooks
 
 ```yaml
