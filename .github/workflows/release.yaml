@@ -24,7 +24,7 @@ jobs:
 
       - run: pip install flit && flit build
 
-      - uses: pypa/gh-action-pypi-publish@v1.12.2
+      - uses: pypa/gh-action-pypi-publish@v1.12.4
 
       - name: Get Previous Tag
         id: tag
