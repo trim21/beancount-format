@@ -19,7 +19,7 @@ description = "Beancount formatter for dprint."
 [workspace.dependencies]
 anyhow = "1.0.64"
 clap = { version = "4.5.4", features = ["derive"] }
-serde = { version = "1.0.144", features = ["derive"] }
+serde = { version = "1.0.228", features = ["derive"] }
 dprint-core = { version = "0.67.4", features = ["formatting"] }
 
 [profile.release]
