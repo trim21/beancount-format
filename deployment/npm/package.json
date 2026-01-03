@@ -1,15 +1,16 @@
 {
-  "name": "@dprint/json",
-  "version": "0.0.0",
-  "description": "Wasm module for dprint-plugin-json.",
+  "name": "@dprint/beancount",
+  "version": "0.1.0",
+  "description": "Wasm module for dprint-plugin-beancount.",
   "main": "./index.js",
   "types": "./index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dprint/dprint-plugin-json.git"
+    "url": "git+https://github.com/dprint/dprint-plugin-beancount.git"
   },
   "keywords": [
-    "json",
+    "beancount",
+    "ledger",
     "code",
     "formatter",
     "dprint"
@@ -17,9 +18,9 @@
   "author": "David Sherret",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/dprint/dprint-plugin-json/issues"
+    "url": "https://github.com/dprint/dprint-plugin-beancount/issues"
   },
-  "homepage": "https://github.com/dprint/dprint-plugin-json#readme",
+  "homepage": "https://github.com/dprint/dprint-plugin-beancount#readme",
   "scripts": {
     "test": "node index.test.js"
   },

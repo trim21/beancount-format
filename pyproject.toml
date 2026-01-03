@@ -1,0 +1,31 @@
+[build-system]
+requires = ["maturin>=1.6,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "bean-format"
+version = "0.1.0"
+description = "Beancount formatter powered by dprint-plugin-beancount"
+authors = [{ name = "David Sherret", email = "dsherret@gmail.com" }]
+readme = "python/README.md"
+requires-python = ">=3.10"
+classifiers = [
+  "Programming Language :: Rust",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "License :: OSI Approved :: MIT License",
+]
+
+[tool.maturin]
+manifest-path = "crates/beancount-formatter-py/Cargo.toml"
+module-name = "bean_format"
+features = ["python"]
+strip = true
+python-source = "python/src"
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = ["maturin>=1.10.2", "pytest>=8.3.5", "ruff>=0.14.10"]
