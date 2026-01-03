@@ -1,16 +1,16 @@
-extern crate dprint_development;
-extern crate dprint_plugin_beancount;
-
 use beancount_formatter::configuration::resolve_config;
+use beancount_formatter::configuration::resolve_global_config;
+use beancount_formatter::configuration::ConfigKeyMap;
 use beancount_formatter::format;
-use dprint_core::configuration::*;
-use dprint_development::ensure_no_diagnostics;
 
 #[test]
 fn formats_without_changes_returns_none() {
-  let global_config = GlobalConfiguration::default();
-  let config_result = resolve_config(ConfigKeyMap::new(), &global_config);
-  ensure_no_diagnostics(&config_result.diagnostics);
+  let mut global_config = ConfigKeyMap::new();
+  let global_result = resolve_global_config(&mut global_config);
+  assert!(global_result.diagnostics.is_empty());
+
+  let config_result = resolve_config(ConfigKeyMap::new(), &global_result.config);
+  assert!(config_result.diagnostics.is_empty());
 
   let result = format(
     Some("example.beancount"),

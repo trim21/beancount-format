@@ -22,7 +22,3 @@ jobs:
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: cargo publish -p beancount-formatter
-      - name: Cargo publish dprint plugin
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
-        run: cargo publish -p dprint-plugin-beancount

@@ -1,26 +1,21 @@
 [workspace]
-members = [
-  "crates/beancount-formatter",
-  "crates/beancount-formatter-cli",
-  "crates/dprint-plugin-beancount",
-  "crates/beancount-formatter-py",
-]
-resolver = "2"
+members = ["crates/*"]
+resolver = "3"
 
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
 authors = ["David Sherret <dsherret@gmail.com>"]
-homepage = "https://github.com/dprint/dprint-plugin-beancount"
+homepage = "https://github.com/trim21/beancount-format"
 license = "MIT"
-repository = "https://github.com/dprint/dprint-plugin-beancount"
-description = "Beancount formatter for dprint."
+repository = "https://github.com/trim21/beancount-format"
+description = "Beancount formatter library and tooling."
 
 [workspace.dependencies]
+beancount-formatter = { path = "./crates/beancount-formatter/" }
 anyhow = "1.0.100"
 clap = { version = "4.5.54", features = ["derive"] }
 serde = { version = "1.0.228", features = ["derive"] }
-dprint-core = { version = "0.67.4", features = ["formatting"] }
 
 [profile.release]
 opt-level = 3

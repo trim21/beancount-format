@@ -9,8 +9,8 @@ homepage.workspace = true
 description = "Core beancount formatter logic."
 
 [dependencies]
-tree-sitter-beancount = "2.4.2"
-tree-sitter = "*"
+tree-sitter-beancount = { git = "https://github.com/trim21/tree-sitter-beancount", rev = "041991d9509050cb5b5d88194f378cecb1452c26" }
+tree-sitter = { version = "0.26.3" }
 anyhow.workspace = true
 serde.workspace = true
 ropey = '*'

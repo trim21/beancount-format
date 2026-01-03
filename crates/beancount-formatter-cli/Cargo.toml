@@ -12,7 +12,7 @@ publish = false
 [dependencies]
 anyhow.workspace = true
 clap.workspace = true
-beancount-formatter = { path = "../beancount-formatter", version = "0.1.0" }
+beancount-formatter = { workspace = true }
 
 [[bin]]
 name = "beancount-formatter"
