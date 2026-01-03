@@ -1,0 +1,111 @@
+name: Python
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          activate-environment: "true"
+
+      - run: uv sync --frozen --group dev
+
+      - name: Format (ruff)
+        run: ruff format --check python
+
+      - name: Lint (ruff)
+        run: ruff check python
+
+  build-wheel:
+    name: Build wheel (abi3)
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          activate-environment: "true"
+
+      - run: uv sync --frozen --group dev
+
+      - run: maturin build --release --out dist
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bean-format-wheel
+          path: dist/*.whl
+          if-no-files-found: error
+
+  tests:
+    name: Tests (wheel install)
+    needs:
+      - lint
+      - build-wheel
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "${{ matrix.python-version }}"
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          activate-environment: "true"
+
+      - name: Download wheel artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: bean-format-wheel
+          path: dist
+
+      - name: Install wheel
+        run: |
+          uv pip install dist/*.whl
+
+      - name: Python smoke test
+        run: python python/tests/test_smoke.py
