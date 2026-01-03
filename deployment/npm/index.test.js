@@ -6,8 +6,8 @@ const getPath = require("./index").getPath;
 const buffer = require("fs").readFileSync(getPath());
 const formatter = createFromBuffer(buffer);
 const result = formatter.formatText({
-  filePath: "file.json",
-  fileText: "{ test: 2, }",
+  filePath: "file.beancount",
+  fileText: "2010-01-01 open Assets:Cash",
 });
 
-assert.strictEqual(result, "{ \"test\": 2 }\n");
+assert.strictEqual(result, undefined);

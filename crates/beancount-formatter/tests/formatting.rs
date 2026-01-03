@@ -1,6 +1,3 @@
-extern crate dprint_development;
-extern crate dprint_plugin_beancount;
-
 use std::path::PathBuf;
 
 use beancount_formatter::configuration::resolve_config;

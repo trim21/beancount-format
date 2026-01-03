@@ -1,0 +1,21 @@
+[package]
+name = "dprint-plugin-beancount"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Beancount formatter for dprint."
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+wasm = ["dprint-core/wasm"]
+
+[dependencies]
+anyhow.workspace = true
+dprint-core = { workspace = true, features = ["formatting", "process"] }
+beancount-formatter = { path = "../beancount-formatter", version = "0.1.0" }
