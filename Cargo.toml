@@ -17,7 +17,7 @@ repository = "https://github.com/dprint/dprint-plugin-beancount"
 description = "Beancount formatter for dprint."
 
 [workspace.dependencies]
-anyhow = "1.0.64"
+anyhow = "1.0.100"
 clap = { version = "4.5.54", features = ["derive"] }
 serde = { version = "1.0.228", features = ["derive"] }
 dprint-core = { version = "0.67.4", features = ["formatting"] }
