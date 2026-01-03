@@ -65,7 +65,7 @@ jobs:
       - run: maturin build --release --out dist
 
       - name: Upload wheel artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: bean-format-wheel
           path: dist/*.whl
