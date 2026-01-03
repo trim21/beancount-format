@@ -1,0 +1,128 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://plugins.dprint.dev/dprint/dprint-plugin-json/0.0.0/schema.json",
+  "type": "object",
+  "definitions": {
+    "preferSingleLine": {
+      "description": "If arrays and objects should collapse to a single line if it would be below the line width.",
+      "type": "boolean",
+      "default": false,
+      "oneOf": [{
+        "const": true,
+        "description": ""
+      }, {
+        "const": false,
+        "description": ""
+      }]
+    }
+  },
+  "properties": {
+    "locked": {
+      "description": "Whether the configuration is not allowed to be overriden or extended.",
+      "type": "boolean"
+    },
+    "lineWidth": {
+      "description": "The width of a line the printer will try to stay under. Note that the printer may exceed this width in certain cases.",
+      "default": 120,
+      "type": "number"
+    },
+    "indentWidth": {
+      "description": "The number of characters for an indent.",
+      "default": 2,
+      "type": "number"
+    },
+    "useTabs": {
+      "description": "Whether to use tabs (true) or spaces (false).",
+      "type": "boolean",
+      "default": false,
+      "oneOf": [{
+        "const": true,
+        "description": ""
+      }, {
+        "const": false,
+        "description": ""
+      }]
+    },
+    "newLineKind": {
+      "description": "The kind of newline to use.",
+      "type": "string",
+      "default": "lf",
+      "oneOf": [{
+        "const": "auto",
+        "description": "For each file, uses the newline kind found at the end of the last line."
+      }, {
+        "const": "crlf",
+        "description": "Uses carriage return, line feed."
+      }, {
+        "const": "lf",
+        "description": "Uses line feed."
+      }, {
+        "const": "system",
+        "description": "Uses the system standard (ex. crlf on Windows)."
+      }]
+    },
+    "commentLine.forceSpaceAfterSlashes": {
+      "description": "Forces a space after slashes.  For example: `// comment` instead of `//comment`",
+      "type": "boolean",
+      "default": true,
+      "oneOf": [{
+        "const": true,
+        "description": ""
+      }, {
+        "const": false,
+        "description": ""
+      }]
+    },
+    "preferSingleLine": {
+      "$ref": "#/definitions/preferSingleLine"
+    },
+    "array.preferSingleLine": {
+      "$ref": "#/definitions/preferSingleLine"
+    },
+    "object.preferSingleLine": {
+      "$ref": "#/definitions/preferSingleLine"
+    },
+    "trailingCommas": {
+      "description": "Whether to use trailing commas.",
+      "type": "string",
+      "default": "jsonc",
+      "oneOf": [{
+        "const": "always",
+        "description": "Always format with trailing commas. Beware: trailing commas can cause many JSON parsers to fail."
+      }, {
+        "const": "jsonc",
+        "description": "Use trailing commas in JSONC files and do not use trailing commas in JSON files."
+      }, {
+        "const": "maintain",
+        "description": "Keep the trailing comma if it exists."
+      }, {
+        "const": "never",
+        "description": "Never format with trailing commas."
+      }]
+    },
+    "jsonTrailingCommaFiles": {
+      "description": "When `trailingCommas` is `jsonc`, treat these files as JSONC and use trailing commas (ex. `[\"tsconfig.json\", \".vscode/settings.json\"]`).",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "deno": {
+      "description": "Top level configuration that sets the configuration to what is used in Deno.",
+      "type": "boolean",
+      "default": false,
+      "oneOf": [{
+        "const": true,
+        "description": ""
+      }, {
+        "const": false,
+        "description": ""
+      }]
+    },
+    "ignoreNodeCommentText": {
+      "description": "The text to use for an ignore comment (ex. `// dprint-ignore`).",
+      "default": "dprint-ignore",
+      "type": "string"
+    }
+  }
+}
