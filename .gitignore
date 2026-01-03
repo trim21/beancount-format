@@ -1,5 +1,6 @@
 .vscode
 target
 **/*.rs.bk
-deployment/npm/plugin.wasm
-deployment/npm/node_modules
+plugin.wasm
+node_modules
+*.py[cod]

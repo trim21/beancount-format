@@ -1,0 +1,32 @@
+{
+  "name": "@dprint/beancount",
+  "version": "0.1.0",
+  "description": "Wasm module for dprint-plugin-beancount.",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dprint/dprint-plugin-beancount.git"
+  },
+  "keywords": [
+    "beancount",
+    "ledger",
+    "code",
+    "formatter",
+    "dprint"
+  ],
+  "author": "David Sherret",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dprint/dprint-plugin-beancount/issues"
+  },
+  "homepage": "https://github.com/dprint/dprint-plugin-beancount#readme",
+  "packageManager": "pnpm@10.27.0",
+  "scripts": {
+    "test": "node index.js && node index.test.js"
+  },
+  "devDependencies": {
+    "@dprint/formatter": "~0.4.1"
+  }
+}
