@@ -20,7 +20,7 @@ description = "Beancount formatter for dprint."
 anyhow = "1.0.64"
 clap = { version = "4.5.4", features = ["derive"] }
 dprint-core = { version = "0.67.4", features = ["formatting", "process"] }
-pyo3 = { version = "0.21", features = ["abi3", "abi3-py38", "extension-module"] }
+pyo3 = { version = "0.24", features = ["abi3", "abi3-py38", "extension-module"] }
 serde = { version = "1.0.144", features = ["derive"] }
 
 [profile.release]
