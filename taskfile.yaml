@@ -1,0 +1,32 @@
+version: '3'
+
+tasks:
+  build:wasm:
+    desc: Build the dprint beancount plugin wasm artifact
+    cmds:
+      - cargo build -p dprint-plugin-beancount --target wasm32-unknown-unknown --features wasm --release
+
+  build:cli:
+    desc: Build the CLI binary
+    cmds:
+      - cargo build -p beancount-formatter-cli --release
+
+  build:pypi:
+    desc: Build the PyPI package via maturin (python feature)
+    cmds:
+      - maturin build --release
+
+  test:
+    desc: Run Rust tests
+    cmds:
+      - cargo test --workspace
+
+  lint:
+    desc: Run clippy lints
+    cmds:
+      - cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+  fmt:
+    desc: Run Rust formatter
+    cmds:
+      - cargo fmt --all

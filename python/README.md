@@ -1,0 +1,29 @@
+# dprint-beancount
+
+Python package wrapping the Rust `dprint-plugin-beancount` formatter.
+
+## Install
+
+```bash
+pip install dprint-beancount
+```
+
+## Usage
+
+```python
+from dprint_beancount import format_text
+
+source = "2010-01-01 open Assets:Cash\n"
+formatted = format_text(source)
+print(formatted)
+
+# Override formatter options
+formatted = format_text(
+    source,
+    line_width=80,
+    use_tabs=False,
+    indent_width=2,
+    new_line_kind="lf",  # "lf" or "crlf"
+)
+print(formatted)
+```
