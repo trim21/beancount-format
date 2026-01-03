@@ -1,7 +1,29 @@
-# dprint-plugin-json
+# @dprint/beancount
 
-[![crates.io version](https://img.shields.io/crates/v/dprint-plugin-json.svg)](https://crates.io/crates/dprint-plugin-json) [![CI](https://github.com/dprint/dprint-plugin-json/workflows/CI/badge.svg)](https://github.com/dprint/dprint-plugin-json/actions?query=workflow%3ACI)
+This package is kept in-repo to exercise dprint integration tests. It is not
+published independently; it assumes you have built the wasm artifact locally.
 
-JSON formatting plugin for [dprint](https://github.com/dprint/dprint).
+Use this with [@dprint/formatter](https://github.com/dprint/js-formatter) or
+just use @dprint/formatter and download the
+[dprint-plugin-beancount WASM file](https://github.com/dprint/dprint-plugin-beancount/releases).
 
-This uses the [jsonc-parser](https://github.com/dprint/jsonc-parser) parser.
+## Running tests locally
+
+```sh
+cargo build -p dprint-plugin-beancount --target wasm32-unknown-unknown --features wasm --release
+pnpm install --frozen-lockfile
+pnpm test
+```
+
+## Example
+
+```ts
+import { createFromBuffer } from "@dprint/formatter";
+import { getPath } from "@dprint/beancount";
+import * as fs from "fs";
+
+const buffer = fs.readFileSync(getPath());
+const formatter = createFromBuffer(buffer);
+
+console.log(formatter.formatText("example.beancount", "2010-01-01 open Assets:Cash"));
+```
