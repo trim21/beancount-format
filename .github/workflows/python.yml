@@ -98,7 +98,7 @@ jobs:
           activate-environment: "true"
 
       - name: Download wheel artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: bean-format-wheel
           path: dist
