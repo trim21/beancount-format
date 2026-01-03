@@ -7,29 +7,17 @@
       "description": "Whether the configuration is not allowed to be overriden or extended.",
       "type": "boolean"
     },
-    "lineWidth": {
+    "line_width": {
       "description": "The width of a line the printer will try to stay under. Note that the printer may exceed this width in certain cases.",
       "default": 120,
       "type": "number"
     },
-    "indentWidth": {
+    "indent_width": {
       "description": "The number of characters for an indent.",
       "default": 2,
       "type": "number"
     },
-    "useTabs": {
-      "description": "Whether to use tabs (true) or spaces (false).",
-      "type": "boolean",
-      "default": false,
-      "oneOf": [{
-        "const": true,
-        "description": ""
-      }, {
-        "const": false,
-        "description": ""
-      }]
-    },
-    "newLineKind": {
+    "new_line_kind": {
       "description": "The kind of newline to use.",
       "type": "string",
       "default": "lf",

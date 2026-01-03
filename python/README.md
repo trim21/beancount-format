@@ -20,8 +20,8 @@ print(formatted)
 # Override formatter options
 formatted = format_text(
     source,
+    path="ledger.beancount",  # defaults to "<memory>"
     line_width=80,
-    use_tabs=False,
     indent_width=2,
     new_line_kind="lf",  # "lf" or "crlf"
 )

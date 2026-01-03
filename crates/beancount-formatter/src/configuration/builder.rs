@@ -42,27 +42,45 @@ impl ConfigurationBuilder {
   /// The width of a line the the printer will try to stay under. Note that the printer may exceed this width in certain cases.
   /// Default: 120
   pub fn line_width(&mut self, value: u32) -> &mut Self {
-    self.insert("lineWidth", (value as i32).into())
-  }
-
-  /// Whether to use tabs (true) or spaces (false).
-  ///
-  /// Default: `false`
-  pub fn use_tabs(&mut self, value: bool) -> &mut Self {
-    self.insert("useTabs", value.into())
+    self.insert("line_width", (value as i32).into())
   }
 
   /// The number of columns for an indent.
   ///
   /// Default: `2`
   pub fn indent_width(&mut self, value: u8) -> &mut Self {
-    self.insert("indentWidth", (value as i32).into())
+    self.insert("indent_width", (value as i32).into())
   }
 
   /// The kind of newline to use.
   /// Default: `NewLineKind::LF`
   pub fn new_line_kind(&mut self, value: NewLineKind) -> &mut Self {
-    self.insert("newLineKind", value.as_str().into())
+    self.insert("new_line_kind", value.as_str().into())
+  }
+
+  /// Use this prefix width instead of determining an optimal value automatically.
+  pub fn prefix_width(&mut self, value: usize) -> &mut Self {
+    self.insert("prefix_width", value.into())
+  }
+
+  /// Use this width to render numbers instead of determining an optimal value.
+  pub fn num_width(&mut self, value: usize) -> &mut Self {
+    self.insert("num_width", value.into())
+  }
+
+  /// Align currencies in this column.
+  pub fn currency_column(&mut self, value: usize) -> &mut Self {
+    self.insert("currency_column", value.into())
+  }
+
+  /// Spacing between account names and amounts.
+  pub fn account_amount_spacing(&mut self, value: usize) -> &mut Self {
+    self.insert("account_amount_spacing", value.into())
+  }
+
+  /// Number of spaces between the number and currency.
+  pub fn number_currency_spacing(&mut self, value: usize) -> &mut Self {
+    self.insert("number_currency_spacing", value.into())
   }
 
   #[cfg(test)]
@@ -87,12 +105,16 @@ mod tests {
     config
       .new_line_kind(NewLineKind::CRLF)
       .line_width(90)
-      .use_tabs(true)
       .indent_width(4)
-      .new_line_kind(NewLineKind::CRLF);
+      .new_line_kind(NewLineKind::CRLF)
+      .prefix_width(12)
+      .num_width(8)
+      .currency_column(40)
+      .account_amount_spacing(2)
+      .number_currency_spacing(3);
 
     let inner_config = config.get_inner_config();
-    assert_eq!(inner_config.len(), 4);
+    assert_eq!(inner_config.len(), 8);
     let diagnostics = resolve_config(inner_config, &GlobalConfiguration::default()).diagnostics;
     assert_eq!(diagnostics.len(), 0);
   }
@@ -100,9 +122,9 @@ mod tests {
   #[test]
   fn handle_global_config() {
     let mut global_config = ConfigKeyMap::new();
-    global_config.insert(String::from("lineWidth"), 90.into());
-    global_config.insert(String::from("newLineKind"), "crlf".into());
-    global_config.insert(String::from("useTabs"), true.into());
+    global_config.insert(String::from("line_width"), 90.into());
+    global_config.insert(String::from("new_line_kind"), "crlf".into());
+    global_config.insert(String::from("use_tabs"), true.into());
     let global_config = resolve_global_config(&mut global_config).config;
     let mut config_builder = ConfigurationBuilder::new();
     let config = config_builder.global_config(global_config).build();

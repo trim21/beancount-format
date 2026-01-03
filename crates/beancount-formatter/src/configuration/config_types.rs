@@ -32,6 +32,18 @@ impl From<u8> for ConfigKeyValue {
   }
 }
 
+impl From<usize> for ConfigKeyValue {
+  fn from(value: usize) -> Self {
+    ConfigKeyValue::Number(value as i64)
+  }
+}
+
+impl From<i64> for ConfigKeyValue {
+  fn from(value: i64) -> Self {
+    ConfigKeyValue::Number(value)
+  }
+}
+
 impl From<&str> for ConfigKeyValue {
   fn from(value: &str) -> Self {
     ConfigKeyValue::Text(value.to_string())
@@ -61,7 +73,6 @@ pub struct ResolveConfigurationResult<T> {
 #[derive(Debug, Clone, PartialEq)]
 pub struct GlobalConfiguration {
   pub line_width: Option<u32>,
-  pub use_tabs: Option<bool>,
   pub indent_width: Option<u8>,
   pub new_line_kind: Option<String>,
 }
@@ -69,13 +80,11 @@ pub struct GlobalConfiguration {
 pub const DEFAULT_LINE_WIDTH: u32 = 120;
 pub const DEFAULT_INDENT_WIDTH: u8 = 2;
 pub const DEFAULT_NEW_LINE_KIND: &str = "lf";
-pub const DEFAULT_USE_TABS: bool = false;
 
 impl Default for GlobalConfiguration {
   fn default() -> Self {
     GlobalConfiguration {
       line_width: Some(DEFAULT_LINE_WIDTH),
-      use_tabs: Some(DEFAULT_USE_TABS),
       indent_width: Some(DEFAULT_INDENT_WIDTH),
       new_line_kind: Some(DEFAULT_NEW_LINE_KIND.to_string()),
     }

@@ -9,5 +9,8 @@ homepage.workspace = true
 description = "Core beancount formatter logic."
 
 [dependencies]
+tree-sitter-beancount = "2.4.2"
+tree-sitter = "*"
 anyhow.workspace = true
 serde.workspace = true
+ropey = '*'
