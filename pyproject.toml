@@ -28,4 +28,4 @@ python-source = "python/src"
 package = false
 
 [dependency-groups]
-dev = ["maturin>=1.10.2", "pytest>=8.4.2", "ruff>=0.14.10"]
+dev = ["maturin>=1.10.2", "pytest>=9.0.2", "ruff>=0.14.10"]
