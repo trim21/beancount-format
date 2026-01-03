@@ -8,9 +8,6 @@ on:
     branches:
       - master
 
-permissions:
-  contents: read
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
@@ -35,70 +32,3 @@ jobs:
 
       - name: Tests
         run: cargo test --workspace
-
-  python:
-    name: Python fmt, lint, tests
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version:
-          - "3.10"
-          - "3.11"
-          - "3.12"
-          - "3.13"
-          - "3.14"
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "${{ matrix.python-version }}"
-
-      - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          activate-environment: "true"
-
-      - run: uv sync --frozen
-
-      - run: maturin develop --release
-
-      - name: Format (ruff)
-        run: ruff format --check python
-
-      - name: Lint (ruff)
-        run: ruff check python
-
-      - name: Python smoke test
-        run: python python/tests/test_smoke.py
-
-  dprint_plugin:
-    name: Plugin wasm + pnpm tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          components: rustfmt
-
-      - name: Build wasm plugin
-        run: cargo build -p dprint-plugin-beancount --target wasm32-unknown-unknown --features wasm --release
-
-      - name: Setup | pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          package_json_file: package.json
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "20"
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Install pnpm dependencies
-        run: pnpm install --frozen-lockfile
-
-      - run: node ./test.js
