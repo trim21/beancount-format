@@ -2,7 +2,7 @@
 const fs = require("fs");
 const path = require("path");
 const args = process.argv.slice(2);
-const wasmPath = path.join(__dirname, "../../target/wasm32-unknown-unknown/release/dprint_plugin_json.wasm");
+const wasmPath = path.join(__dirname, "../../target/wasm32-unknown-unknown/release/dprint_plugin_beancount.wasm");
 fs.copyFileSync(wasmPath, path.join(__dirname, "plugin.wasm"));
 
 if (args.length > 0) {
@@ -11,7 +11,7 @@ if (args.length > 0) {
   const packageJsonText = fs.readFileSync(packageJsonPath, "utf8");
   const packageJson = JSON.parse(packageJsonText);
   if (args[0] === "sync-version") {
-    const cargoTomlPath = path.join(__dirname, "../../Cargo.toml");
+    const cargoTomlPath = path.join(__dirname, "../../crates/dprint-plugin-beancount/Cargo.toml");
     const cargoTomlText = fs.readFileSync(cargoTomlPath, "utf8");
     const versionMatch = cargoTomlText.match(/^version\s*=\s*"([^"]+)"/m);
     if (!versionMatch) {

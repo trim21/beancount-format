@@ -1,16 +1,26 @@
-[package]
-name = "dprint-plugin-json"
-version = "0.21.1"
-authors = ["David Sherret <dsherret@gmail.com>"]
-edition = "2024"
-homepage = "https://github.com/dprint/dprint-plugin-json"
-keywords = ["formatting", "formatter", "json", "jsonc"]
-license = "MIT"
-repository = "https://github.com/dprint/dprint-plugin-json"
-description = "JSON formatter for dprint."
+[workspace]
+members = [
+  "crates/beancount-formatter",
+  "crates/beancount-formatter-cli",
+  "crates/dprint-plugin-beancount",
+  "crates/beancount-formatter-py",
+]
+resolver = "2"
 
-[lib]
-crate-type = ["lib", "cdylib"]
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["David Sherret <dsherret@gmail.com>"]
+homepage = "https://github.com/dprint/dprint-plugin-beancount"
+license = "MIT"
+repository = "https://github.com/dprint/dprint-plugin-beancount"
+description = "Beancount formatter for dprint."
+
+[workspace.dependencies]
+anyhow = "1.0.64"
+clap = { version = "4.5.4", features = ["derive"] }
+serde = { version = "1.0.144", features = ["derive"] }
+dprint-core = { version = "0.67.4", features = ["formatting"] }
 
 [profile.release]
 opt-level = 3
@@ -19,21 +29,3 @@ lto = true
 debug-assertions = false
 overflow-checks = false
 panic = "abort"
-
-[features]
-wasm = ["serde_json", "dprint-core/wasm"]
-tracing = ["dprint-core/tracing"]
-
-[dependencies]
-anyhow = "1.0.64"
-dprint-core = { version = "0.67.4", features = ["formatting"] }
-dprint-core-macros = "0.1.0"
-jsonc-parser = { version = "0.28.0" }
-serde = { version = "1.0.144", features = ["derive"] }
-serde_json = { version = "1.0", optional = true }
-text_lines = "0.6.0"
-
-[dev-dependencies]
-debug-here = "0.2"
-dprint-development = "0.10.2"
-serde_json = { version = "1.0" }

@@ -1,0 +1,19 @@
+[package]
+name = "beancount-formatter-cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "CLI for the beancount formatter."
+publish = false
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+beancount-formatter = { path = "../beancount-formatter", version = "0.1.0" }
+
+[[bin]]
+name = "beancount-formatter"
+path = "src/main.rs"
