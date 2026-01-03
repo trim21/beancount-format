@@ -1,0 +1,22 @@
+[package]
+name = "beancount-formatter-py"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Python bindings for the beancount formatter."
+publish = false
+
+[lib]
+name = "bean_format"
+crate-type = ["cdylib"]
+
+[features]
+default = []
+python = ["pyo3"]
+
+[dependencies]
+beancount-formatter = { path = "../beancount-formatter", version = "0.1.0" }
+pyo3 = { workspace = true, optional = true }

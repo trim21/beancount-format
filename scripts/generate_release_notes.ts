@@ -14,24 +14,24 @@ ${changelog}
 
 Then in your project's dprint configuration file:
 
-1. Specify the plugin url in the \`"plugins"\` array (can be done via \`dprint config add json\`).
-2. Add a \`"json"\` configuration property if desired.
-   \`\`\`jsonc
+1. Specify the plugin url in the `"plugins"` array (can be done via `dprint config add beancount`).
+2. Add a `"beancount"` configuration property if desired.
+   ```jsonc
    {
      // ...etc...
-     "json": {
-       // json config goes here
+     "beancount": {
+       // beancount config goes here
      },
      "plugins": [
-       "https://plugins.dprint.dev/json-${version}.wasm"
+       "https://plugins.dprint.dev/beancount-${version}.wasm"
      ]
    }
-   \`\`\`
+   ```
 
 ## JS Formatting API
 
 * [JS Formatter](https://github.com/dprint/js-formatter) - Browser/Deno and Node
-* [npm package](https://www.npmjs.com/package/@dprint/json)
+* [npm package](https://www.npmjs.com/package/@dprint/beancount)
 `;
 
 console.log(text);

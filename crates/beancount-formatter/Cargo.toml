@@ -1,0 +1,17 @@
+[package]
+name = "beancount-formatter"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Core beancount formatter logic."
+
+[dependencies]
+anyhow.workspace = true
+dprint-core.workspace = true
+serde.workspace = true
+
+[dev-dependencies]
+dprint-development = "0.10.2"
