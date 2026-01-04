@@ -14,7 +14,7 @@ std = ["tree-sitter-beancount/std"]
 wasm = ["tree-sitter-beancount/wasm", "tree-sitter-language"]
 
 [dependencies]
-tree-sitter-beancount = { git = "https://github.com/trim21/tree-sitter-beancount", rev = "906f746dc43d977ca379373c380eea992de81120", default-features = false }
+tree-sitter-beancount = { git = "https://github.com/trim21/tree-sitter-beancount", rev = "026d67faeb19fa6fd42dd82dc4865d023a1d945b", default-features = false }
 tree-sitter = { version = "0.26.3" }
 tree-sitter-language = { optional = true, version = "^0.1.6"}
 # tree-sitter-language = { optional = true, git = "https://github.com/trim21/tree-sitter.git" }
