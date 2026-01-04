@@ -17,9 +17,6 @@ anyhow = "1.0.100"
 clap = { version = "4.5.54", features = ["derive"] }
 serde = { version = "1.0.228", features = ["derive"] }
 
-[patch.crates-io]
-tree-sitter-language = { path = "./patches/language/" }
-
 [profile.release]
 opt-level = 3
 debug = false
