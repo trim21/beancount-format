@@ -66,9 +66,10 @@ fn load_configuration(inputs: &[PathBuf]) -> Result<Configuration> {
     let parsed = parse_pyproject(&content).with_context(|| format!("Failed to parse {}", pyproject_path.display()))?;
 
     if let Some(tool) = parsed.tool
-      && let Some(cfg) = tool.beancount_formatter {
-        cfg.apply(&mut config);
-      }
+      && let Some(cfg) = tool.beancount_formatter
+    {
+      cfg.apply(&mut config);
+    }
   }
 
   Ok(config)
