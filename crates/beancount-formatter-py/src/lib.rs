@@ -1,9 +1,7 @@
 #![cfg(feature = "python")]
 
-use std::path::Path;
-
-use beancount_formatter::configuration::{ConfigurationBuilder, NewLineKind};
-use beancount_formatter::format_text;
+use beancount_formatter::configuration::{Configuration, NewLineKind};
+use beancount_formatter::format;
 use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
 
@@ -11,41 +9,34 @@ use pyo3::prelude::*;
 #[pyo3(signature = (
   text,
   *,
+  path = None,
   line_width = None,
-  use_tabs = None,
   indent_width = None,
   new_line_kind = None
 ))]
 fn format_text_py(
   text: &str,
+  path: Option<&str>,
   line_width: Option<u32>,
-  use_tabs: Option<bool>,
   indent_width: Option<u8>,
   new_line_kind: Option<&str>,
 ) -> PyResult<String> {
-  let mut config_builder = ConfigurationBuilder::new();
+  let mut config = Configuration::default();
 
   if let Some(value) = line_width {
-    config_builder.line_width(value);
-  }
-
-  if let Some(value) = use_tabs {
-    config_builder.use_tabs(value);
+    config.line_width = value;
   }
 
   if let Some(value) = indent_width {
-    config_builder.indent_width(value);
+    config.indent_width = value;
   }
 
   if let Some(value) = new_line_kind {
-    let parsed = NewLineKind::parse(value).map_err(PyValueError::new_err)?;
-    config_builder.new_line_kind(parsed);
+    config.new_line_kind = NewLineKind::parse(value).map_err(PyValueError::new_err)?;
   }
 
-  let config = config_builder.build();
-  let result = format_text(Path::new("example.beancount"), text, &config)
-    .map_err(|err| PyRuntimeError::new_err(err.to_string()))?;
-  Ok(result.unwrap_or_else(|| text.to_string()))
+  let formatted = format(path, text, &config).map_err(|err| PyRuntimeError::new_err(err.to_string()))?;
+  Ok(formatted)
 }
 
 #[pymodule]

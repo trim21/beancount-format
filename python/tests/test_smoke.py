@@ -6,5 +6,10 @@ def test_round_trip_open_account() -> None:
     assert format_text(sample) == sample
 
 
+def test_round_trip_with_path() -> None:
+    sample = "2010-01-01 open Assets:Cash\n"
+    assert format_text(sample, path="ledger.beancount") == sample
+
+
 if __name__ == "__main__":
     test_round_trip_open_account()
