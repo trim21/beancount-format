@@ -23,7 +23,7 @@ function runTests() {
     fileText: "2010-01-01 open Assets:Cash",
   });
 
-  assert.strictEqual(result, "2010-01-01 open Assets:Cash");
+  assert.strictEqual(result, "2010-01-01 open Assets:Cash\n");
 }
 
 runTests()
