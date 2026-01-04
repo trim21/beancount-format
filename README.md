@@ -1,29 +1,13 @@
-# @dprint/beancount
+# beancount-format
 
-This package is kept in-repo to exercise dprint integration tests. It is not
-published independently; it assumes you have built the wasm artifact locally.
+Rust formatter for Beancount files with a reusable core library, a small CLI, and optional Python bindings.
 
-Use this with [@dprint/formatter](https://github.com/dprint/js-formatter) or
-just use @dprint/formatter and download the
-[dprint-plugin-beancount WASM file](https://github.com/dprint/dprint-plugin-beancount/releases).
+## Crates
+- crates/beancount-formatter: core library containing the formatter and configuration.
+- crates/beancount-formatter-cli: CLI wrapper around the formatter library.
+- crates/beancount-formatter-py: Python bindings built with PyO3/maturin.
 
-## Running tests locally
-
-```sh
-cargo build -p dprint-plugin-beancount --target wasm32-unknown-unknown --features wasm --release
-pnpm install --frozen-lockfile
-pnpm test
-```
-
-## Example
-
-```ts
-import { createFromBuffer } from "@dprint/formatter";
-import { getPath } from "@dprint/beancount";
-import * as fs from "fs";
-
-const buffer = fs.readFileSync(getPath());
-const formatter = createFromBuffer(buffer);
-
-console.log(formatter.formatText("example.beancount", "2010-01-01 open Assets:Cash"));
-```
+## Development
+- Build CLI: `cargo build -p beancount-formatter-cli --release`
+- Run tests: `cargo test --workspace`
+- Format code: `cargo fmt --all`

@@ -1,6 +1,6 @@
 #![cfg(feature = "python")]
 
-use beancount_formatter::configuration::{ConfigurationBuilder, NewLineKind};
+use beancount_formatter::configuration::{Configuration, NewLineKind};
 use beancount_formatter::format;
 use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
@@ -21,22 +21,20 @@ fn format_text_py(
   indent_width: Option<u8>,
   new_line_kind: Option<&str>,
 ) -> PyResult<String> {
-  let mut config_builder = ConfigurationBuilder::new();
+  let mut config = Configuration::default();
 
   if let Some(value) = line_width {
-    config_builder.line_width(value);
+    config.line_width = value;
   }
 
   if let Some(value) = indent_width {
-    config_builder.indent_width(value);
+    config.indent_width = value;
   }
 
   if let Some(value) = new_line_kind {
-    let parsed = NewLineKind::parse(value).map_err(PyValueError::new_err)?;
-    config_builder.new_line_kind(parsed);
+    config.new_line_kind = NewLineKind::parse(value).map_err(PyValueError::new_err)?;
   }
 
-  let config = config_builder.build();
   let formatted = format(path, text, &config).map_err(|err| PyRuntimeError::new_err(err.to_string()))?;
   Ok(formatted)
 }

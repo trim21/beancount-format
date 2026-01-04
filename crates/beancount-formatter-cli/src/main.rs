@@ -2,7 +2,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use anyhow::Result;
-use beancount_formatter::configuration::ConfigurationBuilder;
+use beancount_formatter::configuration::Configuration;
 use beancount_formatter::format;
 use clap::Parser;
 
@@ -20,7 +20,7 @@ struct Cli {
 fn main() -> Result<()> {
   let args = Cli::parse();
   let content = fs::read_to_string(&args.input)?;
-  let config = ConfigurationBuilder::new().build();
+  let config = Configuration::default();
   let path = args.input.to_string_lossy();
   let formatted = format(Some(&path), &content, &config)?;
 
