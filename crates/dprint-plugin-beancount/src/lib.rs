@@ -2,7 +2,7 @@
 
 use beancount_formatter::configuration::Configuration;
 use beancount_formatter::configuration::NewLineKind;
-use beancount_formatter::format_text;
+use beancount_formatter::format as format_beancount;
 use dprint_core::configuration::ConfigKeyMap;
 use dprint_core::configuration::GlobalConfiguration;
 use dprint_core::configuration::NewLineKind as DprintNewLineKind;
@@ -65,7 +65,13 @@ impl SyncPluginHandler<Configuration> for BeancountPluginHandler {
     _format_with_host: impl FnMut(SyncHostFormatRequest) -> FormatResult,
   ) -> FormatResult {
     let file_text = String::from_utf8(request.file_bytes)?;
-    format_text(request.file_path, &file_text, request.config).map(|maybe_text| maybe_text.map(|t| t.into_bytes()))
+    let formatted = format_beancount(request.file_path.to_str(), &file_text, &request.config)?;
+
+    if formatted == file_text {
+      Ok(None)
+    } else {
+      Ok(Some(formatted.into_bytes()))
+    }
   }
 }
 
@@ -86,34 +92,27 @@ fn resolve_config_dprint(
   let resolved_config = Configuration {
     line_width: get_value(
       &mut config,
-      "lineWidth",
+      "line_width",
       global_config
         .line_width
         .unwrap_or(RECOMMENDED_GLOBAL_CONFIGURATION.line_width),
       &mut diagnostics,
     ),
-    use_tabs: get_value(
-      &mut config,
-      "useTabs",
-      global_config
-        .use_tabs
-        .unwrap_or(RECOMMENDED_GLOBAL_CONFIGURATION.use_tabs),
-      &mut diagnostics,
-    ),
     indent_width: get_value(
       &mut config,
-      "indentWidth",
+      "indent_width",
       global_config.indent_width.unwrap_or(2),
       &mut diagnostics,
     ),
     new_line_kind: map_new_line_kind(get_value(
       &mut config,
-      "newLineKind",
+      "new_line_kind",
       global_config
         .new_line_kind
         .unwrap_or(RECOMMENDED_GLOBAL_CONFIGURATION.new_line_kind),
       &mut diagnostics,
     )),
+    ..Configuration::default()
   };
 
   diagnostics.extend(get_unknown_property_diagnostics(config));

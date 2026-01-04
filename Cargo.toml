@@ -16,7 +16,9 @@ beancount-formatter = { path = "./crates/beancount-formatter/" }
 anyhow = "1.0.100"
 clap = { version = "4.5.54", features = ["derive"] }
 serde = { version = "1.0.228", features = ["derive"] }
-dprint-core = { version = "0.67.4", features = ["formatting"] }
+
+[patch.crates-io]
+nix = { path = "./patches/language/" }
 
 [profile.release]
 opt-level = 3
