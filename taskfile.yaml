@@ -1,6 +1,11 @@
 version: "3"
 
 tasks:
+  build:wasm:
+    desc: Build the dprint beancount plugin wasm artifact
+    cmds:
+      - cargo build -p dprint-plugin-beancount --target wasm32-unknown-unknown --features wasm --release
+
   build:cli:
     desc: Build the CLI binary
     cmds:
