@@ -88,7 +88,6 @@ dependencies = [
  "serde",
  "tree-sitter",
  "tree-sitter-beancount",
- "tree-sitter-language",
 ]
 
 [[package]]
@@ -550,7 +549,7 @@ dependencies = [
 [[package]]
 name = "tree-sitter-beancount"
 version = "2.4.2"
-source = "git+https://github.com/trim21/tree-sitter-beancount?rev=026d67faeb19fa6fd42dd82dc4865d023a1d945b#026d67faeb19fa6fd42dd82dc4865d023a1d945b"
+source = "git+https://github.com/trim21/tree-sitter-beancount?branch=wasm#110e43d6398cbb413abca24407bfa7ced21f88f5"
 dependencies = [
  "cc",
  "tree-sitter",
