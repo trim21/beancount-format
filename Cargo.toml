@@ -16,6 +16,10 @@ beancount-formatter = { path = "./crates/beancount-formatter/" }
 anyhow = "1.0.100"
 clap = { version = "4.5.54", features = ["derive"] }
 serde = { version = "1.0.228", features = ["derive"] }
+toml = "0.8.19"
+
+[patch.crates-io]
+tree-sitter-language = { path = "./patches/tree-sitter-language-0.1.6/" }
 
 [profile.release]
 opt-level = 3

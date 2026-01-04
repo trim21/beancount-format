@@ -164,6 +164,10 @@ fn format_content(path: Option<&str>, content: &str, formatting_config: &Configu
 
   let root = tree.root_node();
 
+  let newline = match formatting_config.new_line_kind {
+    NewLineKind::LF => "\n",
+    NewLineKind::CRLF => "\r\n",
+  };
   // Walk the AST and format each top-level declaration/entry via dedicated handlers.
   let mut cursor = root.walk();
   let mut ctx = FormatterContext::new(formatting_config, content.len());
@@ -190,6 +194,8 @@ fn format_content(path: Option<&str>, content: &str, formatting_config: &Configu
       "popmeta" => ctx.format_popmeta(node, &content),
       _ => ctx.format_fallback(node, &content),
     }
+
+    ctx.write(newline);
   }
 
   let mut formatted = ctx.finish();
@@ -198,11 +204,6 @@ fn format_content(path: Option<&str>, content: &str, formatting_config: &Configu
   if !formatted.ends_with('\n') && !formatted.ends_with("\r\n") {
     formatted.push('\n');
   }
-
-  let newline = match formatting_config.new_line_kind {
-    NewLineKind::LF => "\n",
-    NewLineKind::CRLF => "\r\n",
-  };
 
   if newline == "\r\n" {
     formatted = formatted.replace("\n", "\r\n");
