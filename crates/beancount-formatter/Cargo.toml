@@ -8,9 +8,16 @@ repository.workspace = true
 homepage.workspace = true
 description = "Core beancount formatter logic."
 
+[features]
+default = ["std"]
+std = ["tree-sitter-beancount/std"]
+wasm = ["tree-sitter-beancount/wasm", "tree-sitter-language"]
+
 [dependencies]
-tree-sitter-beancount = { git = "https://github.com/trim21/tree-sitter-beancount", rev = "041991d9509050cb5b5d88194f378cecb1452c26" }
+tree-sitter-beancount = { git = "https://github.com/trim21/tree-sitter-beancount", rev = "026d67faeb19fa6fd42dd82dc4865d023a1d945b", default-features = false }
 tree-sitter = { version = "0.26.3" }
+tree-sitter-language = { optional = true, version = "^0.1.6"}
+# tree-sitter-language = { optional = true, git = "https://github.com/trim21/tree-sitter.git" }
 anyhow.workspace = true
 serde.workspace = true
 ropey = '*'

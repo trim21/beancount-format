@@ -1,0 +1,44 @@
+name: Wasm Plugin
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  dprint_plugin:
+    name: Plugin wasm + pnpm tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Build wasm plugin
+        run: cargo build -p dprint-plugin-beancount --target wasm32-unknown-unknown --features wasm --release
+
+      - name: Setup | pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: package.json
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install pnpm dependencies
+        run: pnpm install --frozen-lockfile
+
+      - run: node ./test.js
