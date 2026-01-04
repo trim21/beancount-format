@@ -65,11 +65,10 @@ fn load_configuration(inputs: &[PathBuf]) -> Result<Configuration> {
 
     let parsed = parse_pyproject(&content).with_context(|| format!("Failed to parse {}", pyproject_path.display()))?;
 
-    if let Some(tool) = parsed.tool {
-      if let Some(cfg) = tool.beancount_formatter {
+    if let Some(tool) = parsed.tool
+      && let Some(cfg) = tool.beancount_formatter {
         cfg.apply(&mut config);
       }
-    }
   }
 
   Ok(config)
@@ -141,7 +140,7 @@ fn collect_dir(dir: &Path, files: &mut Vec<PathBuf>) -> Result<()> {
     .with_context(|| format!("Failed to read directory {}", dir.display()))?
     .collect::<Result<Vec<_>, _>>()?;
 
-  entries.sort_by(|a, b| a.path().cmp(&b.path()));
+  entries.sort_by_key(|a| a.path());
 
   for entry in entries {
     let path = entry.path();
