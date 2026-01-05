@@ -427,6 +427,57 @@ fn parse_popmeta<'a>(node: Node, source: &'a str, filename: &str) -> Result<Dire
   }))
 }
 
+fn parse_key_value<'a>(node: Node, source: &'a str, filename: &str) -> Result<KeyValue<'a>> {
+  let mut cursor = node.walk();
+  let mut key = None;
+  let mut value = None;
+
+  for child in node.named_children(&mut cursor) {
+    match child.kind() {
+      "key" => key = Some(std::borrow::Cow::Borrowed(slice(child, source))),
+      "value" => value = Some(std::borrow::Cow::Borrowed(slice(child, source))),
+      _ => {}
+    }
+  }
+
+  Ok(KeyValue {
+    meta: meta(node, filename),
+    span: span(node),
+    key: key.ok_or_else(|| parse_error(node, filename, "missing key"))?,
+    value: value.ok_or_else(|| parse_error(node, filename, "missing value"))?,
+  })
+}
+
+fn parse_posting<'a>(node: Node, source: &'a str, filename: &str) -> Result<Posting<'a>> {
+  let amount = field_text(node, "amount", source).or_else(|| {
+    let mut cursor = node.walk();
+    node
+      .named_children(&mut cursor)
+      .find(|n| n.kind() == "incomplete_amount")
+      .map(|n| std::borrow::Cow::Borrowed(slice(n, source)))
+  });
+
+  let price_operator = {
+    let mut cursor = node.walk();
+    node
+      .named_children(&mut cursor)
+      .find(|n| matches!(n.kind(), "at" | "atat"))
+      .map(|n| std::borrow::Cow::Borrowed(slice(n, source)))
+  };
+
+  Ok(Posting {
+    meta: meta(node, filename),
+    span: span(node),
+    opt_flag: field_text(node, "optflag", source),
+    account: required_field_text(node, "account", source, filename)?,
+    amount,
+    cost_spec: field_text(node, "cost_spec", source),
+    price_operator,
+    price_annotation: field_text(node, "price_annotation", source),
+    comment: field_text(node, "comment", source),
+  })
+}
+
 fn parse_transaction<'a>(node: Node, source: &'a str, filename: &str) -> Result<Directive<'a>> {
   // We keep this intentionally shallow for now: ensure the node has a date and narration.
   // Different grammar versions may or may not expose field names; we support both fields and heuristics.
@@ -478,6 +529,24 @@ fn parse_transaction<'a>(node: Node, source: &'a str, filename: &str) -> Result<
     }
   };
 
+  let mut tags_links_lines = Vec::new();
+  let mut comments = Vec::new();
+  let mut key_values = Vec::new();
+  let mut postings = Vec::new();
+
+  {
+    let mut cursor = node.walk();
+    for child in node.named_children(&mut cursor) {
+      match child.kind() {
+        "tags_links" => tags_links_lines.push(std::borrow::Cow::Borrowed(slice(child, source))),
+        "comment" => comments.push(std::borrow::Cow::Borrowed(slice(child, source))),
+        "key_value" => key_values.push(parse_key_value(child, source, filename)?),
+        "posting" => postings.push(parse_posting(child, source, filename)?),
+        _ => {}
+      }
+    }
+  }
+
   Ok(Directive::Transaction(Transaction {
     meta: meta(node, filename),
     span: span(node),
@@ -485,7 +554,11 @@ fn parse_transaction<'a>(node: Node, source: &'a str, filename: &str) -> Result<
     txn,
     payee,
     narration,
-    tags_links: field_text(node, "tags_links", source),
-    comment: field_text(node, "comment", source),
+    tags_links: field_text(node, "tags_links", source).or_else(|| tags_links_lines.first().cloned()),
+    comment: field_text(node, "comment", source).or_else(|| comments.first().cloned()),
+    tags_links_lines,
+    comments,
+    key_values,
+    postings,
   }))
 }

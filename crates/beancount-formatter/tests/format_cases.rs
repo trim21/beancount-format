@@ -16,37 +16,15 @@ fn format_and_check_fixtures() {
     new_line: Option<NewLineKind>,
     prefix_width: Option<usize>,
     num_width: Option<usize>,
-    currency_column: Option<usize>,
-    account_amount_spacing: Option<usize>,
-    number_currency_spacing: Option<usize>,
   }
 
   impl PartialConfiguration {
     fn apply_to(self, mut config: Configuration) -> Configuration {
-      if let Some(v) = self.line_width {
-        config.line_width = v;
-      }
-      if let Some(v) = self.indent_width {
-        config.indent_width = v;
-      }
-      if let Some(v) = self.new_line {
-        config.new_line = v;
-      }
-      if let Some(v) = self.prefix_width {
-        config.prefix_width = Some(v);
-      }
-      if let Some(v) = self.num_width {
-        config.num_width = Some(v);
-      }
-      if let Some(v) = self.currency_column {
-        config.currency_column = Some(v);
-      }
-      if let Some(v) = self.account_amount_spacing {
-        config.account_amount_spacing = Some(v);
-      }
-      if let Some(v) = self.number_currency_spacing {
-        config.number_currency_spacing = Some(v);
-      }
+      config.line_width = self.line_width.unwrap_or(config.line_width);
+      config.indent_width = self.indent_width.unwrap_or(config.indent_width);
+      config.new_line = self.new_line.unwrap_or(config.new_line);
+      config.prefix_width = self.prefix_width.or(config.prefix_width);
+      config.num_width = self.num_width.or(config.num_width);
 
       config
     }
@@ -57,29 +35,21 @@ fn format_and_check_fixtures() {
       return;
     }
 
-    eprintln!("=== expected ===\n{}", expected);
-    eprintln!("=== actual ===\n{}", actual);
-    eprintln!("=== line diff ===");
+    let diff = similar::TextDiff::from_lines(expected, actual)
+      .unified_diff()
+      .header("expected", "actual")
+      .to_string();
 
-    let expected_lines: Vec<&str> = expected.split_terminator('\n').collect();
-    let actual_lines: Vec<&str> = actual.split_terminator('\n').collect();
-    let max = expected_lines.len().max(actual_lines.len());
-
-    for i in 0..max {
-      let expected_line = expected_lines.get(i).copied().unwrap_or("");
-      let actual_line = actual_lines.get(i).copied().unwrap_or("");
-      if expected_line == actual_line {
-        continue;
-      }
-      eprintln!("line {}:", i + 1);
-      eprintln!("- expected: {:?}", expected_line);
-      eprintln!("+ actual  : {:?}", actual_line);
-    }
-
-    panic!("text mismatch; see diff above");
+    eprintln!("{diff}");
+    panic!("text mismatch; see unified diff above");
   }
 
   fn run_case(input_path: &Path) {
+    let update_expected = std::env::var("TEST_UPDATE_EXPECTED")
+      .map(|v: String| v == "1" || v.eq_ignore_ascii_case("true"))
+      .unwrap_or(false)
+      || std::env::args().any(|a| a == "--update");
+
     let file_name = input_path
       .file_name()
       .and_then(|s| s.to_str())
@@ -135,7 +105,17 @@ fn format_and_check_fixtures() {
       }
     };
 
-    assert_eq_with_diff(&expected, &formatted);
+    if expected == formatted {
+      return;
+    }
+
+    if update_expected {
+      fs::write(&expected_path, &formatted)
+        .unwrap_or_else(|e| panic!("Failed to write expected {}: {e}", expected_path.display()));
+      eprintln!("updated expected fixture {}", expected_path.display());
+    } else {
+      assert_eq_with_diff(&expected, &formatted);
+    }
   }
 
   let fixtures_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/format-and-check");

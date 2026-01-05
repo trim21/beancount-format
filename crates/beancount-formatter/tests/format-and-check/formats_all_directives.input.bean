@@ -1,0 +1,21 @@
+2010-01-01   open    Assets:Cash   USD   EUR   ;comment
+2010-01-02 close   Assets:Cash    ; close comment
+2010-01-03  balance  Assets:Cash   10   USD   ;bal
+2010-01-04 pad   Assets:Cash   Assets:Bank    ; pad
+2010-01-05 commodity  USD   ; c
+2010-01-06 price   USD   10   EUR   ; p
+2010-01-07   event  "Type"   "Desc"   ; e
+2010-01-08 query   "Name"   "SELECT 1"   ; q
+2010-01-09  note   Assets:Cash   "note here"   ; n
+2010-01-10   document   Assets:Docs   "file.pdf"  #tag1 ^link1   ; d
+2010-01-11 custom  "custom_name"   "v1"   "v2"  ; c
+option   "operating_currency"    "USD"
+include   "file.bean"
+plugin   "mod"   "{ config }"
+pushtag    #tag1
+poptag    #tag1
+pushmeta   foo:  "bar"
+popmeta   foo:
+2010-01-12 *   "Payee"  "Narration"   #tag1  ; headercmt
+    Assets:Cash   -10   USD    ;comment1
+        Expenses:Food  10   USD   ;comment2

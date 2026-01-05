@@ -114,6 +114,35 @@ pub struct Transaction<'a> {
   pub narration: Cow<'a, str>,
   pub tags_links: Option<Cow<'a, str>>,
   pub comment: Option<Cow<'a, str>>,
+  /// All tag/link groups attached to the transaction (inline and indented lines).
+  pub tags_links_lines: Vec<Cow<'a, str>>,
+  /// All comments attached to the transaction (inline and indented lines).
+  pub comments: Vec<Cow<'a, str>>,
+  /// Metadata key/value lines attached to the transaction.
+  pub key_values: Vec<KeyValue<'a>>,
+  /// Postings within the transaction, in source order.
+  pub postings: Vec<Posting<'a>>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct KeyValue<'a> {
+  pub meta: Meta,
+  pub span: Span,
+  pub key: Cow<'a, str>,
+  pub value: Cow<'a, str>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Posting<'a> {
+  pub meta: Meta,
+  pub span: Span,
+  pub opt_flag: Option<Cow<'a, str>>,
+  pub account: Cow<'a, str>,
+  pub amount: Option<Cow<'a, str>>,
+  pub cost_spec: Option<Cow<'a, str>>,
+  pub price_operator: Option<Cow<'a, str>>,
+  pub price_annotation: Option<Cow<'a, str>>,
+  pub comment: Option<Cow<'a, str>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
