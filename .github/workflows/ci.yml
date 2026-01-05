@@ -32,3 +32,6 @@ jobs:
 
       - name: Tests
         run: cargo test --workspace
+
+      - name: CLI e2e
+        run: cargo test -p beancount-formatter-cli --test cli_e2e

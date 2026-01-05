@@ -29,6 +29,11 @@ tasks:
     cmds:
       - cargo test --workspace
 
+  test:cli:
+    desc: Run CLI end-to-end tests
+    cmds:
+      - cargo test -p beancount-formatter-cli --test cli_e2e
+
   lint:
     desc: Run clippy lints
     cmds:
