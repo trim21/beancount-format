@@ -19,7 +19,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 toml = "0.8.19"
 
 [patch.crates-io]
-# tree-sitter-language = { path = "./patches/tree-sitter-language-0.1.6/" }
+tree-sitter-language = { path = "./patches/tree-sitter-language-0.1.6/" }
 
 [profile.release]
 opt-level = 3
