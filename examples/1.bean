@@ -1,0 +1,362 @@
+;; -*- mode: beancount; coding: utf-8; -*-
+
+;; 1-5: Options and Commodities
+
+option "title" "Complete 100-Directive Sample"
+
+option "operating_currency" "USD"
+
+2026-01-01 custom "budget" "monthly"
+
+1776-07-04 commodity USD
+
+2026-01-01 commodity AAPL
+
+;; 6-25: Account Openings
+
+2026-01-01 open Assets:Checking             USD
+
+2026-01-01 open Assets:Savings              USD
+
+2026-01-01 open Assets:Investment:ETrade     AAPL, USD
+
+2026-01-01 open Liabilities:CreditCard:Amex  USD
+
+2026-01-01 open Expenses:Food:Groceries      USD
+
+2026-01-01 open Expenses:Food:Dining         USD
+
+2026-01-01 open Expenses:Housing:Rent        USD
+
+2026-01-01 open Expenses:Housing:Utilities   USD
+
+2026-01-01 open Expenses:Transport:Gas       USD
+
+2026-01-01 open Expenses:Transport:Public    USD
+
+2026-01-01 open Expenses:Health:Pharmacy     USD
+
+2026-01-01 open Expenses:Leisure:Streaming   USD
+
+2026-01-01 open Expenses:Leisure:Books       USD
+
+2026-01-01 open Expenses:Fees:Bank           USD
+
+2026-01-01 open Income:Salary                USD
+
+2026-01-01 open Income:Dividends             USD
+
+2026-01-01 open Income:Gifts                 USD
+
+2026-01-01 open Equity:OpeningBalances       USD
+
+2026-01-01 open Expenses:Misc                USD
+
+2026-01-01 open Assets:Cash                  USD
+
+;; 26: Setup Initial Balance
+
+2026-01-01 pad Assets:Checking Equity:OpeningBalances
+
+;; 27-100: Daily Directives
+
+2026-01-01 balance Assets:Checking 10000.00 USD
+
+2026-01-02 * "Landlord" "Rent"
+  Expenses:Housing:Rent 2200.00 USD
+  Assets:Checking
+
+2026-01-03 * "Whole Foods" "Groceries"
+  Expenses:Food:Groceries 85.42 USD
+  Liabilities:CreditCard:Amex
+
+2026-01-03 * "Shell" "Gas"
+  Expenses:Transport:Gas 45.00 USD
+  Liabilities:CreditCard:Amex
+
+2026-01-04 * "Netflix" "Subscription"
+  Expenses:Leisure:Streaming 15.99 USD
+  Liabilities:CreditCard:Amex
+
+2026-01-05 * "Employer" "Salary"
+  Income:Salary -3000.00 USD
+  Assets:Checking 3000.00 USD
+
+2026-01-05 price AAPL 240.00 USD
+
+2026-01-06 * "Starbucks" "Coffee"
+  Expenses:Food:Dining 6.75 USD
+  Assets:Cash
+
+2026-01-07 * "CVS" "Medicine"
+  Expenses:Health:Pharmacy 12.50 USD
+  Liabilities:CreditCard:Amex
+
+2026-01-08 * "ETrade" "Buy Stock"
+  Assets:Investment:ETrade 5 AAPL {240.00 USD}
+  Assets:Checking -1200.00 USD
+
+2026-01-09 * "Local Diner" "Lunch"
+  Expenses:Food:Dining 24.00 USD
+  Liabilities:CreditCard:Amex
+
+2026-01-10 * "City Power" "Electric"
+  Expenses:Housing:Utilities 112.30 USD
+  Assets:Checking
+
+2026-01-11 * "Amazon" "Book"
+  Expenses:Leisure:Books 22.10 USD
+  Liabilities:CreditCard:Amex
+
+2026-01-12 * "MTA" "Metro"
+  Expenses:Transport:Public 33.00 USD
+  Assets:Checking
+
+2026-01-13 * "Transfer" "Savings"
+  Assets:Savings 500.00 USD
+  Assets:Checking
+
+2026-01-14 * "Grandma" "Gift"
+  Income:Gifts -50.00 USD
+  Assets:Cash 50.00 USD
+
+2026-01-15 * "Market" "Vegetables"
+  Expenses:Food:Groceries 30.00 USD
+  Assets:Cash
+
+2026-01-16 * "Amex" "Payment"
+  Liabilities:CreditCard:Amex 150.00 USD
+  Assets:Checking
+
+2026-01-17 * "Water Co" "Water"
+  Expenses:Housing:Utilities 45.00 USD
+  Assets:Checking
+
+2026-01-18 * "Employer" "Salary"
+  Income:Salary -3000.00 USD
+  Assets:Checking 3000.00 USD
+
+2026-01-19 * "Trader Joes" "Groceries"
+  Expenses:Food:Groceries 55.20 USD
+  Liabilities:CreditCard:Amex
+
+2026-01-20 * "Apple" "iCloud"
+  Expenses:Misc 0.99 USD
+  Liabilities:CreditCard:Amex
+
+2026-01-21 * "Shell" "Gas"
+  Expenses:Transport:Gas 42.10 USD
+  Liabilities:CreditCard:Amex
+
+2026-01-22 * "Steam" "Game"
+  Expenses:Leisure:Streaming 14.99 USD
+  Liabilities:CreditCard:Amex
+
+2026-01-23 * "Chase" "Fee"
+  Expenses:Fees:Bank 12.00 USD
+  Assets:Checking
+
+2026-01-24 * "Uber" "Ride"
+  Expenses:Transport:Public 18.50 USD
+  Liabilities:CreditCard:Amex
+
+2026-01-25 * "AAPL" "Dividend"
+  Income:Dividends -10.50 USD
+  Assets:Investment:ETrade 10.50 USD
+
+2026-01-26 * "Walgreens" "Health"
+  Expenses:Health:Pharmacy 5.99 USD
+  Liabilities:CreditCard:Amex
+
+2026-01-27 * "Blue Bottle" "Coffee"
+  Expenses:Food:Groceries 18.00 USD
+  Assets:Cash
+
+2026-01-28 * "Gym" "Monthly"
+  Expenses:Health:Pharmacy 50.00 USD
+  Assets:Checking
+
+2026-01-29 * "Taco Bell" "Dinner"
+  Expenses:Food:Dining 12.50 USD
+  Liabilities:CreditCard:Amex
+
+2026-01-30 * "Internet" "Fiber"
+  Expenses:Housing:Utilities 80.00 USD
+  Assets:Checking
+
+2026-01-31 * "Bank" "Interest"
+  Income:Dividends -2.50 USD
+  Assets:Savings 2.50 USD
+
+2026-02-01 * "Landlord" "Rent"
+  Expenses:Housing:Rent 2200.00 USD
+  Assets:Checking
+
+2026-02-02 * "Whole Foods" "Groceries"
+  Expenses:Food:Groceries 92.15 USD
+  Liabilities:CreditCard:Amex
+
+2026-02-03 * "Gas Station" "Gas"
+  Expenses:Transport:Gas 48.00 USD
+  Liabilities:CreditCard:Amex
+
+2026-02-04 * "Disney+" "Sub"
+  Expenses:Leisure:Streaming 10.99 USD
+  Liabilities:CreditCard:Amex
+
+2026-02-05 * "Employer" "Salary"
+  Income:Salary -3000.00 USD
+  Assets:Checking 3000.00 USD
+
+2026-02-06 * "Bakery" "Bread"
+  Expenses:Food:Dining 5.00 USD
+  Assets:Cash
+
+2026-02-07 * "Pharmacy" "Meds"
+  Expenses:Health:Pharmacy 20.00 USD
+  Liabilities:CreditCard:Amex
+
+2026-02-08 * "ETrade" "Fees"
+  Expenses:Fees:Bank 5.00 USD
+  Assets:Investment:ETrade
+
+2026-02-09 * "Pizza Hut" "Dinner"
+  Expenses:Food:Dining 35.00 USD
+  Liabilities:CreditCard:Amex
+
+2026-02-10 * "City Power" "Electric"
+  Expenses:Housing:Utilities 98.40 USD
+  Assets:Checking
+
+2026-02-11 * "Bookstore" "Paperback"
+  Expenses:Leisure:Books 15.00 USD
+  Liabilities:CreditCard:Amex
+
+2026-02-12 * "MTA" "Metro"
+  Expenses:Transport:Public 33.00 USD
+  Assets:Checking
+
+2026-02-13 * "Savings" "Transfer"
+  Assets:Savings 500.00 USD
+  Assets:Checking
+
+2026-02-14 * "Valentine" "Flowers"
+  Expenses:Misc 45.00 USD
+  Liabilities:CreditCard:Amex
+
+2026-02-15 * "Market" "Food"
+  Expenses:Food:Groceries 40.00 USD
+  Assets:Cash
+
+2026-02-16 * "Amex" "Payment"
+  Liabilities:CreditCard:Amex 200.00 USD
+  Assets:Checking
+
+2026-02-17 * "Water Co" "Water"
+  Expenses:Housing:Utilities 45.00 USD
+  Assets:Checking
+
+2026-02-18 * "Employer" "Salary"
+  Income:Salary -3000.00 USD
+  Assets:Checking 3000.00 USD
+
+2026-02-19 * "SafeWay" "Groceries"
+  Expenses:Food:Groceries 110.00 USD
+  Liabilities:CreditCard:Amex
+
+2026-02-20 * "Apple" "iCloud"
+  Expenses:Misc 0.99 USD
+  Liabilities:CreditCard:Amex
+
+2026-02-21 * "Shell" "Gas"
+  Expenses:Transport:Gas 41.00 USD
+  Liabilities:CreditCard:Amex
+
+2026-02-22 * "Hulu" "Sub"
+  Expenses:Leisure:Streaming 12.00 USD
+  Liabilities:CreditCard:Amex
+
+2026-02-23 * "Bank" "Fee"
+  Expenses:Fees:Bank 12.00 USD
+  Assets:Checking
+
+2026-02-24 * "Lyft" "Ride"
+  Expenses:Transport:Public 22.00 USD
+  Liabilities:CreditCard:Amex
+
+2026-02-25 * "AAPL" "Dividend"
+  Income:Dividends -10.50 USD
+  Assets:Investment:ETrade 10.50 USD
+
+2026-02-26 * "Drugstore" "Soap"
+  Expenses:Health:Pharmacy 8.50 USD
+  Liabilities:CreditCard:Amex
+
+2026-02-27 * "Cafe" "Latte"
+  Expenses:Food:Dining 5.50 USD
+  Assets:Cash
+
+2026-02-28 * "Gym" "Membership"
+  Expenses:Health:Pharmacy 50.00 USD
+  Assets:Checking
+
+2026-03-01 * "Landlord" "Rent"
+  Expenses:Housing:Rent 2200.00 USD
+  Assets:Checking
+
+2026-03-02 * "Grocer" "Weekly"
+  Expenses:Food:Groceries 60.00 USD
+  Liabilities:CreditCard:Amex
+
+2026-03-03 * "Mobile" "Phone Bill"
+  Expenses:Housing:Utilities 75.00 USD
+  Assets:Checking
+
+2026-03-04 * "Spotify" "Music"
+  Expenses:Leisure:Streaming 9.99 USD
+  Liabilities:CreditCard:Amex
+
+2026-03-05 * "Employer" "Salary"
+  Income:Salary -3000.00 USD
+  Assets:Checking 3000.00 USD
+
+2026-03-06 * "Post Office" "Shipping"
+  Expenses:Misc 15.00 USD
+  Assets:Cash
+
+2026-03-07 * "Hospital" "Copay"
+  Expenses:Health:Pharmacy 30.00 USD
+  Liabilities:CreditCard:Amex
+
+2026-03-08 price AAPL 245.00 USD
+
+2026-03-09 * "Burger King" "Lunch"
+  Expenses:Food:Dining 11.00 USD
+  Liabilities:CreditCard:Amex
+
+2026-03-10 * "City Power" "Electric"
+  Expenses:Housing:Utilities 88.00 USD
+  Assets:Checking
+
+2026-03-11 * "Kindle" "Ebook"
+  Expenses:Leisure:Books 9.99 USD
+  Liabilities:CreditCard:Amex
+
+2026-03-12 * "MTA" "Metro"
+  Expenses:Transport:Public 33.00 USD
+  Assets:Checking
+
+2026-03-13 * "Savings" "Transfer"
+  Assets:Savings 500.00 USD
+  Assets:Checking
+
+2026-03-14 * "Friend" "Dinner"
+  Expenses:Food:Dining 40.00 USD
+  Assets:Cash
+
+2026-03-15 * "Hardware" "Tools"
+  Expenses:Housing:Rent 25.00 USD
+  Liabilities:CreditCard:Amex
+
+2026-03-16 balance Assets:Cash 25.00 USD
+

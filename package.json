@@ -28,5 +28,8 @@
   },
   "devDependencies": {
     "@dprint/formatter": "~0.4.1"
+  },
+  "dependencies": {
+    "dprint": "^0.51.1"
   }
 }
