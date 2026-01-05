@@ -29,8 +29,6 @@ impl Writer {
 struct FormatterContext<'a> {
   config: &'a Configuration,
   writer: Writer,
-  pending_space: bool,
-  last_was_newline: bool,
 }
 
 impl<'a> FormatterContext<'a> {
@@ -38,8 +36,6 @@ impl<'a> FormatterContext<'a> {
     Self {
       config,
       writer: Writer::with_capacity(capacity),
-      pending_space: false,
-      last_was_newline: true,
     }
   }
 
@@ -82,130 +78,6 @@ impl<'a> FormatterContext<'a> {
       Directive::Pushmeta(d) => self.format_span(d.span, full_source),
       Directive::Popmeta(d) => self.format_span(d.span, full_source),
       Directive::Raw(d) => self.format_span(d.span, full_source),
-    }
-  }
-
-  // AST-driven formatter helpers (currently unused by the stable formatting path).
-  // Keep them around for incremental migration without triggering dead_code warnings.
-  fn newline_lf(&mut self) {
-    self.pending_space = false;
-    if !self.last_was_newline {
-      self.write("\n");
-      self.last_was_newline = true;
-    }
-  }
-
-  fn space(&mut self) {
-    if !self.last_was_newline {
-      self.pending_space = true;
-    }
-  }
-
-  fn write_token(&mut self, token: &str) {
-    if self.pending_space {
-      self.write(" ");
-      self.pending_space = false;
-    }
-    self.write(token);
-    self.last_was_newline = token.ends_with('\n');
-    if self.last_was_newline {
-      self.pending_space = false;
-    }
-  }
-
-  /// AST-driven formatter: format the given node by walking its children.
-  ///
-  /// Contract (current):
-  /// - Preserve token order.
-  /// - Convert tabs to spaces (outside string literals).
-  /// - Trim trailing whitespace per line.
-  /// - Avoid producing extra blank lines.
-  fn format_node(&mut self, node: Node, text: &str) {
-    if node.child_count() == 0 {
-      self.format_leaf_token(slice_text(node, text));
-      return;
-    }
-
-    // We need to preserve separators (spaces, newlines, punctuation) that are not
-    // represented as named nodes. Tree-sitter stores them as part of the source
-    // between children byte ranges.
-    let mut cursor = node.walk();
-    let mut prev_end = node.start_byte();
-    let named: Vec<Node> = node.named_children(&mut cursor).collect();
-
-    for child in named.iter().copied() {
-      if child.is_missing() || child.is_error() {
-        continue;
-      }
-
-      // Write interleaving raw text between children, normalized.
-      let gap = &text[prev_end..child.start_byte()];
-      self.format_gap_text(gap);
-      // If the gap had only horizontal whitespace, ensure we keep exactly one
-      // separating space between tokens.
-      let gap_norm = gap.replace("\r\n", "\n");
-      if !gap_norm.contains('\n') && gap_norm.chars().all(|c| c == ' ' || c == '\t') && !self.last_was_newline {
-        self.pending_space = true;
-      }
-
-      self.format_node(child, text);
-      prev_end = child.end_byte();
-    }
-
-    // Tail gap after last child.
-    let gap = &text[prev_end..node.end_byte()];
-    self.format_gap_text(gap);
-  }
-
-  /// Formats a leaf *token* text (already a concrete grammar token), preserving
-  /// its internal spaces but normalizing tabs and trimming trailing whitespace.
-  fn format_leaf_token(&mut self, text: &str) {
-    for (i, line) in text.replace("\r\n", "\n").split('\n').enumerate() {
-      if i > 0 {
-        self.newline_lf();
-      }
-
-      if line.is_empty() {
-        continue;
-      }
-
-      let expanded = expand_tabs_outside_strings(line, self.config.indent_width);
-      let trimmed = expanded.trim_end();
-      if trimmed.is_empty() {
-        continue;
-      }
-      self.write_token(trimmed);
-    }
-  }
-
-  /// Formats the raw text between AST nodes. This is where we normalize
-  /// separators: collapse horizontal whitespace to a single space, preserve
-  /// newlines, and trim spaces before newlines.
-  fn format_gap_text(&mut self, text: &str) {
-    let text = text.replace("\r\n", "\n");
-    let mut seen_space = false;
-
-    for ch in text.chars() {
-      match ch {
-        '\n' => {
-          seen_space = false;
-          self.newline_lf();
-        }
-        ' ' | '\t' => {
-          if !self.last_was_newline {
-            seen_space = true;
-          }
-        }
-        _ => {
-          if seen_space {
-            self.pending_space = true;
-            seen_space = false;
-          }
-          let mut buf = [0u8; 4];
-          let s = ch.encode_utf8(&mut buf);
-          self.write_token(s);
-        }
-      }
     }
   }
 }
