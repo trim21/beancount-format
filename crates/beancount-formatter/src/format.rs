@@ -38,8 +38,8 @@ impl<'a> FormatterContext<'a> {
     Self {
       config,
       writer: Writer::with_capacity(capacity),
-  pending_space: false,
-  last_was_newline: true,
+      pending_space: false,
+      last_was_newline: true,
     }
   }
 
@@ -49,113 +49,6 @@ impl<'a> FormatterContext<'a> {
 
   fn write(&mut self, piece: &str) {
     self.writer.write_str(piece);
-  }
-
-  fn newline_lf(&mut self) {
-    self.pending_space = false;
-    if !self.last_was_newline {
-      self.write("\n");
-      self.last_was_newline = true;
-    }
-  }
-
-  fn space(&mut self) {
-    if !self.last_was_newline {
-      self.pending_space = true;
-    }
-  }
-
-  fn write_token(&mut self, token: &str) {
-    if self.pending_space {
-      self.write(" ");
-      self.pending_space = false;
-    }
-    self.write(token);
-    self.last_was_newline = token.ends_with('\n');
-    if self.last_was_newline {
-      self.pending_space = false;
-    }
-  }
-
-  /// Formats a transaction entry.
-  fn format_transaction(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_balance(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_open(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_close(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_pad(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_document(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_note(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_event(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_price(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_commodity(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_query(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_custom(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_option(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_include(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_plugin(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_pushtag(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_poptag(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_pushmeta(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_popmeta(&mut self, node: Node, text: &str) {
-  self.format_leaf(node, text);
-  }
-
-  fn format_fallback(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
   }
 
   fn format_span(&mut self, span: crate::ast::Span, full_source: &str) {
@@ -192,13 +85,32 @@ impl<'a> FormatterContext<'a> {
     }
   }
 
-  /// Current stable behavior: slice the node's source and normalize whitespace.
-  ///
-  /// NOTE: This is intentionally kept as the default while we incrementally
-  /// migrate specific node kinds to true AST-driven formatting.
-  fn format_leaf(&mut self, node: Node, text: &str) {
-    let slice = slice_text(node, text);
-    self.write(&normalize_indentation(slice, self.config.indent_width));
+  // AST-driven formatter helpers (currently unused by the stable formatting path).
+  // Keep them around for incremental migration without triggering dead_code warnings.
+  fn newline_lf(&mut self) {
+    self.pending_space = false;
+    if !self.last_was_newline {
+      self.write("\n");
+      self.last_was_newline = true;
+    }
+  }
+
+  fn space(&mut self) {
+    if !self.last_was_newline {
+      self.pending_space = true;
+    }
+  }
+
+  fn write_token(&mut self, token: &str) {
+    if self.pending_space {
+      self.write(" ");
+      self.pending_space = false;
+    }
+    self.write(token);
+    self.last_was_newline = token.ends_with('\n');
+    if self.last_was_newline {
+      self.pending_space = false;
+    }
   }
 
   /// AST-driven formatter: format the given node by walking its children.
@@ -210,18 +122,18 @@ impl<'a> FormatterContext<'a> {
   /// - Avoid producing extra blank lines.
   fn format_node(&mut self, node: Node, text: &str) {
     if node.child_count() == 0 {
-  self.format_leaf_token(slice_text(node, text));
+      self.format_leaf_token(slice_text(node, text));
       return;
     }
 
     // We need to preserve separators (spaces, newlines, punctuation) that are not
     // represented as named nodes. Tree-sitter stores them as part of the source
     // between children byte ranges.
-  let mut cursor = node.walk();
-  let mut prev_end = node.start_byte();
-  let named: Vec<Node> = node.named_children(&mut cursor).collect();
+    let mut cursor = node.walk();
+    let mut prev_end = node.start_byte();
+    let named: Vec<Node> = node.named_children(&mut cursor).collect();
 
-  for (_idx, child) in named.iter().copied().enumerate() {
+    for child in named.iter().copied() {
       if child.is_missing() || child.is_error() {
         continue;
       }
@@ -232,10 +144,8 @@ impl<'a> FormatterContext<'a> {
       // If the gap had only horizontal whitespace, ensure we keep exactly one
       // separating space between tokens.
       let gap_norm = gap.replace("\r\n", "\n");
-      if !gap_norm.contains('\n') && gap_norm.chars().all(|c| c == ' ' || c == '\t') {
-        if !self.last_was_newline {
-          self.pending_space = true;
-        }
+      if !gap_norm.contains('\n') && gap_norm.chars().all(|c| c == ' ' || c == '\t') && !self.last_was_newline {
+        self.pending_space = true;
       }
 
       self.format_node(child, text);
@@ -244,7 +154,7 @@ impl<'a> FormatterContext<'a> {
 
     // Tail gap after last child.
     let gap = &text[prev_end..node.end_byte()];
-  self.format_gap_text(gap);
+    self.format_gap_text(gap);
   }
 
   /// Formats a leaf *token* text (already a concrete grammar token), preserving
@@ -333,7 +243,7 @@ fn format_content(path: Option<&str>, content: &str, formatting_config: &Configu
 
   let directives = parse_directives(root, &content, path.to_string()).map_err(anyhow::Error::new)?;
 
-  let newline = match formatting_config.new_line_kind {
+  let newline = match formatting_config.new_line {
     NewLineKind::LF => "\n",
     NewLineKind::CRLF => "\r\n",
   };

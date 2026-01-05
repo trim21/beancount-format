@@ -13,7 +13,7 @@ fn format_and_check_fixtures() {
   struct PartialConfiguration {
     line_width: Option<u32>,
     indent_width: Option<u8>,
-    new_line_kind: Option<NewLineKind>,
+    new_line: Option<NewLineKind>,
     prefix_width: Option<usize>,
     num_width: Option<usize>,
     currency_column: Option<usize>,
@@ -29,8 +29,8 @@ fn format_and_check_fixtures() {
       if let Some(v) = self.indent_width {
         config.indent_width = v;
       }
-      if let Some(v) = self.new_line_kind {
-        config.new_line_kind = v;
+      if let Some(v) = self.new_line {
+        config.new_line = v;
       }
       if let Some(v) = self.prefix_width {
         config.prefix_width = Some(v);
@@ -94,14 +94,14 @@ fn format_and_check_fixtures() {
     let config_path = dir.join(format!("{case_name}.config.json"));
     let expected_path = dir.join(format!("{case_name}.expected.bean"));
 
-    let input = fs::read_to_string(input_path)
-      .unwrap_or_else(|e| panic!("Failed to read input {}: {e}", input_path.display()));
+    let input =
+      fs::read_to_string(input_path).unwrap_or_else(|e| panic!("Failed to read input {}: {e}", input_path.display()));
 
     let config = if config_path.exists() {
       let json = fs::read_to_string(&config_path)
         .unwrap_or_else(|e| panic!("Failed to read config {}: {e}", config_path.display()));
-      let partial: PartialConfiguration = serde_json::from_str(&json)
-        .unwrap_or_else(|e| panic!("Invalid JSON in {}: {e}", config_path.display()));
+      let partial: PartialConfiguration =
+        serde_json::from_str(&json).unwrap_or_else(|e| panic!("Invalid JSON in {}: {e}", config_path.display()));
       partial.apply_to(Configuration::default())
     } else {
       Configuration::default()
@@ -123,6 +123,17 @@ fn format_and_check_fixtures() {
 
     let expected = fs::read_to_string(&expected_path)
       .unwrap_or_else(|e| panic!("Failed to read expected {}: {e}", expected_path.display()));
+
+    // Fixtures in git may be checked out with LF endings even when the case
+    // config requests CRLF. Convert expected text to the configured newline
+    // style before comparing.
+    let expected = match config.new_line {
+      NewLineKind::LF => expected.replace("\r\n", "\n"),
+      NewLineKind::CRLF => {
+        let lf = expected.replace("\r\n", "\n");
+        lf.replace("\n", "\r\n")
+      }
+    };
 
     assert_eq_with_diff(&expected, &formatted);
   }
@@ -158,4 +169,3 @@ fn format_and_check_fixtures() {
     run_case(&input_path);
   }
 }
-

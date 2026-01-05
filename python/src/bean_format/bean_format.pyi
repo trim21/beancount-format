@@ -8,5 +8,5 @@ def format_text(
     path: Optional[str] = ...,
     line_width: Optional[int] = ...,
     indent_width: Optional[int] = ...,
-    new_line_kind: Optional[str] = ...,
+    new_line: Optional[str] = ...,
 ) -> str: ...

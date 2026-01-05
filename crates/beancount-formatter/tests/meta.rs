@@ -22,7 +22,7 @@ fn meta_is_attached_to_each_directive() -> Result<()> {
 
   match &dirs[0] {
     Directive::Open(o) => {
-  assert_eq!(o.meta.filename.as_str(), "book.bean");
+      assert_eq!(o.meta.filename.as_str(), "book.bean");
       assert_eq!(o.meta.line, 1);
       assert_eq!(o.meta.column, 1);
     }
@@ -31,7 +31,7 @@ fn meta_is_attached_to_each_directive() -> Result<()> {
 
   match &dirs[1] {
     Directive::Close(c) => {
-  assert_eq!(c.meta.filename.as_str(), "book.bean");
+      assert_eq!(c.meta.filename.as_str(), "book.bean");
       assert_eq!(c.meta.line, 2);
       assert_eq!(c.meta.column, 1);
     }

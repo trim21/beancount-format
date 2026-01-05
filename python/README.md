@@ -23,7 +23,7 @@ formatted = format_text(
     path="ledger.beancount",  # defaults to "<memory>"
     line_width=80,
     indent_width=2,
-    new_line_kind="lf",  # "lf" or "crlf"
+    new_line="lf",  # "lf" or "crlf"
 )
 print(formatted)
 ```

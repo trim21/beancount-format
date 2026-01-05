@@ -23,9 +23,9 @@ type Result<T> = std::result::Result<T, ParseError>;
 fn meta(node: Node, filename: &str) -> Meta {
   let p = node.start_position();
   Meta {
-  filename: filename.to_owned(),
-    line: (p.row as usize) + 1,
-    column: (p.column as usize) + 1,
+    filename: filename.to_owned(),
+    line: p.row + 1,
+    column: p.column + 1,
   }
 }
 
@@ -33,8 +33,8 @@ fn parse_error(node: Node, filename: &str, message: impl Into<String>) -> ParseE
   let p = node.start_position();
   ParseError {
     filename: filename.to_owned(),
-    line: (p.row as usize) + 1,
-    column: (p.column as usize) + 1,
+    line: p.row + 1,
+    column: p.column + 1,
     message: message.into(),
   }
 }
@@ -53,8 +53,19 @@ fn field_text<'a>(node: Node, field: &str, source: &'a str) -> Option<std::borro
     .map(|n| std::borrow::Cow::Borrowed(slice(n, source)))
 }
 
-fn required_field_text<'a>(node: Node, field: &str, source: &'a str, filename: &str) -> Result<std::borrow::Cow<'a, str>> {
-  field_text(node, field, source).ok_or_else(|| parse_error(node, filename, format!("missing field `{}` in `{}`", field, node.kind())))
+fn required_field_text<'a>(
+  node: Node,
+  field: &str,
+  source: &'a str,
+  filename: &str,
+) -> Result<std::borrow::Cow<'a, str>> {
+  field_text(node, field, source).ok_or_else(|| {
+    parse_error(
+      node,
+      filename,
+      format!("missing field `{}` in `{}`", field, node.kind()),
+    )
+  })
 }
 
 fn first_named_child_text<'a>(node: Node, source: &'a str) -> Option<std::borrow::Cow<'a, str>> {
@@ -62,7 +73,7 @@ fn first_named_child_text<'a>(node: Node, source: &'a str) -> Option<std::borrow
   node
     .named_children(&mut cursor)
     .next()
-  .map(|n| std::borrow::Cow::Borrowed(slice(n, source)))
+    .map(|n| std::borrow::Cow::Borrowed(slice(n, source)))
 }
 
 pub fn parse_directives<'a>(root: Node, source: &'a str, filename: String) -> Result<Vec<Directive<'a>>> {
@@ -72,8 +83,8 @@ pub fn parse_directives<'a>(root: Node, source: &'a str, filename: String) -> Re
     let p = root.start_position();
     return Err(ParseError {
       filename,
-      line: (p.row as usize) + 1,
-      column: (p.column as usize) + 1,
+      line: p.row + 1,
+      column: p.column + 1,
       message: format!("expected root node kind `file`, got `{}`", root.kind()),
     });
   }
@@ -84,7 +95,6 @@ pub fn parse_directives<'a>(root: Node, source: &'a str, filename: String) -> Re
     .map(|node| parse_top_level(node, source, &filename))
     .collect::<Result<Vec<_>>>()
 }
-
 
 fn parse_top_level<'a>(node: Node, source: &'a str, filename: &str) -> Result<Directive<'a>> {
   match node.kind() {
@@ -114,7 +124,11 @@ fn parse_top_level<'a>(node: Node, source: &'a str, filename: &str) -> Result<Di
     // Known non-directive top-level nodes.
     "section" | "comment" => Ok(raw(node, source, filename)),
 
-    other => Err(parse_error(node, filename, format!("unknown directive node kind `{}`", other))),
+    other => Err(parse_error(
+      node,
+      filename,
+      format!("unknown directive node kind `{}`", other),
+    )),
   }
 }
 
@@ -181,10 +195,10 @@ fn parse_currencies_from_text(text: &str) -> Vec<std::borrow::Cow<'_, str>> {
     // Keep only if ends with [A-Z0-9] per grammar.
     if i > start {
       let last = bytes[i - 1];
-      if last.is_ascii_uppercase() || last.is_ascii_digit() {
-        if let Ok(s) = std::str::from_utf8(&bytes[start..i]) {
-          out.push(std::borrow::Cow::Owned(s.to_string()));
-        }
+      if (last.is_ascii_uppercase() || last.is_ascii_digit())
+        && let Ok(s) = std::str::from_utf8(&bytes[start..i])
+      {
+        out.push(std::borrow::Cow::Owned(s.to_string()));
       }
     }
   }
@@ -344,7 +358,7 @@ fn parse_plugin<'a>(node: Node, source: &'a str, filename: &str) -> Result<Direc
   let mut strings = node
     .named_children(&mut cursor)
     .filter(|n| n.kind() == "string")
-  .map(|n| std::borrow::Cow::Borrowed(slice(n, source)));
+    .map(|n| std::borrow::Cow::Borrowed(slice(n, source)));
 
   let name = strings
     .next()

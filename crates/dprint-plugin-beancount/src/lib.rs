@@ -104,12 +104,12 @@ fn resolve_config_dprint(
       global_config.indent_width.unwrap_or(2),
       &mut diagnostics,
     ),
-    new_line_kind: map_new_line_kind(get_value(
+    new_line: map_new_line_kind(get_value(
       &mut config,
-      "new_line_kind",
+      "new_line",
       global_config
-        .new_line_kind
-        .unwrap_or(RECOMMENDED_GLOBAL_CONFIGURATION.new_line_kind),
+        .new_line
+        .unwrap_or(RECOMMENDED_GLOBAL_CONFIGURATION.new_line),
       &mut diagnostics,
     )),
     ..Configuration::default()

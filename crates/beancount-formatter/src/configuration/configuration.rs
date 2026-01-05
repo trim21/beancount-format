@@ -9,7 +9,8 @@ pub const DEFAULT_NEW_LINE_KIND: NewLineKind = NewLineKind::LF;
 pub struct Configuration {
   pub line_width: u32,
   pub indent_width: u8,
-  pub new_line_kind: NewLineKind,
+  #[serde(rename = "new_line")]
+  pub new_line: NewLineKind,
   #[serde(default)]
   pub prefix_width: Option<usize>,
   #[serde(default)]
@@ -27,7 +28,7 @@ impl Default for Configuration {
     Self {
       line_width: DEFAULT_LINE_WIDTH,
       indent_width: DEFAULT_INDENT_WIDTH,
-      new_line_kind: DEFAULT_NEW_LINE_KIND,
+      new_line: DEFAULT_NEW_LINE_KIND,
       prefix_width: None,
       num_width: None,
       currency_column: None,
