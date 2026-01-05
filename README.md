@@ -30,6 +30,7 @@ or
 pnpm exec dprint fmt
 ```
 
+It's not a bug that will reproduce 100% in everytimes, you may need to run it multiple times.
 
 what's more:
 
