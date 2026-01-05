@@ -1,7 +1,9 @@
 use anyhow::{Context, Result};
 use tree_sitter::{Node, Parser, Point};
 
+use crate::ast::Directive;
 use crate::configuration::{Configuration, NewLineKind};
+use crate::parse::parse_directives;
 
 /// Simple string writer to avoid building large intermediate vectors before concatenation.
 struct Writer {
@@ -27,6 +29,8 @@ impl Writer {
 struct FormatterContext<'a> {
   config: &'a Configuration,
   writer: Writer,
+  pending_space: bool,
+  last_was_newline: bool,
 }
 
 impl<'a> FormatterContext<'a> {
@@ -34,6 +38,8 @@ impl<'a> FormatterContext<'a> {
     Self {
       config,
       writer: Writer::with_capacity(capacity),
+  pending_space: false,
+  last_was_newline: true,
     }
   }
 
@@ -45,91 +51,252 @@ impl<'a> FormatterContext<'a> {
     self.writer.write_str(piece);
   }
 
+  fn newline_lf(&mut self) {
+    self.pending_space = false;
+    if !self.last_was_newline {
+      self.write("\n");
+      self.last_was_newline = true;
+    }
+  }
+
+  fn space(&mut self) {
+    if !self.last_was_newline {
+      self.pending_space = true;
+    }
+  }
+
+  fn write_token(&mut self, token: &str) {
+    if self.pending_space {
+      self.write(" ");
+      self.pending_space = false;
+    }
+    self.write(token);
+    self.last_was_newline = token.ends_with('\n');
+    if self.last_was_newline {
+      self.pending_space = false;
+    }
+  }
+
   /// Formats a transaction entry.
   fn format_transaction(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_balance(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_open(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_close(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_pad(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_document(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_note(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_event(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_price(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_commodity(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_query(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_custom(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_option(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_include(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_plugin(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_pushtag(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_poptag(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_pushmeta(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_popmeta(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
+  self.format_leaf(node, text);
   }
 
   fn format_fallback(&mut self, node: Node, text: &str) {
     self.format_leaf(node, text);
   }
 
-  /// Basic leaf formatter: slices the source for the node, normalizes indentation and trailing whitespace, and enforces LF before newline-kind conversion.
+  fn format_span(&mut self, span: crate::ast::Span, full_source: &str) {
+    let slice = &full_source[span.start..span.end];
+    self.write(&normalize_indentation(slice, self.config.indent_width));
+    // normalize_indentation already wrote trailing newlines; caller adds newline.
+    if self.writer.buf.ends_with('\n') {
+      self.writer.buf.pop();
+    }
+  }
+
+  fn format_directive(&mut self, dir: &Directive<'a>, full_source: &str) {
+    match dir {
+      Directive::Open(d) => self.format_span(d.span, full_source),
+      Directive::Close(d) => self.format_span(d.span, full_source),
+      Directive::Balance(d) => self.format_span(d.span, full_source),
+      Directive::Pad(d) => self.format_span(d.span, full_source),
+      Directive::Transaction(d) => self.format_span(d.span, full_source),
+      Directive::Commodity(d) => self.format_span(d.span, full_source),
+      Directive::Price(d) => self.format_span(d.span, full_source),
+      Directive::Event(d) => self.format_span(d.span, full_source),
+      Directive::Query(d) => self.format_span(d.span, full_source),
+      Directive::Note(d) => self.format_span(d.span, full_source),
+      Directive::Document(d) => self.format_span(d.span, full_source),
+      Directive::Custom(d) => self.format_span(d.span, full_source),
+      Directive::Option(d) => self.format_span(d.span, full_source),
+      Directive::Include(d) => self.format_span(d.span, full_source),
+      Directive::Plugin(d) => self.format_span(d.span, full_source),
+      Directive::Pushtag(d) => self.format_span(d.span, full_source),
+      Directive::Poptag(d) => self.format_span(d.span, full_source),
+      Directive::Pushmeta(d) => self.format_span(d.span, full_source),
+      Directive::Popmeta(d) => self.format_span(d.span, full_source),
+      Directive::Raw(d) => self.format_span(d.span, full_source),
+    }
+  }
+
+  /// Current stable behavior: slice the node's source and normalize whitespace.
+  ///
+  /// NOTE: This is intentionally kept as the default while we incrementally
+  /// migrate specific node kinds to true AST-driven formatting.
   fn format_leaf(&mut self, node: Node, text: &str) {
     let slice = slice_text(node, text);
     self.write(&normalize_indentation(slice, self.config.indent_width));
+  }
+
+  /// AST-driven formatter: format the given node by walking its children.
+  ///
+  /// Contract (current):
+  /// - Preserve token order.
+  /// - Convert tabs to spaces (outside string literals).
+  /// - Trim trailing whitespace per line.
+  /// - Avoid producing extra blank lines.
+  fn format_node(&mut self, node: Node, text: &str) {
+    if node.child_count() == 0 {
+  self.format_leaf_token(slice_text(node, text));
+      return;
+    }
+
+    // We need to preserve separators (spaces, newlines, punctuation) that are not
+    // represented as named nodes. Tree-sitter stores them as part of the source
+    // between children byte ranges.
+  let mut cursor = node.walk();
+  let mut prev_end = node.start_byte();
+  let named: Vec<Node> = node.named_children(&mut cursor).collect();
+
+  for (_idx, child) in named.iter().copied().enumerate() {
+      if child.is_missing() || child.is_error() {
+        continue;
+      }
+
+      // Write interleaving raw text between children, normalized.
+      let gap = &text[prev_end..child.start_byte()];
+      self.format_gap_text(gap);
+      // If the gap had only horizontal whitespace, ensure we keep exactly one
+      // separating space between tokens.
+      let gap_norm = gap.replace("\r\n", "\n");
+      if !gap_norm.contains('\n') && gap_norm.chars().all(|c| c == ' ' || c == '\t') {
+        if !self.last_was_newline {
+          self.pending_space = true;
+        }
+      }
+
+      self.format_node(child, text);
+      prev_end = child.end_byte();
+    }
+
+    // Tail gap after last child.
+    let gap = &text[prev_end..node.end_byte()];
+  self.format_gap_text(gap);
+  }
+
+  /// Formats a leaf *token* text (already a concrete grammar token), preserving
+  /// its internal spaces but normalizing tabs and trimming trailing whitespace.
+  fn format_leaf_token(&mut self, text: &str) {
+    for (i, line) in text.replace("\r\n", "\n").split('\n').enumerate() {
+      if i > 0 {
+        self.newline_lf();
+      }
+
+      if line.is_empty() {
+        continue;
+      }
+
+      let expanded = expand_tabs_outside_strings(line, self.config.indent_width);
+      let trimmed = expanded.trim_end();
+      if trimmed.is_empty() {
+        continue;
+      }
+      self.write_token(trimmed);
+    }
+  }
+
+  /// Formats the raw text between AST nodes. This is where we normalize
+  /// separators: collapse horizontal whitespace to a single space, preserve
+  /// newlines, and trim spaces before newlines.
+  fn format_gap_text(&mut self, text: &str) {
+    let text = text.replace("\r\n", "\n");
+    let mut seen_space = false;
+
+    for ch in text.chars() {
+      match ch {
+        '\n' => {
+          seen_space = false;
+          self.newline_lf();
+        }
+        ' ' | '\t' => {
+          if !self.last_was_newline {
+            seen_space = true;
+          }
+        }
+        _ => {
+          if seen_space {
+            self.pending_space = true;
+            seen_space = false;
+          }
+          let mut buf = [0u8; 4];
+          let s = ch.encode_utf8(&mut buf);
+          self.write_token(s);
+        }
+      }
+    }
   }
 }
 
@@ -164,57 +331,39 @@ fn format_content(path: Option<&str>, content: &str, formatting_config: &Configu
 
   let root = tree.root_node();
 
-  // Walk the AST and format each top-level declaration/entry via dedicated handlers.
-  let mut cursor = root.walk();
-  let mut ctx = FormatterContext::new(formatting_config, content.len());
-  for node in root.named_children(&mut cursor) {
-    match node.kind() {
-      "transaction" => ctx.format_transaction(node, &content),
-      "balance" => ctx.format_balance(node, &content),
-      "open" => ctx.format_open(node, &content),
-      "close" => ctx.format_close(node, &content),
-      "pad" => ctx.format_pad(node, &content),
-      "document" => ctx.format_document(node, &content),
-      "note" => ctx.format_note(node, &content),
-      "event" => ctx.format_event(node, &content),
-      "price" => ctx.format_price(node, &content),
-      "commodity" => ctx.format_commodity(node, &content),
-      "query" => ctx.format_query(node, &content),
-      "custom" => ctx.format_custom(node, &content),
-      "option" => ctx.format_option(node, &content),
-      "include" => ctx.format_include(node, &content),
-      "plugin" => ctx.format_plugin(node, &content),
-      "pushtag" => ctx.format_pushtag(node, &content),
-      "poptag" => ctx.format_poptag(node, &content),
-      "pushmeta" => ctx.format_pushmeta(node, &content),
-      "popmeta" => ctx.format_popmeta(node, &content),
-      _ => ctx.format_fallback(node, &content),
-    }
-  }
-
-  let mut formatted = ctx.finish();
-
-  // Always ensure a trailing newline for downstream consumers.
-  if !formatted.ends_with('\n') && !formatted.ends_with("\r\n") {
-    formatted.push('\n');
-  }
+  let directives = parse_directives(root, &content, path.to_string()).map_err(anyhow::Error::new)?;
 
   let newline = match formatting_config.new_line_kind {
     NewLineKind::LF => "\n",
     NewLineKind::CRLF => "\r\n",
   };
 
+  let mut ctx = FormatterContext::new(formatting_config, content.len());
+  for dir in &directives {
+    ctx.format_directive(dir, &content);
+    ctx.write(newline);
+  }
+
+  // From this point on we only normalize newline style; the per-node formatter
+  // should not add extra trailing newlines beyond what we explicitly wrote.
+  let mut formatted = ctx.finish();
+
   if newline == "\r\n" {
+    // Convert lone LF to CRLF, but don't double-convert existing CRLF.
+    formatted = formatted.replace("\r\n", "\n");
     formatted = formatted.replace("\n", "\r\n");
+  } else {
+    // Normalize any CRLF sequences back to LF.
+    formatted = formatted.replace("\r\n", "\n");
+  }
+
+  // Always ensure a single trailing newline for downstream consumers.
+  if newline == "\r\n" {
     if !formatted.ends_with("\r\n") {
       formatted.push_str("\r\n");
     }
-  } else {
-    // Normalize any stray CRLF sequences back to LF and guarantee trailing LF.
-    formatted = formatted.replace("\r\n", "\n");
-    if !formatted.ends_with('\n') {
-      formatted.push('\n');
-    }
+  } else if !formatted.ends_with('\n') {
+    formatted.push('\n');
   }
 
   Ok(formatted)
@@ -287,11 +436,6 @@ fn normalize_indentation(text: &str, indent_width: u8) -> String {
     let expanded = expand_tabs_outside_strings(line, indent_width);
     let trimmed = expanded.trim_end();
     out.push_str(trimmed);
-  }
-
-  // Ensure a single trailing newline for leaf nodes to ease concatenation.
-  if !out.ends_with('\n') {
-    out.push('\n');
   }
 
   out

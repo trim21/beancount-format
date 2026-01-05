@@ -15,7 +15,11 @@ wasm = ["tree-sitter-beancount/wasm"]
 
 [dependencies]
 tree-sitter-beancount = { git = "https://github.com/trim21/tree-sitter-beancount", branch = "wasm", default-features = false }
+# tree-sitter-beancount = { path = "C:/Users/trim21/projects/tree-sitter-beancount/", default-features = false }
 tree-sitter = { version = "0.26.3" }
 anyhow.workspace = true
 serde.workspace = true
 ropey = '1.6.1'
+
+[dev-dependencies]
+serde_json = "1"

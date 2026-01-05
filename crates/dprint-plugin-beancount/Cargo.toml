@@ -8,9 +8,6 @@ repository.workspace = true
 homepage.workspace = true
 description = "Beancount formatter for dprint."
 
-[lib]
-crate-type = ["cdylib", "rlib"]
-
 [features]
 default = []
 wasm = ["dprint-core/wasm"]
