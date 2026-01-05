@@ -12,6 +12,10 @@ description = "Beancount formatter for dprint."
 default = []
 wasm = ["dprint-core/wasm"]
 
+[lib]
+# for wasm
+crate-type = ["cdylib"]
+
 [dependencies]
 anyhow.workspace = true
 dprint-core = { version = "0.67.4", features = ["formatting", "wasm"] }
