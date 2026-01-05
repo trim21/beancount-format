@@ -431,6 +431,13 @@ fn format_content(path: Option<&str>, content: &str, formatting_config: &Configu
     formatted = formatted.replace("\r\n", "\n");
   }
 
+  // Collapse multiple trailing newlines down to a single newline token.
+  let had_trailing_newline = formatted.ends_with(newline);
+  formatted = formatted.trim_end_matches(newline).to_string();
+  if had_trailing_newline {
+    formatted.push_str(newline);
+  }
+
   // Always ensure a single trailing newline for downstream consumers.
   if newline == "\r\n" {
     if !formatted.ends_with("\r\n") {
