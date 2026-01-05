@@ -16,6 +16,11 @@ beancount-formatter = { workspace = true }
 toml.workspace = true
 serde.workspace = true
 
+[dev-dependencies]
+assert_cmd = "2.0"
+assert_fs = "1.1"
+predicates = "3.1"
+
 [[bin]]
 name = "beancount-formatter"
 path = "src/main.rs"

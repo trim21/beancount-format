@@ -191,7 +191,7 @@ impl PartialConfiguration {
   fn apply(self, config: &mut Configuration) {
     config.line_width = self.line_width.unwrap_or(config.line_width);
     config.indent_width = self.indent_width.unwrap_or(config.indent_width);
-    config.new_line = self.new_line_kind.unwrap_or(config.new_line);
+    config.new_line_kind = self.new_line_kind.unwrap_or(config.new_line_kind);
     config.prefix_width = self.prefix_width.or(config.prefix_width);
     config.num_width = self.num_width.or(config.num_width);
   }
