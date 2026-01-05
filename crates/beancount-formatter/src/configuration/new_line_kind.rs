@@ -27,7 +27,7 @@ impl NewLineKind {
     match text.to_ascii_lowercase().as_str().trim() {
       "lf" => Ok(NewLineKind::LF),
       "crlf" => Ok(NewLineKind::CRLF),
-      other => Err(format!("Unsupported new_line_kind: {}", other)),
+      other => Err(format!("Unsupported new_line: {}", other)),
     }
   }
 }
