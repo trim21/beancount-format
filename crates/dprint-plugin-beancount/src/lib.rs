@@ -108,8 +108,8 @@ fn resolve_config_dprint(
       &mut config,
       "new_line",
       global_config
-        .new_line
-        .unwrap_or(RECOMMENDED_GLOBAL_CONFIGURATION.new_line),
+        .new_line_kind
+        .unwrap_or(RECOMMENDED_GLOBAL_CONFIGURATION.new_line_kind),
       &mut diagnostics,
     )),
     ..Configuration::default()
