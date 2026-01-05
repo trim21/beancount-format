@@ -21,9 +21,9 @@ print(formatted)
 formatted = format_text(
     source,
     path="ledger.beancount",  # defaults to "<memory>"
-    line_width=80,
+    line_width=88,
     indent_width=2,
-    new_line_kind="lf",  # "lf" or "crlf"
+    new_line="lf",  # "lf" or "crlf"
 )
 print(formatted)
 ```

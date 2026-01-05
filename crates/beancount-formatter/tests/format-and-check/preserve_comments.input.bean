@@ -1,0 +1,5 @@
+; 1
+
+2010-01-01 * "Payee"    "Narration"   ; ok
+    Assets:Cash    -10 CNY ; hello
+    Expenses:Food      10 CNY ; world

@@ -1,6 +1,11 @@
 version: "3"
 
 tasks:
+  default:
+    - task: fmt
+    - task: lint
+    - task: test
+
   build:wasm:
     desc: Build the dprint beancount plugin wasm artifact
     env:

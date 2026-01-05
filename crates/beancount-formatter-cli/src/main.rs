@@ -185,21 +185,15 @@ struct PartialConfiguration {
   new_line_kind: Option<beancount_formatter::configuration::NewLineKind>,
   prefix_width: Option<usize>,
   num_width: Option<usize>,
-  currency_column: Option<usize>,
-  account_amount_spacing: Option<usize>,
-  number_currency_spacing: Option<usize>,
 }
 
 impl PartialConfiguration {
   fn apply(self, config: &mut Configuration) {
     config.line_width = self.line_width.unwrap_or(config.line_width);
     config.indent_width = self.indent_width.unwrap_or(config.indent_width);
-    config.new_line_kind = self.new_line_kind.unwrap_or(config.new_line_kind);
+    config.new_line = self.new_line_kind.unwrap_or(config.new_line);
     config.prefix_width = self.prefix_width.or(config.prefix_width);
     config.num_width = self.num_width.or(config.num_width);
-    config.currency_column = self.currency_column.or(config.currency_column);
-    config.account_amount_spacing = self.account_amount_spacing.or(config.account_amount_spacing);
-    config.number_currency_spacing = self.number_currency_spacing.or(config.number_currency_spacing);
   }
 }
 

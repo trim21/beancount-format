@@ -1,11 +1,212 @@
 use anyhow::{Context, Result};
 use tree_sitter::{Node, Parser, Point};
 
+use crate::ast::Directive;
 use crate::configuration::{Configuration, NewLineKind};
+use crate::parse::parse_directives;
 
 /// Simple string writer to avoid building large intermediate vectors before concatenation.
 struct Writer {
   buf: String,
+}
+
+fn format_open(writer: &mut Writer, d: &crate::ast::Open<'_>, config: &Configuration) {
+  let comment_col = config.line_width as usize;
+  let mut line = join_parts([
+    Some(to_part(d.date.as_ref())),
+    Some("open".to_string()),
+    Some(to_part(d.account.as_ref())),
+  ]);
+  line = align_trailing(line, format_currencies(&d.currencies), comment_col);
+  if let Some(comment) = &d.comment {
+    line = append_comment(line, &format_comment(comment), config, true);
+  }
+  writer.write_str(&line);
+}
+
+fn format_close(writer: &mut Writer, d: &crate::ast::Close<'_>, config: &Configuration) {
+  let mut line = join_parts([
+    Some(to_part(d.date.as_ref())),
+    Some("close".to_string()),
+    Some(to_part(d.account.as_ref())),
+  ]);
+  if let Some(comment) = &d.comment {
+    line = append_comment(line, &format_comment(comment), config, false);
+  }
+  writer.write_str(&line);
+}
+
+fn format_balance(writer: &mut Writer, d: &crate::ast::Balance<'_>, config: &Configuration) {
+  let comment_col = config.line_width as usize;
+  let mut line = join_parts([
+    Some(to_part(d.date.as_ref())),
+    Some("balance".to_string()),
+    Some(to_part(d.account.as_ref())),
+  ]);
+  let trailing = split_amount(&d.amount)
+    .map(|(num, cur)| format!("{} {}", compact_ws(&num), cur))
+    .or_else(|| Some(compact_ws(&d.amount)));
+  line = align_trailing(line, trailing, comment_col);
+  if let Some(comment) = &d.comment {
+    line = append_comment(line, &format_comment(comment), config, true);
+  }
+  writer.write_str(&line);
+}
+
+fn format_pad(writer: &mut Writer, d: &crate::ast::Pad<'_>, config: &Configuration) {
+  let mut line = join_parts([
+    Some(to_part(d.date.as_ref())),
+    Some("pad".to_string()),
+    Some(to_part(d.account.as_ref())),
+    Some(to_part(d.from_account.as_ref())),
+  ]);
+  if let Some(comment) = &d.comment {
+    line = append_comment(line, &format_comment(comment), config, false);
+  }
+  writer.write_str(&line);
+}
+
+fn format_commodity(writer: &mut Writer, d: &crate::ast::Commodity<'_>, config: &Configuration) {
+  let comment_col = config.line_width as usize;
+  let mut line = join_parts([Some(to_part(d.date.as_ref())), Some("commodity".to_string())]);
+  line = align_trailing(line, Some(to_part(d.currency.as_ref())), comment_col);
+  if let Some(comment) = &d.comment {
+    line = append_comment(line, &format_comment(comment), config, true);
+  }
+  writer.write_str(&line);
+}
+
+fn format_price(writer: &mut Writer, d: &crate::ast::Price<'_>, config: &Configuration) {
+  let comment_col = config.line_width as usize;
+  let mut line = join_parts([
+    Some(to_part(d.date.as_ref())),
+    Some("price".to_string()),
+    Some(to_part(d.currency.as_ref())),
+  ]);
+  let trailing = split_amount(&d.amount)
+    .map(|(num, cur)| format!("{} {}", compact_ws(&num), cur))
+    .or_else(|| Some(compact_ws(&d.amount)));
+  line = align_trailing(line, trailing, comment_col);
+  if let Some(comment) = &d.comment {
+    line = append_comment(line, &format_comment(comment), config, true);
+  }
+  writer.write_str(&line);
+}
+
+fn format_event(writer: &mut Writer, d: &crate::ast::Event<'_>, config: &Configuration) {
+  let mut line = join_parts([
+    Some(to_part(d.date.as_ref())),
+    Some("event".to_string()),
+    Some(to_part(d.event_type.as_ref())),
+    Some(to_part(d.desc.as_ref())),
+  ]);
+  if let Some(comment) = &d.comment {
+    line = append_comment(line, &format_comment(comment), config, false);
+  }
+  writer.write_str(&line);
+}
+
+fn format_query(writer: &mut Writer, d: &crate::ast::Query<'_>, config: &Configuration) {
+  let mut line = join_parts([
+    Some(to_part(d.date.as_ref())),
+    Some("query".to_string()),
+    Some(to_part(d.name.as_ref())),
+    Some(to_part(d.query.as_ref())),
+  ]);
+  if let Some(comment) = &d.comment {
+    line = append_comment(line, &format_comment(comment), config, false);
+  }
+  writer.write_str(&line);
+}
+
+fn format_note(writer: &mut Writer, d: &crate::ast::Note<'_>, config: &Configuration) {
+  let mut line = join_parts([
+    Some(to_part(d.date.as_ref())),
+    Some("note".to_string()),
+    Some(to_part(d.account.as_ref())),
+    Some(to_part(d.note.as_ref())),
+  ]);
+  if let Some(comment) = &d.comment {
+    line = append_comment(line, &format_comment(comment), config, false);
+  }
+  writer.write_str(&line);
+}
+
+fn format_document(writer: &mut Writer, d: &crate::ast::Document<'_>, config: &Configuration) {
+  let mut line = join_parts([
+    Some(to_part(d.date.as_ref())),
+    Some("document".to_string()),
+    Some(to_part(d.account.as_ref())),
+    Some(to_part(d.filename.as_ref())),
+    d.tags_links.as_ref().map(|t| t.trim().to_string()),
+  ]);
+  if let Some(comment) = &d.comment {
+    line = append_comment(line, &format_comment(comment), config, false);
+  }
+  writer.write_str(&line);
+}
+
+fn format_custom(writer: &mut Writer, d: &crate::ast::Custom<'_>, config: &Configuration) {
+  let mut line = join_parts([
+    Some(to_part(d.date.as_ref())),
+    Some("custom".to_string()),
+    Some(to_part(d.name.as_ref())),
+    if d.values.is_empty() {
+      None
+    } else {
+      Some(d.values.iter().map(|v| v.trim()).collect::<Vec<_>>().join(" "))
+    },
+  ]);
+  if let Some(comment) = &d.comment {
+    line = append_comment(line, &format_comment(comment), config, false);
+  }
+  writer.write_str(&line);
+}
+
+fn format_option(writer: &mut Writer, d: &crate::ast::OptionDirective<'_>) {
+  let line = join_parts([
+    Some("option".to_string()),
+    Some(to_part(d.key.as_ref())),
+    Some(to_part(d.value.as_ref())),
+  ]);
+  writer.write_str(&line);
+}
+
+fn format_include(writer: &mut Writer, d: &crate::ast::Include<'_>) {
+  let line = join_parts([Some("include".to_string()), Some(to_part(d.filename.as_ref()))]);
+  writer.write_str(&line);
+}
+
+fn format_plugin(writer: &mut Writer, d: &crate::ast::Plugin<'_>) {
+  let line = join_parts([
+    Some("plugin".to_string()),
+    Some(to_part(d.name.as_ref())),
+    d.config.as_ref().map(|c| c.trim().to_string()),
+  ]);
+  writer.write_str(&line);
+}
+
+fn format_pushtag(writer: &mut Writer, d: &crate::ast::TagDirective<'_>) {
+  let line = join_parts([Some("pushtag".to_string()), Some(to_part(d.tag.as_ref()))]);
+  writer.write_str(&line);
+}
+
+fn format_poptag(writer: &mut Writer, d: &crate::ast::TagDirective<'_>) {
+  let line = join_parts([Some("poptag".to_string()), Some(to_part(d.tag.as_ref()))]);
+  writer.write_str(&line);
+}
+
+fn format_pushmeta(writer: &mut Writer, d: &crate::ast::Pushmeta<'_>) {
+  let line = join_parts([Some("pushmeta".to_string()), Some(normalize_key_value(&d.key_value))]);
+  writer.write_str(&line);
+}
+
+fn format_popmeta(writer: &mut Writer, d: &crate::ast::Popmeta<'_>) {
+  let line = join_parts([
+    Some("popmeta".to_string()),
+    Some(format!("{}:", to_part(d.key.as_ref()))),
+  ]);
+  writer.write_str(&line);
 }
 
 impl Writer {
@@ -45,91 +246,131 @@ impl<'a> FormatterContext<'a> {
     self.writer.write_str(piece);
   }
 
-  /// Formats a transaction entry.
-  fn format_transaction(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_balance(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_open(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_close(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_pad(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_document(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_note(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_event(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_price(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_commodity(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_query(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_custom(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_option(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_include(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_plugin(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_pushtag(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_poptag(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_pushmeta(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_popmeta(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  fn format_fallback(&mut self, node: Node, text: &str) {
-    self.format_leaf(node, text);
-  }
-
-  /// Basic leaf formatter: slices the source for the node, normalizes indentation and trailing whitespace, and enforces LF before newline-kind conversion.
-  fn format_leaf(&mut self, node: Node, text: &str) {
-    let slice = slice_text(node, text);
+  fn format_span(&mut self, span: crate::ast::Span, full_source: &str) {
+    let slice = &full_source[span.start..span.end];
     self.write(&normalize_indentation(slice, self.config.indent_width));
+    // normalize_indentation already wrote trailing newlines; caller adds newline.
+    if self.writer.buf.ends_with('\n') {
+      self.writer.buf.pop();
+    }
+  }
+
+  fn format_directive(&mut self, dir: &Directive<'a>, full_source: &str) {
+    match dir {
+      Directive::Open(d) => format_open(&mut self.writer, d, self.config),
+      Directive::Close(d) => format_close(&mut self.writer, d, self.config),
+      Directive::Balance(d) => format_balance(&mut self.writer, d, self.config),
+      Directive::Pad(d) => format_pad(&mut self.writer, d, self.config),
+      Directive::Transaction(d) => self.format_transaction(d, full_source),
+      Directive::Commodity(d) => format_commodity(&mut self.writer, d, self.config),
+      Directive::Price(d) => format_price(&mut self.writer, d, self.config),
+      Directive::Event(d) => format_event(&mut self.writer, d, self.config),
+      Directive::Query(d) => format_query(&mut self.writer, d, self.config),
+      Directive::Note(d) => format_note(&mut self.writer, d, self.config),
+      Directive::Document(d) => format_document(&mut self.writer, d, self.config),
+      Directive::Custom(d) => format_custom(&mut self.writer, d, self.config),
+      Directive::Option(d) => format_option(&mut self.writer, d),
+      Directive::Include(d) => format_include(&mut self.writer, d),
+      Directive::Plugin(d) => format_plugin(&mut self.writer, d),
+      Directive::Pushtag(d) => format_pushtag(&mut self.writer, d),
+      Directive::Poptag(d) => format_poptag(&mut self.writer, d),
+      Directive::Pushmeta(d) => format_pushmeta(&mut self.writer, d),
+      Directive::Popmeta(d) => format_popmeta(&mut self.writer, d),
+      Directive::Raw(d) => self.format_span(d.span, full_source),
+    }
+  }
+
+  fn format_transaction(&mut self, txn: &crate::ast::Transaction<'a>, full_source: &str) {
+    let txn_text = &full_source[txn.span.start..txn.span.end];
+    let mut lines: Vec<String> = txn_text.replace("\r\n", "\n").lines().map(|l| l.to_string()).collect();
+
+    let has_posting_comments = txn.postings.iter().any(|p| p.comment.is_some());
+
+    let mut header_parts: Vec<String> = Vec::new();
+    header_parts.push(txn.date.trim().to_string());
+    if let Some(flag) = &txn.txn {
+      header_parts.push(flag.trim().to_string());
+    }
+    if let Some(payee) = &txn.payee {
+      header_parts.push(payee.trim().to_string());
+    }
+    header_parts.push(txn.narration.trim().to_string());
+    if let Some(tags) = &txn.tags_links {
+      header_parts.push(tags.trim().to_string());
+    }
+    let mut header_line = header_parts.join(" ");
+    if let Some(comment) = &txn.comment {
+      header_line = append_comment(header_line, &format_comment(comment), self.config, false);
+    }
+    lines[0] = header_line;
+
+    let mut posting_line_indices = Vec::new();
+
+    if has_posting_comments {
+      let mut min_indent = usize::MAX;
+
+      for posting in &txn.postings {
+        let offset = posting.span.start.saturating_sub(txn.span.start);
+        let line_idx = count_newlines_up_to(txn_text, offset);
+        posting_line_indices.push(line_idx);
+        if let Some(line) = lines.get(line_idx) {
+          let indent = leading_indent_width(line, self.config.indent_width);
+          min_indent = min_indent.min(indent);
+        }
+      }
+
+      if min_indent == usize::MAX {
+        min_indent = (self.config.indent_width as usize) * 2;
+      }
+
+      for (posting, &line_idx) in txn.postings.iter().zip(posting_line_indices.iter()) {
+        let flag = posting.opt_flag.as_deref().map(str::trim);
+        let account = posting.account.trim();
+        let amount = posting.amount.as_ref().and_then(|a| split_amount(a));
+        let trailing = if let Some((num, cur)) = amount {
+          let mut parts = vec![format!("{} {}", compact_ws(&num), cur)];
+          if let Some(cost) = posting.cost_spec.as_ref() {
+            parts.push(compact_ws(cost));
+          }
+          if let Some(price_op) = posting.price_operator.as_ref() {
+            parts.push(price_op.trim().to_string());
+          }
+          if let Some(price_ann) = posting.price_annotation.as_ref() {
+            parts.push(compact_ws(price_ann));
+          }
+          Some(parts.join(" "))
+        } else {
+          None
+        };
+
+        let mut line = String::new();
+        line.push_str(&" ".repeat(min_indent));
+        if let Some(f) = flag {
+          line.push_str(f);
+          line.push(' ');
+        }
+        line.push_str(account);
+
+        line = align_trailing(line, trailing, self.config.line_width as usize);
+
+        if let Some(comment) = &posting.comment {
+          line = append_comment(line, &format_comment(comment), self.config, true);
+        }
+
+        if let Some(slot) = lines.get_mut(line_idx) {
+          *slot = line;
+        }
+      }
+    }
+
+    for (idx, line) in lines.iter_mut().enumerate().skip(1) {
+      if has_posting_comments && posting_line_indices.contains(&idx) {
+        continue;
+      }
+      *line = normalize_indentation(line, self.config.indent_width);
+    }
+
+    self.write(&lines.join("\n"));
   }
 }
 
@@ -164,58 +405,46 @@ fn format_content(path: Option<&str>, content: &str, formatting_config: &Configu
 
   let root = tree.root_node();
 
-  let newline = match formatting_config.new_line_kind {
+  let directives = parse_directives(root, &content, path.to_string()).map_err(anyhow::Error::new)?;
+
+  let newline = match formatting_config.new_line {
     NewLineKind::LF => "\n",
     NewLineKind::CRLF => "\r\n",
   };
-  // Walk the AST and format each top-level declaration/entry via dedicated handlers.
-  let mut cursor = root.walk();
-  let mut ctx = FormatterContext::new(formatting_config, content.len());
-  for node in root.named_children(&mut cursor) {
-    match node.kind() {
-      "transaction" => ctx.format_transaction(node, &content),
-      "balance" => ctx.format_balance(node, &content),
-      "open" => ctx.format_open(node, &content),
-      "close" => ctx.format_close(node, &content),
-      "pad" => ctx.format_pad(node, &content),
-      "document" => ctx.format_document(node, &content),
-      "note" => ctx.format_note(node, &content),
-      "event" => ctx.format_event(node, &content),
-      "price" => ctx.format_price(node, &content),
-      "commodity" => ctx.format_commodity(node, &content),
-      "query" => ctx.format_query(node, &content),
-      "custom" => ctx.format_custom(node, &content),
-      "option" => ctx.format_option(node, &content),
-      "include" => ctx.format_include(node, &content),
-      "plugin" => ctx.format_plugin(node, &content),
-      "pushtag" => ctx.format_pushtag(node, &content),
-      "poptag" => ctx.format_poptag(node, &content),
-      "pushmeta" => ctx.format_pushmeta(node, &content),
-      "popmeta" => ctx.format_popmeta(node, &content),
-      _ => ctx.format_fallback(node, &content),
-    }
 
+  let mut ctx = FormatterContext::new(formatting_config, content.len());
+  for dir in &directives {
+    ctx.format_directive(dir, &content);
     ctx.write(newline);
   }
 
+  // From this point on we only normalize newline style; the per-node formatter
+  // should not add extra trailing newlines beyond what we explicitly wrote.
   let mut formatted = ctx.finish();
 
-  // Always ensure a trailing newline for downstream consumers.
-  if !formatted.ends_with('\n') && !formatted.ends_with("\r\n") {
-    formatted.push('\n');
+  if newline == "\r\n" {
+    // Convert lone LF to CRLF, but don't double-convert existing CRLF.
+    formatted = formatted.replace("\r\n", "\n");
+    formatted = formatted.replace("\n", "\r\n");
+  } else {
+    // Normalize any CRLF sequences back to LF.
+    formatted = formatted.replace("\r\n", "\n");
   }
 
+  // Collapse multiple trailing newlines down to a single newline token.
+  let had_trailing_newline = formatted.ends_with(newline);
+  formatted = formatted.trim_end_matches(newline).to_string();
+  if had_trailing_newline {
+    formatted.push_str(newline);
+  }
+
+  // Always ensure a single trailing newline for downstream consumers.
   if newline == "\r\n" {
-    formatted = formatted.replace("\n", "\r\n");
     if !formatted.ends_with("\r\n") {
       formatted.push_str("\r\n");
     }
-  } else {
-    // Normalize any stray CRLF sequences back to LF and guarantee trailing LF.
-    formatted = formatted.replace("\r\n", "\n");
-    if !formatted.ends_with('\n') {
-      formatted.push('\n');
-    }
+  } else if !formatted.ends_with('\n') {
+    formatted.push('\n');
   }
 
   Ok(formatted)
@@ -290,11 +519,6 @@ fn normalize_indentation(text: &str, indent_width: u8) -> String {
     out.push_str(trimmed);
   }
 
-  // Ensure a single trailing newline for leaf nodes to ease concatenation.
-  if !out.ends_with('\n') {
-    out.push('\n');
-  }
-
   out
 }
 
@@ -344,4 +568,116 @@ fn expand_tabs_outside_strings(line: &str, indent_width: u8) -> String {
   }
 
   out
+}
+
+fn count_newlines_up_to(text: &str, offset: usize) -> usize {
+  text
+    .as_bytes()
+    .iter()
+    .take(offset.min(text.len()))
+    .filter(|b| **b == b'\n')
+    .count()
+}
+
+fn leading_indent_width(line: &str, indent_width: u8) -> usize {
+  let mut width = 0usize;
+  for ch in line.chars() {
+    match ch {
+      ' ' => width += 1,
+      '\t' => width += indent_width as usize,
+      _ => break,
+    }
+  }
+  width
+}
+
+fn join_parts(parts: impl IntoIterator<Item = Option<String>>) -> String {
+  let mut out = Vec::new();
+  for p in parts.into_iter().flatten() {
+    if !p.is_empty() {
+      out.push(p);
+    }
+  }
+  out.join(" ")
+}
+
+fn to_part(text: &str) -> String {
+  text.trim().to_string()
+}
+
+fn compact_ws(text: &str) -> String {
+  text.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+fn normalize_key_value(text: &str) -> String {
+  let mut parts = text.splitn(2, ':');
+  let key = parts.next().unwrap_or("").trim();
+  let value = parts.next().unwrap_or("").trim();
+  if value.is_empty() {
+    format!("{}:", key)
+  } else {
+    format!("{}: {}", key, value)
+  }
+}
+
+fn append_comment(mut line: String, comment: &str, config: &Configuration, align: bool) -> String {
+  let trimmed = line.trim_end().to_string();
+  let base_len = trimmed.len();
+  let target = config.line_width as usize;
+
+  line = trimmed;
+  if align && base_len < target {
+    line.push_str(&" ".repeat(target - base_len));
+  } else if !line.ends_with(' ') {
+    line.push(' ');
+  }
+
+  line.push_str(comment);
+  line
+}
+
+fn align_trailing(mut base: String, trailing: Option<String>, comment_col: usize) -> String {
+  if let Some(value) = trailing {
+    let value_len = value.len();
+    let target_end = comment_col.saturating_sub(2);
+    let desired_start = target_end.saturating_sub(value_len.saturating_sub(1));
+    let start = desired_start.max(base.len().saturating_add(1));
+
+    if base.len() < start {
+      base.push_str(&" ".repeat(start - base.len()));
+    }
+    base.push_str(&value);
+  }
+
+  base
+}
+
+fn split_amount(text: &str) -> Option<(String, String)> {
+  let parts: Vec<&str> = text.split_whitespace().collect();
+  if parts.len() < 2 {
+    return None;
+  }
+  let currency = parts.last().unwrap().to_string();
+  let number = parts[..parts.len() - 1].join(" ");
+  if currency.is_empty() || number.is_empty() {
+    return None;
+  }
+  Some((number, currency))
+}
+
+fn format_currencies(currencies: &[std::borrow::Cow<'_, str>]) -> Option<String> {
+  if currencies.is_empty() {
+    return None;
+  }
+  Some(currencies.iter().map(|c| c.trim()).collect::<Vec<_>>().join(" "))
+}
+
+fn format_comment(raw: &str) -> String {
+  let trimmed = raw.trim();
+  let without_semicolon = trimmed.strip_prefix(';').unwrap_or(trimmed).trim_start();
+  if without_semicolon.is_empty() {
+    ";".to_string()
+  } else {
+    format!("; {}", without_semicolon)
+  }
 }

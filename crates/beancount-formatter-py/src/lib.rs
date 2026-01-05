@@ -12,14 +12,14 @@ use pyo3::prelude::*;
   path = None,
   line_width = None,
   indent_width = None,
-  new_line_kind = None
+  new_line = None
 ))]
 fn format_text_py(
   text: &str,
   path: Option<&str>,
   line_width: Option<u32>,
   indent_width: Option<u8>,
-  new_line_kind: Option<&str>,
+  new_line: Option<&str>,
 ) -> PyResult<String> {
   let mut config = Configuration::default();
 
@@ -31,8 +31,8 @@ fn format_text_py(
     config.indent_width = value;
   }
 
-  if let Some(value) = new_line_kind {
-    config.new_line_kind = NewLineKind::parse(value).map_err(PyValueError::new_err)?;
+  if let Some(value) = new_line {
+    config.new_line = NewLineKind::parse(value).map_err(PyValueError::new_err)?;
   }
 
   let formatted = format(path, text, &config).map_err(|err| PyRuntimeError::new_err(err.to_string()))?;

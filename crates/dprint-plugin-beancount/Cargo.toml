@@ -8,12 +8,13 @@ repository.workspace = true
 homepage.workspace = true
 description = "Beancount formatter for dprint."
 
-[lib]
-crate-type = ["cdylib"]
-
 [features]
 default = []
 wasm = ["dprint-core/wasm"]
+
+[lib]
+# for wasm
+crate-type = ["cdylib"]
 
 [dependencies]
 anyhow.workspace = true
