@@ -1,5 +1,5 @@
 use anyhow::Result;
-use assert_cmd::{cargo::cargo_bin_cmd, Command};
+use assert_cmd::{Command, cargo::cargo_bin_cmd};
 use assert_fs::prelude::*;
 use predicates::{ord::eq, prelude::*};
 
