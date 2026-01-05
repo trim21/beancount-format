@@ -10,7 +10,7 @@ struct Writer {
   buf: String,
 }
 
-fn format_open(d: &crate::ast::Open<'_>, config: &Configuration) -> String {
+fn format_open(writer: &mut Writer, d: &crate::ast::Open<'_>, config: &Configuration) {
   let comment_col = config.line_width as usize;
   let mut line = join_parts([
     Some(to_part(d.date.as_ref())),
@@ -21,10 +21,10 @@ fn format_open(d: &crate::ast::Open<'_>, config: &Configuration) -> String {
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, true);
   }
-  line
+  writer.write_str(&line);
 }
 
-fn format_close(d: &crate::ast::Close<'_>, config: &Configuration) -> String {
+fn format_close(writer: &mut Writer, d: &crate::ast::Close<'_>, config: &Configuration) {
   let mut line = join_parts([
     Some(to_part(d.date.as_ref())),
     Some("close".to_string()),
@@ -33,10 +33,10 @@ fn format_close(d: &crate::ast::Close<'_>, config: &Configuration) -> String {
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
   }
-  line
+  writer.write_str(&line);
 }
 
-fn format_balance(d: &crate::ast::Balance<'_>, config: &Configuration) -> String {
+fn format_balance(writer: &mut Writer, d: &crate::ast::Balance<'_>, config: &Configuration) {
   let comment_col = config.line_width as usize;
   let mut line = join_parts([
     Some(to_part(d.date.as_ref())),
@@ -50,10 +50,10 @@ fn format_balance(d: &crate::ast::Balance<'_>, config: &Configuration) -> String
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, true);
   }
-  line
+  writer.write_str(&line);
 }
 
-fn format_pad(d: &crate::ast::Pad<'_>, config: &Configuration) -> String {
+fn format_pad(writer: &mut Writer, d: &crate::ast::Pad<'_>, config: &Configuration) {
   let mut line = join_parts([
     Some(to_part(d.date.as_ref())),
     Some("pad".to_string()),
@@ -63,20 +63,20 @@ fn format_pad(d: &crate::ast::Pad<'_>, config: &Configuration) -> String {
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
   }
-  line
+  writer.write_str(&line);
 }
 
-fn format_commodity(d: &crate::ast::Commodity<'_>, config: &Configuration) -> String {
+fn format_commodity(writer: &mut Writer, d: &crate::ast::Commodity<'_>, config: &Configuration) {
   let comment_col = config.line_width as usize;
   let mut line = join_parts([Some(to_part(d.date.as_ref())), Some("commodity".to_string())]);
   line = align_trailing(line, Some(to_part(d.currency.as_ref())), comment_col);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, true);
   }
-  line
+  writer.write_str(&line);
 }
 
-fn format_price(d: &crate::ast::Price<'_>, config: &Configuration) -> String {
+fn format_price(writer: &mut Writer, d: &crate::ast::Price<'_>, config: &Configuration) {
   let comment_col = config.line_width as usize;
   let mut line = join_parts([
     Some(to_part(d.date.as_ref())),
@@ -90,10 +90,10 @@ fn format_price(d: &crate::ast::Price<'_>, config: &Configuration) -> String {
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, true);
   }
-  line
+  writer.write_str(&line);
 }
 
-fn format_event(d: &crate::ast::Event<'_>, config: &Configuration) -> String {
+fn format_event(writer: &mut Writer, d: &crate::ast::Event<'_>, config: &Configuration) {
   let mut line = join_parts([
     Some(to_part(d.date.as_ref())),
     Some("event".to_string()),
@@ -103,10 +103,10 @@ fn format_event(d: &crate::ast::Event<'_>, config: &Configuration) -> String {
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
   }
-  line
+  writer.write_str(&line);
 }
 
-fn format_query(d: &crate::ast::Query<'_>, config: &Configuration) -> String {
+fn format_query(writer: &mut Writer, d: &crate::ast::Query<'_>, config: &Configuration) {
   let mut line = join_parts([
     Some(to_part(d.date.as_ref())),
     Some("query".to_string()),
@@ -116,10 +116,10 @@ fn format_query(d: &crate::ast::Query<'_>, config: &Configuration) -> String {
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
   }
-  line
+  writer.write_str(&line);
 }
 
-fn format_note(d: &crate::ast::Note<'_>, config: &Configuration) -> String {
+fn format_note(writer: &mut Writer, d: &crate::ast::Note<'_>, config: &Configuration) {
   let mut line = join_parts([
     Some(to_part(d.date.as_ref())),
     Some("note".to_string()),
@@ -129,10 +129,10 @@ fn format_note(d: &crate::ast::Note<'_>, config: &Configuration) -> String {
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
   }
-  line
+  writer.write_str(&line);
 }
 
-fn format_document(d: &crate::ast::Document<'_>, config: &Configuration) -> String {
+fn format_document(writer: &mut Writer, d: &crate::ast::Document<'_>, config: &Configuration) {
   let mut line = join_parts([
     Some(to_part(d.date.as_ref())),
     Some("document".to_string()),
@@ -143,10 +143,10 @@ fn format_document(d: &crate::ast::Document<'_>, config: &Configuration) -> Stri
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
   }
-  line
+  writer.write_str(&line);
 }
 
-fn format_custom(d: &crate::ast::Custom<'_>, config: &Configuration) -> String {
+fn format_custom(writer: &mut Writer, d: &crate::ast::Custom<'_>, config: &Configuration) {
   let mut line = join_parts([
     Some(to_part(d.date.as_ref())),
     Some("custom".to_string()),
@@ -160,46 +160,53 @@ fn format_custom(d: &crate::ast::Custom<'_>, config: &Configuration) -> String {
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
   }
-  line
+  writer.write_str(&line);
 }
 
-fn format_option(d: &crate::ast::OptionDirective<'_>) -> String {
-  join_parts([
+fn format_option(writer: &mut Writer, d: &crate::ast::OptionDirective<'_>) {
+  let line = join_parts([
     Some("option".to_string()),
     Some(to_part(d.key.as_ref())),
     Some(to_part(d.value.as_ref())),
-  ])
+  ]);
+  writer.write_str(&line);
 }
 
-fn format_include(d: &crate::ast::Include<'_>) -> String {
-  join_parts([Some("include".to_string()), Some(to_part(d.filename.as_ref()))])
+fn format_include(writer: &mut Writer, d: &crate::ast::Include<'_>) {
+  let line = join_parts([Some("include".to_string()), Some(to_part(d.filename.as_ref()))]);
+  writer.write_str(&line);
 }
 
-fn format_plugin(d: &crate::ast::Plugin<'_>) -> String {
-  join_parts([
+fn format_plugin(writer: &mut Writer, d: &crate::ast::Plugin<'_>) {
+  let line = join_parts([
     Some("plugin".to_string()),
     Some(to_part(d.name.as_ref())),
     d.config.as_ref().map(|c| c.trim().to_string()),
-  ])
+  ]);
+  writer.write_str(&line);
 }
 
-fn format_pushtag(d: &crate::ast::TagDirective<'_>) -> String {
-  join_parts([Some("pushtag".to_string()), Some(to_part(d.tag.as_ref()))])
+fn format_pushtag(writer: &mut Writer, d: &crate::ast::TagDirective<'_>) {
+  let line = join_parts([Some("pushtag".to_string()), Some(to_part(d.tag.as_ref()))]);
+  writer.write_str(&line);
 }
 
-fn format_poptag(d: &crate::ast::TagDirective<'_>) -> String {
-  join_parts([Some("poptag".to_string()), Some(to_part(d.tag.as_ref()))])
+fn format_poptag(writer: &mut Writer, d: &crate::ast::TagDirective<'_>) {
+  let line = join_parts([Some("poptag".to_string()), Some(to_part(d.tag.as_ref()))]);
+  writer.write_str(&line);
 }
 
-fn format_pushmeta(d: &crate::ast::Pushmeta<'_>) -> String {
-  join_parts([Some("pushmeta".to_string()), Some(normalize_key_value(&d.key_value))])
+fn format_pushmeta(writer: &mut Writer, d: &crate::ast::Pushmeta<'_>) {
+  let line = join_parts([Some("pushmeta".to_string()), Some(normalize_key_value(&d.key_value))]);
+  writer.write_str(&line);
 }
 
-fn format_popmeta(d: &crate::ast::Popmeta<'_>) -> String {
-  join_parts([
+fn format_popmeta(writer: &mut Writer, d: &crate::ast::Popmeta<'_>) {
+  let line = join_parts([
     Some("popmeta".to_string()),
     Some(format!("{}:", to_part(d.key.as_ref()))),
-  ])
+  ]);
+  writer.write_str(&line);
 }
 
 impl Writer {
@@ -250,25 +257,25 @@ impl<'a> FormatterContext<'a> {
 
   fn format_directive(&mut self, dir: &Directive<'a>, full_source: &str) {
     match dir {
-      Directive::Open(d) => self.write(&format_open(d, self.config)),
-      Directive::Close(d) => self.write(&format_close(d, self.config)),
-      Directive::Balance(d) => self.write(&format_balance(d, self.config)),
-      Directive::Pad(d) => self.write(&format_pad(d, self.config)),
+      Directive::Open(d) => format_open(&mut self.writer, d, self.config),
+      Directive::Close(d) => format_close(&mut self.writer, d, self.config),
+      Directive::Balance(d) => format_balance(&mut self.writer, d, self.config),
+      Directive::Pad(d) => format_pad(&mut self.writer, d, self.config),
       Directive::Transaction(d) => self.format_transaction(d, full_source),
-      Directive::Commodity(d) => self.write(&format_commodity(d, self.config)),
-      Directive::Price(d) => self.write(&format_price(d, self.config)),
-      Directive::Event(d) => self.write(&format_event(d, self.config)),
-      Directive::Query(d) => self.write(&format_query(d, self.config)),
-      Directive::Note(d) => self.write(&format_note(d, self.config)),
-      Directive::Document(d) => self.write(&format_document(d, self.config)),
-      Directive::Custom(d) => self.write(&format_custom(d, self.config)),
-      Directive::Option(d) => self.write(&format_option(d)),
-      Directive::Include(d) => self.write(&format_include(d)),
-      Directive::Plugin(d) => self.write(&format_plugin(d)),
-      Directive::Pushtag(d) => self.write(&format_pushtag(d)),
-      Directive::Poptag(d) => self.write(&format_poptag(d)),
-      Directive::Pushmeta(d) => self.write(&format_pushmeta(d)),
-      Directive::Popmeta(d) => self.write(&format_popmeta(d)),
+      Directive::Commodity(d) => format_commodity(&mut self.writer, d, self.config),
+      Directive::Price(d) => format_price(&mut self.writer, d, self.config),
+      Directive::Event(d) => format_event(&mut self.writer, d, self.config),
+      Directive::Query(d) => format_query(&mut self.writer, d, self.config),
+      Directive::Note(d) => format_note(&mut self.writer, d, self.config),
+      Directive::Document(d) => format_document(&mut self.writer, d, self.config),
+      Directive::Custom(d) => format_custom(&mut self.writer, d, self.config),
+      Directive::Option(d) => format_option(&mut self.writer, d),
+      Directive::Include(d) => format_include(&mut self.writer, d),
+      Directive::Plugin(d) => format_plugin(&mut self.writer, d),
+      Directive::Pushtag(d) => format_pushtag(&mut self.writer, d),
+      Directive::Poptag(d) => format_poptag(&mut self.writer, d),
+      Directive::Pushmeta(d) => format_pushmeta(&mut self.writer, d),
+      Directive::Popmeta(d) => format_popmeta(&mut self.writer, d),
       Directive::Raw(d) => self.format_span(d.span, full_source),
     }
   }
