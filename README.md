@@ -34,4 +34,5 @@ It's not a bug that will reproduce 100% in everytimes, you may need to run it mu
 
 what's more:
 
-you can un-comment `[patch.crates-io]` in `./Cargo.toml`, which contains a c malloc implemented in rust, and build-run again, you will find it work as expected.
+you can un-comment `[patch.crates-io]` in `./Cargo.toml`, 
+there is a fixed version or [tree-sitter-language-0.1.6](https://github.com/trim21/beancount-format/tree/broken-malloc/patches/tree-sitter-language-0.1.6) which contains a c malloc implemented in rust.
