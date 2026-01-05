@@ -1,17 +1,10 @@
 use anyhow::Result;
-use assert_cmd::Command;
+use assert_cmd::{cargo::cargo_bin_cmd, Command};
 use assert_fs::prelude::*;
 use predicates::{ord::eq, prelude::*};
 
 const UNFORMATTED: &str = "2010-01-01 open\tAssets:Cash   \n";
 const FORMATTED: &str = "2010-01-01 open Assets:Cash\n";
-
-fn cli_cmd() -> Result<Command> {
-  #[allow(deprecated)]
-  {
-    Command::cargo_bin("beancount-formatter").map_err(Into::into)
-  }
-}
 
 #[test]
 fn exits_zero_and_echoes_when_already_formatted() -> Result<()> {
@@ -19,7 +12,7 @@ fn exits_zero_and_echoes_when_already_formatted() -> Result<()> {
   let file = temp.child("already.bean");
   file.write_str(FORMATTED)?;
 
-  let mut cmd = cli_cmd()?;
+  let mut cmd: Command = cargo_bin_cmd!("beancount-formatter");
   cmd.arg(file.path());
 
   cmd
@@ -38,7 +31,7 @@ fn prints_formatted_output_and_nonzero_when_changes() -> Result<()> {
   let file = temp.child("needs-format.beancount");
   file.write_str(UNFORMATTED)?;
 
-  let mut cmd = cli_cmd()?;
+  let mut cmd: Command = cargo_bin_cmd!("beancount-formatter");
   cmd.arg(file.path());
 
   cmd
@@ -57,7 +50,7 @@ fn rewrites_file_in_place_when_requested() -> Result<()> {
   let file = temp.child("rewrite.beancount");
   file.write_str(UNFORMATTED)?;
 
-  let mut cmd = cli_cmd()?;
+  let mut cmd: Command = cargo_bin_cmd!("beancount-formatter");
   cmd.arg("--in-place").arg(file.path());
 
   cmd
@@ -83,7 +76,7 @@ new_line_kind = "crlf"
   let file = temp.child("configurable.beancount");
   file.write_str("2010-01-01 open Assets:Cash\n")?;
 
-  let mut cmd = cli_cmd()?;
+  let mut cmd: Command = cargo_bin_cmd!("beancount-formatter");
   cmd.current_dir(temp.path());
   cmd.arg(file.path());
 
