@@ -68,10 +68,7 @@ fn format_pad(d: &crate::ast::Pad<'_>, config: &Configuration) -> String {
 
 fn format_commodity(d: &crate::ast::Commodity<'_>, config: &Configuration) -> String {
   let comment_col = config.line_width as usize;
-  let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
-    Some("commodity".to_string()),
-  ]);
+  let mut line = join_parts([Some(to_part(d.date.as_ref())), Some("commodity".to_string())]);
   line = align_trailing(line, Some(to_part(d.currency.as_ref())), comment_col);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, true);
@@ -199,7 +196,10 @@ fn format_pushmeta(d: &crate::ast::Pushmeta<'_>) -> String {
 }
 
 fn format_popmeta(d: &crate::ast::Popmeta<'_>) -> String {
-  join_parts([Some("popmeta".to_string()), Some(format!("{}:", to_part(d.key.as_ref())))])
+  join_parts([
+    Some("popmeta".to_string()),
+    Some(format!("{}:", to_part(d.key.as_ref()))),
+  ])
 }
 
 impl Writer {
