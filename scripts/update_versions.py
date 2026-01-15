@@ -20,6 +20,16 @@ def _validate_pyproject(text: str, expected_version: str) -> bool:
     return data.get("project", {}).get("version") == expected_version
 
 
+def _iter_replace_once(text: str, old: str, new: str):
+    start = 0
+    while True:
+        index = text.find(old, start)
+        if index == -1:
+            return
+        yield text[:index] + new + text[index + len(old) :]
+        start = index + len(old)
+
+
 def update_pyproject(pyproject: Path, version: str) -> bool:
     text = pyproject.read_bytes().decode("utf-8")
     try:
@@ -30,31 +40,15 @@ def update_pyproject(pyproject: Path, version: str) -> bool:
     if not old_version:
         raise RuntimeError("Missing version field in [project] section")
     old_version = str(old_version)
-    parts = text.split(old_version)
-    if len(parts) < 2:
+    if old_version not in text:
         raise RuntimeError("Failed to find version string in pyproject.toml")
 
-    candidate = version.join([parts[0], old_version.join(parts[1:])])
-    if _validate_pyproject(candidate, version):
-        if candidate != text:
-            pyproject.write_bytes(candidate.encode("utf-8"))
-            return True
-        return False
-
-    head, tail = text.rsplit(old_version, 1)
-    candidate = head + version + tail
-    if _validate_pyproject(candidate, version):
-        if candidate != text:
-            pyproject.write_bytes(candidate.encode("utf-8"))
-            return True
-        return False
-
-    candidate = version.join(parts)
-    if _validate_pyproject(candidate, version):
-        if candidate != text:
-            pyproject.write_bytes(candidate.encode("utf-8"))
-            return True
-        return False
+    for candidate in _iter_replace_once(text, old_version, version):
+        if _validate_pyproject(candidate, version):
+            if candidate != text:
+                pyproject.write_bytes(candidate.encode("utf-8"))
+                return True
+            return False
 
     raise RuntimeError("Failed to update pyproject.toml version safely")
 
@@ -74,31 +68,15 @@ def update_package_json(package_json: Path, version: str) -> bool:
     if not old_version:
         raise RuntimeError("Missing version field in package.json")
     old_version = str(old_version)
-    parts = text.split(old_version)
-    if len(parts) < 2:
+    if old_version not in text:
         raise RuntimeError("Failed to find version string in package.json")
 
-    candidate = version.join([parts[0], old_version.join(parts[1:])])
-    if _validate_package_json(candidate, version):
-        if candidate != text:
-            package_json.write_bytes(candidate.encode("utf-8"))
-            return True
-        return False
-
-    head, tail = text.rsplit(old_version, 1)
-    candidate = head + version + tail
-    if _validate_package_json(candidate, version):
-        if candidate != text:
-            package_json.write_bytes(candidate.encode("utf-8"))
-            return True
-        return False
-
-    candidate = version.join(parts)
-    if _validate_package_json(candidate, version):
-        if candidate != text:
-            package_json.write_bytes(candidate.encode("utf-8"))
-            return True
-        return False
+    for candidate in _iter_replace_once(text, old_version, version):
+        if _validate_package_json(candidate, version):
+            if candidate != text:
+                package_json.write_bytes(candidate.encode("utf-8"))
+                return True
+            return False
 
     raise RuntimeError("Failed to update package.json version safely")
 
