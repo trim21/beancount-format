@@ -70,6 +70,9 @@ impl SyncPluginHandler<Configuration> for BeancountPluginHandler {
     _format_with_host: impl FnMut(SyncHostFormatRequest) -> FormatResult,
   ) -> FormatResult {
     let file_text = String::from_utf8(request.file_bytes)?;
+    if file_text.trim().is_empty() {
+      return Ok(Some(Vec::new()));
+    }
     let formatted = format_beancount(request.file_path.to_str(), &file_text, &request.config)?;
 
     if formatted == file_text {
