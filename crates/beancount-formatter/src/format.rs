@@ -284,8 +284,6 @@ impl<'a> FormatterContext<'a> {
     let txn_text = &full_source[txn.span.start..txn.span.end];
     let mut lines: Vec<String> = txn_text.replace("\r\n", "\n").lines().map(|l| l.to_string()).collect();
 
-    let has_posting_comments = txn.postings.iter().any(|p| p.comment.is_some());
-
     let mut header_parts: Vec<String> = Vec::new();
     header_parts.push(txn.date.trim().to_string());
     if let Some(flag) = &txn.txn {
@@ -307,66 +305,63 @@ impl<'a> FormatterContext<'a> {
     lines[0] = header_line;
 
     let mut posting_line_indices = Vec::new();
+    let mut min_indent = usize::MAX;
 
-    if has_posting_comments {
-      let mut min_indent = usize::MAX;
+    for posting in &txn.postings {
+      let offset = posting.span.start.saturating_sub(txn.span.start);
+      let line_idx = count_newlines_up_to(txn_text, offset);
+      posting_line_indices.push(line_idx);
+      if let Some(line) = lines.get(line_idx) {
+        let indent = leading_indent_width(line, self.config.indent_width);
+        min_indent = min_indent.min(indent);
+      }
+    }
 
-      for posting in &txn.postings {
-        let offset = posting.span.start.saturating_sub(txn.span.start);
-        let line_idx = count_newlines_up_to(txn_text, offset);
-        posting_line_indices.push(line_idx);
-        if let Some(line) = lines.get(line_idx) {
-          let indent = leading_indent_width(line, self.config.indent_width);
-          min_indent = min_indent.min(indent);
+    if min_indent == usize::MAX {
+      min_indent = (self.config.indent_width as usize) * 2;
+    }
+
+    for (posting, &line_idx) in txn.postings.iter().zip(posting_line_indices.iter()) {
+      let flag = posting.opt_flag.as_deref().map(str::trim);
+      let account = posting.account.trim();
+      let amount = posting.amount.as_ref().and_then(|a| split_amount(a));
+      let trailing = if let Some((num, cur)) = amount {
+        let mut parts = vec![format!("{} {}", compact_ws(&num), cur)];
+        if let Some(cost) = posting.cost_spec.as_ref() {
+          parts.push(compact_ws(cost));
         }
+        if let Some(price_op) = posting.price_operator.as_ref() {
+          parts.push(price_op.trim().to_string());
+        }
+        if let Some(price_ann) = posting.price_annotation.as_ref() {
+          parts.push(compact_ws(price_ann));
+        }
+        Some(parts.join(" "))
+      } else {
+        None
+      };
+
+      let mut line = String::new();
+      line.push_str(&" ".repeat(min_indent));
+      if let Some(f) = flag {
+        line.push_str(f);
+        line.push(' ');
+      }
+      line.push_str(account);
+
+      line = align_trailing(line, trailing, self.config.line_width as usize);
+
+      if let Some(comment) = &posting.comment {
+        line = append_comment(line, &format_comment(comment), self.config, true);
       }
 
-      if min_indent == usize::MAX {
-        min_indent = (self.config.indent_width as usize) * 2;
-      }
-
-      for (posting, &line_idx) in txn.postings.iter().zip(posting_line_indices.iter()) {
-        let flag = posting.opt_flag.as_deref().map(str::trim);
-        let account = posting.account.trim();
-        let amount = posting.amount.as_ref().and_then(|a| split_amount(a));
-        let trailing = if let Some((num, cur)) = amount {
-          let mut parts = vec![format!("{} {}", compact_ws(&num), cur)];
-          if let Some(cost) = posting.cost_spec.as_ref() {
-            parts.push(compact_ws(cost));
-          }
-          if let Some(price_op) = posting.price_operator.as_ref() {
-            parts.push(price_op.trim().to_string());
-          }
-          if let Some(price_ann) = posting.price_annotation.as_ref() {
-            parts.push(compact_ws(price_ann));
-          }
-          Some(parts.join(" "))
-        } else {
-          None
-        };
-
-        let mut line = String::new();
-        line.push_str(&" ".repeat(min_indent));
-        if let Some(f) = flag {
-          line.push_str(f);
-          line.push(' ');
-        }
-        line.push_str(account);
-
-        line = align_trailing(line, trailing, self.config.line_width as usize);
-
-        if let Some(comment) = &posting.comment {
-          line = append_comment(line, &format_comment(comment), self.config, true);
-        }
-
-        if let Some(slot) = lines.get_mut(line_idx) {
-          *slot = line;
-        }
+      if let Some(slot) = lines.get_mut(line_idx) {
+        *slot = line;
       }
     }
 
     for (idx, line) in lines.iter_mut().enumerate().skip(1) {
-      if has_posting_comments && posting_line_indices.contains(&idx) {
+      if posting_line_indices.contains(&idx) {
         continue;
       }
       *line = normalize_indentation(line, self.config.indent_width);
