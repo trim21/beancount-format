@@ -46,15 +46,15 @@ impl SyncPluginHandler<Configuration> for BeancountPluginHandler {
   fn plugin_info(&mut self) -> PluginInfo {
     let version = env!("CARGO_PKG_VERSION").to_string();
     PluginInfo {
-      name: env!("CARGO_PKG_NAME").to_string(),
+      name: "@trim21/dprint-plugin-beancount".to_string(),
       version: version.clone(),
       config_key: "beancount".to_string(),
-      help_url: "https://github.com/dprint/dprint-plugin-beancount".to_string(),
+      help_url: "https://github.com/trim21/beancount-format".to_string(),
       config_schema_url: format!(
-        "https://plugins.dprint.dev/dprint/dprint-plugin-beancount/{}/schema.json",
+        "https://cdn.jsdelivr.net/gh/trim21/beancount-format@gh-pages/dprint-plugin-beancount/{}/schema.json",
         version
       ),
-      update_url: Some("https://plugins.dprint.dev/dprint/dprint-plugin-beancount/latest.json".to_string()),
+      update_url: Some("https://cdn.jsdelivr.net/gh/trim21/beancount-format@gh-pages/dprint-plugin-beancount/latest.json".to_string()),
     }
   }
 

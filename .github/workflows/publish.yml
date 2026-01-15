@@ -53,3 +53,31 @@ jobs:
 
       - name: Publish npm package
         run: npm publish --provenance --access public
+
+  pages:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          target: wasm32-unknown-unknown
+
+      - name: Build wasm plugin
+        run: cargo build -p dprint-plugin-beancount --target wasm32-unknown-unknown --features wasm --release
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Generate plugin metadata
+        run: python scripts/generate_plugin_assets.py --out-dir dist
+
+      - name: Publish metadata to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: dist
+          keep_files: true
