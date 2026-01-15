@@ -149,3 +149,23 @@ fn format_and_check_fixtures() {
     run_case(&input_path);
   }
 }
+
+#[test]
+fn format_empty_file_is_single_line() {
+  use beancount_formatter::configuration::{Configuration, NewLineKind};
+  use beancount_formatter::format;
+
+  let config = Configuration {
+    new_line: NewLineKind::LF,
+    ..Default::default()
+  };
+  let formatted_lf = format(Some("empty.bean"), "\n\n\t  ", &config).expect("format failed");
+  assert_eq!(formatted_lf, "\n");
+
+  let config = Configuration {
+    new_line: NewLineKind::CRLF,
+    ..Default::default()
+  };
+  let formatted_crlf = format(Some("empty.bean"), "  \r\n\r\n", &config).expect("format failed");
+  assert_eq!(formatted_crlf, "\r\n");
+}
