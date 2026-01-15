@@ -479,7 +479,7 @@ fn parse_posting<'a>(node: Node, source: &'a str, filename: &str) -> Result<Post
 }
 
 fn parse_transaction<'a>(node: Node, source: &'a str, filename: &str) -> Result<Directive<'a>> {
-  // We keep this intentionally shallow for now: ensure the node has a date and narration.
+  // We keep this intentionally shallow for now: ensure the node has a date.
   // Different grammar versions may or may not expose field names; we support both fields and heuristics.
 
   let date = field_text(node, "date", source)
@@ -506,7 +506,7 @@ fn parse_transaction<'a>(node: Node, source: &'a str, filename: &str) -> Result<
   let narration = field_text(node, "narration", source);
 
   let (payee, narration) = match (payee, narration) {
-    (p, Some(n)) => (p, n),
+    (p, Some(n)) => (p, Some(n)),
     // Heuristic: take string children. If there are 2, assume payee+narration; if 1, narration only.
     (None, None) => {
       let mut cursor = node.walk();
@@ -517,16 +517,12 @@ fn parse_transaction<'a>(node: Node, source: &'a str, filename: &str) -> Result<
       let first = strings.next();
       let second = strings.next();
       match (first, second) {
-        (Some(n), None) => (None, n),
-        (Some(p), Some(n)) => (Some(p), n),
-        _ => return Err(parse_error(node, filename, "missing narration")),
+        (Some(n), None) => (None, Some(n)),
+        (Some(p), Some(n)) => (Some(p), Some(n)),
+        _ => (None, None),
       }
     }
-    (p, None) => {
-      // payee without narration isn't valid; treat as parse error.
-      let _ = p;
-      return Err(parse_error(node, filename, "missing narration"));
-    }
+    (p, None) => (p, None),
   };
 
   let mut tags_links_lines = Vec::new();

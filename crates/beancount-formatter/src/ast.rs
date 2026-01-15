@@ -111,7 +111,7 @@ pub struct Transaction<'a> {
   /// Transaction flag/token (e.g. `*`, `!`) when present.
   pub txn: Option<Cow<'a, str>>,
   pub payee: Option<Cow<'a, str>>,
-  pub narration: Cow<'a, str>,
+  pub narration: Option<Cow<'a, str>>,
   pub tags_links: Option<Cow<'a, str>>,
   pub comment: Option<Cow<'a, str>>,
   /// All tag/link groups attached to the transaction (inline and indented lines).

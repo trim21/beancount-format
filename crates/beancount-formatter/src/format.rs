@@ -294,7 +294,9 @@ impl<'a> FormatterContext<'a> {
     if let Some(payee) = &txn.payee {
       header_parts.push(payee.trim().to_string());
     }
-    header_parts.push(txn.narration.trim().to_string());
+    if let Some(narration) = &txn.narration {
+      header_parts.push(narration.trim().to_string());
+    }
     if let Some(tags) = &txn.tags_links {
       header_parts.push(tags.trim().to_string());
     }
@@ -413,9 +415,22 @@ fn format_content(path: Option<&str>, content: &str, formatting_config: &Configu
   };
 
   let mut ctx = FormatterContext::new(formatting_config, content.len());
-  for dir in &directives {
+  for (idx, dir) in directives.iter().enumerate() {
+    let is_txn = matches!(dir, Directive::Transaction(_));
+    let next_is_txn = directives
+      .get(idx + 1)
+      .is_some_and(|d| matches!(d, Directive::Transaction(_)));
+
+    if is_txn && idx > 0 {
+      ctx.write(newline);
+    }
+
     ctx.format_directive(dir, &content);
     ctx.write(newline);
+
+    if is_txn && idx + 1 < directives.len() && !next_is_txn {
+      ctx.write(newline);
+    }
   }
 
   // From this point on we only normalize newline style; the per-node formatter
