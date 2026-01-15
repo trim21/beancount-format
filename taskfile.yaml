@@ -55,6 +55,7 @@ tasks:
         sh: yq '.workspace.package.version' Cargo.toml
     cmds:
       - python scripts/update_versions.py
-      - git add pyproject.toml package.json Cargo.toml
+      - cargo generate-lockfile
+      - git add pyproject.toml package.json Cargo.toml Cargo.lock
       - 'git commit -m "bump: {{.VERSION}}"'
       - 'git tag "v{{.VERSION}}" -m "v{{.VERSION}}"'
