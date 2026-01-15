@@ -1,13 +1,15 @@
 {
-  "name": "@dprint/beancount",
+  "name": "@trim21/dprint-plugin-beancount",
   "version": "0.1.0",
   "description": "Wasm module for dprint-plugin-beancount.",
   "main": "./index.js",
   "types": "./index.d.ts",
-  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dprint/dprint-plugin-beancount.git"
+    "url": "git+https://github.com/trim21/beancount-format.git"
   },
   "keywords": [
     "beancount",
@@ -19,10 +21,17 @@
   "author": "David Sherret",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/dprint/dprint-plugin-beancount/issues"
+    "url": "https://github.com/trim21/beancount-format/issues"
   },
-  "homepage": "https://github.com/dprint/dprint-plugin-beancount#readme",
+  "homepage": "https://github.com/trim21/beancount-format#readme",
   "packageManager": "pnpm@10.28.0",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "plugin.wasm",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "node index.js && node index.test.js"
   },

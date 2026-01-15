@@ -2,6 +2,13 @@
 
 Rust formatter for Beancount files with a reusable core library, a small CLI, and optional Python bindings.
 
+## NPM / jsDelivr
+The published package includes plugin.wasm for browser/CDN usage.
+
+- Package: @trim21/dprint-plugin-beancount
+- jsDelivr (latest): https://cdn.jsdelivr.net/npm/@trim21/dprint-plugin-beancount@latest/plugin.wasm
+- Node usage: require the package and read `wasmPath` or call `getWasmBuffer()`.
+
 ## Crates
 - crates/beancount-formatter: core library containing the formatter and configuration.
 - crates/beancount-formatter-cli: CLI wrapper around the formatter library.

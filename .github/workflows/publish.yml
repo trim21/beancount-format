@@ -22,3 +22,34 @@ jobs:
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
         run: cargo publish -p beancount-formatter
+
+  npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Build wasm plugin
+        run: cargo build -p dprint-plugin-beancount --target wasm32-unknown-unknown --features wasm --release
+
+      - name: Update plugin.wasm
+        run: cp target/wasm32-unknown-unknown/release/dprint_plugin_beancount.wasm plugin.wasm
+
+      - name: Setup | pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: package.json
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install pnpm dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Publish npm package
+        run: npm publish --provenance --access public
