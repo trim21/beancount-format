@@ -417,22 +417,32 @@ fn format_content(path: Option<&str>, content: &str, formatting_config: &Configu
   };
 
   let mut ctx = FormatterContext::new(formatting_config, content.len());
-  for (idx, dir) in directives.iter().enumerate() {
-    let is_txn = matches!(dir, Directive::Transaction(_));
-    let next_is_txn = directives
-      .get(idx + 1)
-      .is_some_and(|d| matches!(d, Directive::Transaction(_)));
+  let mut prev_end_line: Option<usize> = None;
+  let mut prev_is_txn = false;
 
-    if is_txn && idx > 0 {
-      ctx.write(newline);
+  for dir in directives.iter() {
+    let is_txn = matches!(dir, Directive::Transaction(_));
+    if let Some(prev_end) = prev_end_line {
+      let start_line = directive_start_line(dir, &content);
+      let mut blank_lines = start_line.saturating_sub(prev_end + 1).min(2);
+      let txn_min = if (prev_is_txn && !is_txn) || (!prev_is_txn && is_txn) {
+        1
+      } else {
+        0
+      };
+      if blank_lines < txn_min {
+        blank_lines = txn_min;
+      }
+      for _ in 0..blank_lines {
+        ctx.write(newline);
+      }
     }
 
     ctx.format_directive(dir, &content);
     ctx.write(newline);
 
-    if is_txn && idx + 1 < directives.len() && !next_is_txn {
-      ctx.write(newline);
-    }
+    prev_end_line = Some(directive_end_line(dir, &content));
+    prev_is_txn = is_txn;
   }
 
   // From this point on we only normalize newline style; the per-node formatter
@@ -594,6 +604,46 @@ fn count_newlines_up_to(text: &str, offset: usize) -> usize {
     .take(offset.min(text.len()))
     .filter(|b| **b == b'\n')
     .count()
+}
+
+fn directive_span(dir: &Directive<'_>) -> crate::ast::Span {
+  match dir {
+    Directive::Open(d) => d.span,
+    Directive::Close(d) => d.span,
+    Directive::Balance(d) => d.span,
+    Directive::Pad(d) => d.span,
+    Directive::Transaction(d) => d.span,
+    Directive::Commodity(d) => d.span,
+    Directive::Price(d) => d.span,
+    Directive::Event(d) => d.span,
+    Directive::Query(d) => d.span,
+    Directive::Note(d) => d.span,
+    Directive::Document(d) => d.span,
+    Directive::Custom(d) => d.span,
+    Directive::Option(d) => d.span,
+    Directive::Include(d) => d.span,
+    Directive::Plugin(d) => d.span,
+    Directive::Pushtag(d) => d.span,
+    Directive::Poptag(d) => d.span,
+    Directive::Pushmeta(d) => d.span,
+    Directive::Popmeta(d) => d.span,
+    Directive::Raw(d) => d.span,
+  }
+}
+
+fn line_at_offset(text: &str, offset: usize) -> usize {
+  count_newlines_up_to(text, offset) + 1
+}
+
+fn directive_start_line(dir: &Directive<'_>, text: &str) -> usize {
+  let span = directive_span(dir);
+  line_at_offset(text, span.start)
+}
+
+fn directive_end_line(dir: &Directive<'_>, text: &str) -> usize {
+  let span = directive_span(dir);
+  let end_offset = span.end.saturating_sub(1);
+  line_at_offset(text, end_offset)
 }
 
 fn leading_indent_width(line: &str, indent_width: u8) -> usize {
