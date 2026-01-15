@@ -24,20 +24,14 @@ jobs:
       - name: Update plugin.wasm
         run: cp target/wasm32-unknown-unknown/release/dprint_plugin_beancount.wasm plugin.wasm
 
-      - name: Setup | pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          package_json_file: package.json
-
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
-          cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
           registry-url: "https://registry.npmjs.org"
 
-      - name: Install pnpm dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Update npm
+        run: npm install -g npm@latest
 
       - name: Publish npm package
         run: npm publish

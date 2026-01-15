@@ -1,6 +1,6 @@
 {
   "name": "@trim21/dprint-plugin-beancount",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Wasm module for dprint-plugin-beancount.",
   "main": "./index.js",
   "types": "./index.d.ts",
