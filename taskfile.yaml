@@ -48,3 +48,13 @@ tasks:
     desc: Run Rust formatter
     cmds:
       - cargo fmt --all
+
+  bump:
+    vars:
+      VERSION:
+        sh: yq 'workspace.package.version' Cargo.toml
+    cmds:
+      - python scripts/update_versions.py
+      - git add pyproject.toml package.json Cargo.toml
+      - 'git commit -m "bump: {{.VERSION}}"'
+      - 'git tag "v{{.VERSION}}" -m "v{{.VERSION}}"'
