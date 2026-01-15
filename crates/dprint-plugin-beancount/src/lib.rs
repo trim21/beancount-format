@@ -54,7 +54,9 @@ impl SyncPluginHandler<Configuration> for BeancountPluginHandler {
         "https://cdn.jsdelivr.net/gh/trim21/beancount-format@gh-pages/dprint-plugin-beancount/{}/schema.json",
         version
       ),
-      update_url: Some("https://cdn.jsdelivr.net/gh/trim21/beancount-format@gh-pages/dprint-plugin-beancount/latest.json".to_string()),
+      update_url: Some(
+        "https://cdn.jsdelivr.net/gh/trim21/beancount-format@gh-pages/dprint-plugin-beancount/latest.json".to_string(),
+      ),
     }
   }
 
