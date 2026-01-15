@@ -378,6 +378,13 @@ pub fn format(path: Option<&str>, source_text: &str, config: &Configuration) -> 
 fn format_content(path: Option<&str>, content: &str, formatting_config: &Configuration) -> Result<String> {
   let path = path.unwrap_or("<memory>");
 
+  if content.trim().is_empty() {
+    return Ok(match formatting_config.new_line {
+      NewLineKind::LF => "\n".to_string(),
+      NewLineKind::CRLF => "\r\n".to_string(),
+    });
+  }
+
   // The parser expects a trailing newline; append one if it's missing.
   let content = if content.ends_with('\n') || content.ends_with("\r\n") {
     content.to_string()
