@@ -92,7 +92,7 @@ def main() -> None:
     pyproject_updated = update_pyproject(pyproject, version)
     package_updated = update_package_json(package_json, version)
 
-    updated_files = []
+    updated_files: list[str] = []
     if pyproject_updated:
         updated_files.append("pyproject.toml")
     if package_updated:
