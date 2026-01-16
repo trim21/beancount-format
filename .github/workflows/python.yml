@@ -34,7 +34,7 @@ jobs:
         with:
           activate-environment: "true"
 
-      - run: uv sync --frozen --group dev
+      - run: uv sync --group dev
 
       - name: Format (ruff)
         run: ruff format --check python
@@ -60,7 +60,7 @@ jobs:
         with:
           activate-environment: "true"
 
-      - run: uv sync --frozen --group dev
+      - run: uv sync --group dev
 
       - run: maturin build --release --out dist
 
