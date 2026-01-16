@@ -29,6 +29,12 @@ tasks:
     cmds:
       - cargo test --workspace
 
+  test:update:
+    env:
+      TEST_UPDATE_EXPECTED: "1"
+    cmds:
+      - cargo test --workspace
+
   test:cli:
     desc: Run CLI end-to-end tests
     cmds:
