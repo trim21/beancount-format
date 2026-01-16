@@ -163,11 +163,7 @@ fn format_custom(writer: &mut Writer, d: &ast::Custom<'_>, config: &Configuratio
 }
 
 fn format_option(writer: &mut Writer, d: &ast::OptionDirective<'_>) {
-  let line = join_parts([
-    Some("option".to_string()),
-    Some(to_part(d.key)),
-    Some(to_part(d.value)),
-  ]);
+  let line = join_parts([Some("option".to_string()), Some(to_part(d.key)), Some(to_part(d.value))]);
   writer.write_str(&line);
 }
 
@@ -208,10 +204,7 @@ fn format_pushmeta(writer: &mut Writer, d: &ast::PushMeta<'_>) {
 }
 
 fn format_popmeta(writer: &mut Writer, d: &ast::PopMeta<'_>) {
-  let line = join_parts([
-    Some("popmeta".to_string()),
-    Some(format!("{}:", to_part(d.key))),
-  ]);
+  let line = join_parts([Some("popmeta".to_string()), Some(format!("{}:", to_part(d.key)))]);
   writer.write_str(&line);
 }
 
