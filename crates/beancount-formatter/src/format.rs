@@ -1,21 +1,20 @@
-use anyhow::{Context, Result};
-use tree_sitter::{Node, Parser, Point};
+use anyhow::Result;
 
-use crate::ast::Directive;
 use crate::configuration::{Configuration, NewLineKind};
-use crate::parse::parse_directives;
+use crate::parse::parse_source;
+use beancount_parser::ast::{self, Directive, PriceOperator};
 
 /// Simple string writer to avoid building large intermediate vectors before concatenation.
 struct Writer {
   buf: String,
 }
 
-fn format_open(writer: &mut Writer, d: &crate::ast::Open<'_>, config: &Configuration) {
+fn format_open(writer: &mut Writer, d: &ast::Open<'_>, config: &Configuration) {
   let comment_col = config.line_width as usize;
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("open".to_string()),
-    Some(to_part(d.account.as_ref())),
+    Some(to_part(d.account)),
   ]);
   line = align_trailing(line, format_currencies(&d.currencies), comment_col);
   if let Some(comment) = &d.comment {
@@ -24,11 +23,11 @@ fn format_open(writer: &mut Writer, d: &crate::ast::Open<'_>, config: &Configura
   writer.write_str(&line);
 }
 
-fn format_close(writer: &mut Writer, d: &crate::ast::Close<'_>, config: &Configuration) {
+fn format_close(writer: &mut Writer, d: &ast::Close<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("close".to_string()),
-    Some(to_part(d.account.as_ref())),
+    Some(to_part(d.account)),
   ]);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
@@ -36,16 +35,16 @@ fn format_close(writer: &mut Writer, d: &crate::ast::Close<'_>, config: &Configu
   writer.write_str(&line);
 }
 
-fn format_balance(writer: &mut Writer, d: &crate::ast::Balance<'_>, config: &Configuration) {
+fn format_balance(writer: &mut Writer, d: &ast::Balance<'_>, config: &Configuration) {
   let comment_col = config.line_width as usize;
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("balance".to_string()),
-    Some(to_part(d.account.as_ref())),
+    Some(to_part(d.account)),
   ]);
-  let trailing = split_amount(&d.amount)
+  let trailing = split_amount(d.amount.raw)
     .map(|(num, cur)| format!("{} {}", compact_ws(&num), cur))
-    .or_else(|| Some(compact_ws(&d.amount)));
+    .or_else(|| Some(compact_ws(d.amount.raw)));
   line = align_trailing(line, trailing, comment_col);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, true);
@@ -53,12 +52,12 @@ fn format_balance(writer: &mut Writer, d: &crate::ast::Balance<'_>, config: &Con
   writer.write_str(&line);
 }
 
-fn format_pad(writer: &mut Writer, d: &crate::ast::Pad<'_>, config: &Configuration) {
+fn format_pad(writer: &mut Writer, d: &ast::Pad<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("pad".to_string()),
-    Some(to_part(d.account.as_ref())),
-    Some(to_part(d.from_account.as_ref())),
+    Some(to_part(d.account)),
+    Some(to_part(d.from_account)),
   ]);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
@@ -66,26 +65,26 @@ fn format_pad(writer: &mut Writer, d: &crate::ast::Pad<'_>, config: &Configurati
   writer.write_str(&line);
 }
 
-fn format_commodity(writer: &mut Writer, d: &crate::ast::Commodity<'_>, config: &Configuration) {
+fn format_commodity(writer: &mut Writer, d: &ast::Commodity<'_>, config: &Configuration) {
   let comment_col = config.line_width as usize;
-  let mut line = join_parts([Some(to_part(d.date.as_ref())), Some("commodity".to_string())]);
-  line = align_trailing(line, Some(to_part(d.currency.as_ref())), comment_col);
+  let mut line = join_parts([Some(to_part(d.date)), Some("commodity".to_string())]);
+  line = align_trailing(line, Some(to_part(d.currency)), comment_col);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, true);
   }
   writer.write_str(&line);
 }
 
-fn format_price(writer: &mut Writer, d: &crate::ast::Price<'_>, config: &Configuration) {
+fn format_price(writer: &mut Writer, d: &ast::Price<'_>, config: &Configuration) {
   let comment_col = config.line_width as usize;
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("price".to_string()),
-    Some(to_part(d.currency.as_ref())),
+    Some(to_part(d.currency)),
   ]);
-  let trailing = split_amount(&d.amount)
+  let trailing = split_amount(d.amount.raw)
     .map(|(num, cur)| format!("{} {}", compact_ws(&num), cur))
-    .or_else(|| Some(compact_ws(&d.amount)));
+    .or_else(|| Some(compact_ws(d.amount.raw)));
   line = align_trailing(line, trailing, comment_col);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, true);
@@ -93,12 +92,12 @@ fn format_price(writer: &mut Writer, d: &crate::ast::Price<'_>, config: &Configu
   writer.write_str(&line);
 }
 
-fn format_event(writer: &mut Writer, d: &crate::ast::Event<'_>, config: &Configuration) {
+fn format_event(writer: &mut Writer, d: &ast::Event<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("event".to_string()),
-    Some(to_part(d.event_type.as_ref())),
-    Some(to_part(d.desc.as_ref())),
+    Some(to_part(d.event_type)),
+    Some(to_part(d.desc)),
   ]);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
@@ -106,12 +105,12 @@ fn format_event(writer: &mut Writer, d: &crate::ast::Event<'_>, config: &Configu
   writer.write_str(&line);
 }
 
-fn format_query(writer: &mut Writer, d: &crate::ast::Query<'_>, config: &Configuration) {
+fn format_query(writer: &mut Writer, d: &ast::Query<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("query".to_string()),
-    Some(to_part(d.name.as_ref())),
-    Some(to_part(d.query.as_ref())),
+    Some(to_part(d.name)),
+    Some(to_part(d.query)),
   ]);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
@@ -119,12 +118,12 @@ fn format_query(writer: &mut Writer, d: &crate::ast::Query<'_>, config: &Configu
   writer.write_str(&line);
 }
 
-fn format_note(writer: &mut Writer, d: &crate::ast::Note<'_>, config: &Configuration) {
+fn format_note(writer: &mut Writer, d: &ast::Note<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("note".to_string()),
-    Some(to_part(d.account.as_ref())),
-    Some(to_part(d.note.as_ref())),
+    Some(to_part(d.account)),
+    Some(to_part(d.note)),
   ]);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
@@ -132,12 +131,12 @@ fn format_note(writer: &mut Writer, d: &crate::ast::Note<'_>, config: &Configura
   writer.write_str(&line);
 }
 
-fn format_document(writer: &mut Writer, d: &crate::ast::Document<'_>, config: &Configuration) {
+fn format_document(writer: &mut Writer, d: &ast::Document<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("document".to_string()),
-    Some(to_part(d.account.as_ref())),
-    Some(to_part(d.filename.as_ref())),
+    Some(to_part(d.account)),
+    Some(to_part(d.filename)),
     d.tags_links.as_ref().map(|t| t.trim().to_string()),
   ]);
   if let Some(comment) = &d.comment {
@@ -146,15 +145,15 @@ fn format_document(writer: &mut Writer, d: &crate::ast::Document<'_>, config: &C
   writer.write_str(&line);
 }
 
-fn format_custom(writer: &mut Writer, d: &crate::ast::Custom<'_>, config: &Configuration) {
+fn format_custom(writer: &mut Writer, d: &ast::Custom<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("custom".to_string()),
-    Some(to_part(d.name.as_ref())),
+    Some(to_part(d.name)),
     if d.values.is_empty() {
       None
     } else {
-      Some(d.values.iter().map(|v| v.trim()).collect::<Vec<_>>().join(" "))
+      Some(d.values.iter().map(|v| v.raw.trim()).collect::<Vec<_>>().join(" "))
     },
   ]);
   if let Some(comment) = &d.comment {
@@ -163,49 +162,49 @@ fn format_custom(writer: &mut Writer, d: &crate::ast::Custom<'_>, config: &Confi
   writer.write_str(&line);
 }
 
-fn format_option(writer: &mut Writer, d: &crate::ast::OptionDirective<'_>) {
-  let line = join_parts([
-    Some("option".to_string()),
-    Some(to_part(d.key.as_ref())),
-    Some(to_part(d.value.as_ref())),
-  ]);
+fn format_option(writer: &mut Writer, d: &ast::OptionDirective<'_>) {
+  let line = join_parts([Some("option".to_string()), Some(to_part(d.key)), Some(to_part(d.value))]);
   writer.write_str(&line);
 }
 
-fn format_include(writer: &mut Writer, d: &crate::ast::Include<'_>) {
-  let line = join_parts([Some("include".to_string()), Some(to_part(d.filename.as_ref()))]);
+fn format_include(writer: &mut Writer, d: &ast::Include<'_>) {
+  let line = join_parts([Some("include".to_string()), Some(to_part(d.filename))]);
   writer.write_str(&line);
 }
 
-fn format_plugin(writer: &mut Writer, d: &crate::ast::Plugin<'_>) {
+fn format_plugin(writer: &mut Writer, d: &ast::Plugin<'_>) {
   let line = join_parts([
     Some("plugin".to_string()),
-    Some(to_part(d.name.as_ref())),
+    Some(to_part(d.name)),
     d.config.as_ref().map(|c| c.trim().to_string()),
   ]);
   writer.write_str(&line);
 }
 
-fn format_pushtag(writer: &mut Writer, d: &crate::ast::TagDirective<'_>) {
-  let line = join_parts([Some("pushtag".to_string()), Some(to_part(d.tag.as_ref()))]);
+fn format_pushtag(writer: &mut Writer, d: &ast::TagDirective<'_>) {
+  let tag = format!("#{}", to_part(d.tag));
+  let line = join_parts([Some("pushtag".to_string()), Some(tag)]);
   writer.write_str(&line);
 }
 
-fn format_poptag(writer: &mut Writer, d: &crate::ast::TagDirective<'_>) {
-  let line = join_parts([Some("poptag".to_string()), Some(to_part(d.tag.as_ref()))]);
+fn format_poptag(writer: &mut Writer, d: &ast::TagDirective<'_>) {
+  let tag = format!("#{}", to_part(d.tag));
+  let line = join_parts([Some("poptag".to_string()), Some(tag)]);
   writer.write_str(&line);
 }
 
-fn format_pushmeta(writer: &mut Writer, d: &crate::ast::Pushmeta<'_>) {
-  let line = join_parts([Some("pushmeta".to_string()), Some(normalize_key_value(&d.key_value))]);
+fn format_pushmeta(writer: &mut Writer, d: &ast::PushMeta<'_>) {
+  let key_value = if let Some(value) = d.value.as_ref() {
+    format!("{}: {}", d.key, value.as_str())
+  } else {
+    format!("{}:", d.key)
+  };
+  let line = join_parts([Some("pushmeta".to_string()), Some(normalize_key_value(&key_value))]);
   writer.write_str(&line);
 }
 
-fn format_popmeta(writer: &mut Writer, d: &crate::ast::Popmeta<'_>) {
-  let line = join_parts([
-    Some("popmeta".to_string()),
-    Some(format!("{}:", to_part(d.key.as_ref()))),
-  ]);
+fn format_popmeta(writer: &mut Writer, d: &ast::PopMeta<'_>) {
+  let line = join_parts([Some("popmeta".to_string()), Some(format!("{}:", to_part(d.key)))]);
   writer.write_str(&line);
 }
 
@@ -246,7 +245,7 @@ impl<'a> FormatterContext<'a> {
     self.writer.write_str(piece);
   }
 
-  fn format_span(&mut self, span: crate::ast::Span, full_source: &str) {
+  fn format_span(&mut self, span: ast::Span, full_source: &str) {
     let slice = &full_source[span.start..span.end];
     self.write(&normalize_indentation(slice, self.config.indent_width));
     // normalize_indentation already wrote trailing newlines; caller adds newline.
@@ -272,15 +271,15 @@ impl<'a> FormatterContext<'a> {
       Directive::Option(d) => format_option(&mut self.writer, d),
       Directive::Include(d) => format_include(&mut self.writer, d),
       Directive::Plugin(d) => format_plugin(&mut self.writer, d),
-      Directive::Pushtag(d) => format_pushtag(&mut self.writer, d),
-      Directive::Poptag(d) => format_poptag(&mut self.writer, d),
-      Directive::Pushmeta(d) => format_pushmeta(&mut self.writer, d),
-      Directive::Popmeta(d) => format_popmeta(&mut self.writer, d),
-      Directive::Raw(d) => self.format_span(d.span, full_source),
+      Directive::PushTag(d) => format_pushtag(&mut self.writer, d),
+      Directive::PopTag(d) => format_poptag(&mut self.writer, d),
+      Directive::PushMeta(d) => format_pushmeta(&mut self.writer, d),
+      Directive::PopMeta(d) => format_popmeta(&mut self.writer, d),
+      Directive::Comment(d) => self.format_span(d.span, full_source),
     }
   }
 
-  fn format_transaction(&mut self, txn: &crate::ast::Transaction<'a>, full_source: &str) {
+  fn format_transaction(&mut self, txn: &ast::Transaction<'a>, full_source: &str) {
     let txn_text = &full_source[txn.span.start..txn.span.end];
     let mut lines: Vec<String> = txn_text.replace("\r\n", "\n").lines().map(|l| l.to_string()).collect();
 
@@ -322,19 +321,22 @@ impl<'a> FormatterContext<'a> {
     }
 
     for (posting, &line_idx) in txn.postings.iter().zip(posting_line_indices.iter()) {
-      let flag = posting.opt_flag.as_deref().map(str::trim);
+      let flag = posting.opt_flag.map(str::trim);
       let account = posting.account.trim();
-      let amount = posting.amount.as_ref().and_then(|a| split_amount(a));
+      let amount = posting.amount.as_ref().and_then(|a| split_amount(a.raw));
       let trailing = if let Some((num, cur)) = amount {
         let mut parts = vec![format!("{} {}", compact_ws(&num), cur)];
         if let Some(cost) = posting.cost_spec.as_ref() {
-          parts.push(compact_ws(cost));
+          parts.push(compact_ws(cost.raw));
         }
-        if let Some(price_op) = posting.price_operator.as_ref() {
-          parts.push(price_op.trim().to_string());
+        if let Some(price_op) = posting.price_operator {
+          parts.push(match price_op {
+            PriceOperator::PerUnit => "@".to_string(),
+            PriceOperator::Total => "@@".to_string(),
+          });
         }
         if let Some(price_ann) = posting.price_annotation.as_ref() {
-          parts.push(compact_ws(price_ann));
+          parts.push(compact_ws(price_ann.raw));
         }
         Some(parts.join(" "))
       } else {
@@ -392,24 +394,7 @@ fn format_content(path: Option<&str>, content: &str, formatting_config: &Configu
     format!("{}\n", content)
   };
 
-  let mut parser = Parser::new();
-
-  parser
-    .set_language(&tree_sitter_beancount::language())
-    .context("Failed to load beancount grammar")?;
-
-  let tree = parser
-    .parse(&content, None)
-    .ok_or_else(|| anyhow::anyhow!("Failed to parse {}", path))?;
-
-  if tree.root_node().has_error() {
-    let error_message = describe_parse_errors(tree.root_node(), &content);
-    return Err(anyhow::anyhow!("Failed to parse {}: {}", path, error_message));
-  }
-
-  let root = tree.root_node();
-
-  let directives = parse_directives(root, &content, path.to_string()).map_err(anyhow::Error::new)?;
+  let directives = parse_source(&content, path).map_err(anyhow::Error::new)?;
 
   let newline = match formatting_config.new_line {
     NewLineKind::LF => "\n",
@@ -475,60 +460,6 @@ fn format_content(path: Option<&str>, content: &str, formatting_config: &Configu
   }
 
   Ok(formatted)
-}
-
-/// Build a concise error summary from tree-sitter error nodes, including row/col info.
-fn describe_parse_errors(root: Node, text: &str) -> String {
-  let mut messages = Vec::new();
-  let mut stack = vec![root];
-
-  while let Some(node) = stack.pop() {
-    if node.is_error() || node.is_missing() {
-      let span = format_point_range(node.start_position(), node.end_position());
-      let snippet = slice_text(node, text).trim();
-      if node.is_missing() {
-        messages.push(format!("missing {:?} at {}", node.kind(), span));
-      } else {
-        messages.push(format!("error at {} near {:?}", span, snippet));
-      }
-    }
-
-    let mut cursor = node.walk();
-    if cursor.goto_first_child() {
-      loop {
-        stack.push(cursor.node());
-        if !cursor.goto_next_sibling() {
-          break;
-        }
-      }
-    }
-  }
-
-  if messages.is_empty() {
-    "unknown parse error".to_string()
-  } else {
-    messages.join("; ")
-  }
-}
-
-fn format_point_range(start: Point, end: Point) -> String {
-  if start == end {
-    format!("{}:{}", start.row + 1, start.column + 1)
-  } else {
-    format!(
-      "{}:{}-{}:{}",
-      start.row + 1,
-      start.column + 1,
-      end.row + 1,
-      end.column + 1
-    )
-  }
-}
-
-fn slice_text<'a>(node: Node, text: &'a str) -> &'a str {
-  let start = node.start_byte();
-  let end = node.end_byte();
-  &text[start..end]
 }
 
 /// Normalizes tabs to spaces (respecting indent width) outside of string literals and trims trailing whitespace per line.
@@ -606,7 +537,7 @@ fn count_newlines_up_to(text: &str, offset: usize) -> usize {
     .count()
 }
 
-fn directive_span(dir: &Directive<'_>) -> crate::ast::Span {
+fn directive_span(dir: &Directive<'_>) -> ast::Span {
   match dir {
     Directive::Open(d) => d.span,
     Directive::Close(d) => d.span,
@@ -623,11 +554,11 @@ fn directive_span(dir: &Directive<'_>) -> crate::ast::Span {
     Directive::Option(d) => d.span,
     Directive::Include(d) => d.span,
     Directive::Plugin(d) => d.span,
-    Directive::Pushtag(d) => d.span,
-    Directive::Poptag(d) => d.span,
-    Directive::Pushmeta(d) => d.span,
-    Directive::Popmeta(d) => d.span,
-    Directive::Raw(d) => d.span,
+    Directive::PushTag(d) => d.span,
+    Directive::PopTag(d) => d.span,
+    Directive::PushMeta(d) => d.span,
+    Directive::PopMeta(d) => d.span,
+    Directive::Comment(d) => d.span,
   }
 }
 
@@ -732,7 +663,7 @@ fn split_amount(text: &str) -> Option<(String, String)> {
   Some((number, currency))
 }
 
-fn format_currencies(currencies: &[std::borrow::Cow<'_, str>]) -> Option<String> {
+fn format_currencies(currencies: &[&str]) -> Option<String> {
   if currencies.is_empty() {
     return None;
   }

@@ -1,4 +1,4 @@
-2010-01-01 open Assets:Cash                                                         USD ; comment
+2010-01-01 open Assets:Cash                                                     USD EUR ; comment
 2010-01-02 close Assets:Cash ; close comment
 2010-01-03 balance Assets:Cash                                                   10 USD ; bal
 2010-01-04 pad Assets:Cash Assets:Bank ; pad

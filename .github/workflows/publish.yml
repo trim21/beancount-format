@@ -19,7 +19,7 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Build wasm plugin
-        run: cargo build -p dprint-plugin-beancount --target wasm32-unknown-unknown --features wasm --release
+        run: cargo build -p dprint-plugin-beancount --target wasm32-unknown-unknown --release
 
       - name: Update plugin.wasm
         run: cp target/wasm32-unknown-unknown/release/dprint_plugin_beancount.wasm plugin.wasm
@@ -48,7 +48,7 @@ jobs:
           target: wasm32-unknown-unknown
 
       - name: Build wasm plugin
-        run: cargo build -p dprint-plugin-beancount --target wasm32-unknown-unknown --features wasm --release
+        run: cargo build -p dprint-plugin-beancount --target wasm32-unknown-unknown --release
 
       - uses: actions/setup-python@v6
         with:

@@ -9,13 +9,14 @@ homepage.workspace = true
 description = "Core beancount formatter logic."
 
 [features]
-default = ["std"]
-std = ["tree-sitter-beancount/std"]
-wasm = ["tree-sitter-beancount/wasm"]
 
+# default = ["std"]
+# std = ["tree-sitter-beancount/std"]
+# wasm = ["tree-sitter-beancount/wasm"]
 [dependencies]
-tree-sitter-beancount = { version = "2.5.0", default-features = false }
-# tree-sitter-beancount = { path = "C:/Users/trim21/projects/tree-sitter-beancount/", default-features = false }
+beancount-parser = { git = "https://github.com/trim21/beancount.git", rev = "3753c6f1" }
+# beancount-parser = { path = "/home/trim21/proj/beancount/crates/beancount-parser" }
+# tree-sitter-beancount = { version = "2.5.0", default-features = false }
 tree-sitter = { version = "0.26.3" }
 anyhow.workspace = true
 serde.workspace = true

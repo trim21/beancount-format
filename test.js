@@ -12,7 +12,7 @@ const wasmSourcePath = path.join(
 function runTests() {
   if (!fs.existsSync(wasmSourcePath)) {
     throw new Error(
-      "Missing wasm artifact. Run `cargo build -p dprint-plugin-beancount --target wasm32-unknown-unknown --features wasm --release` first.",
+      "Missing wasm artifact. Run `cargo build -p dprint-plugin-beancount --target wasm32-unknown-unknown --release` first.",
     );
   }
 
