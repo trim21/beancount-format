@@ -1,4 +1,4 @@
-#![cfg(all(feature = "wasm", target_arch = "wasm32", target_os = "unknown"))]
+#![cfg(all(target_arch = "wasm32", target_os = "unknown"))]
 
 use beancount_formatter::configuration::Configuration;
 use beancount_formatter::configuration::NewLineKind;
