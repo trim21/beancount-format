@@ -4,7 +4,7 @@ mod format;
 mod parse;
 
 pub use format::format;
-pub use parse::ParseError;
+pub use beancount_parser::ParseError;
 
 /// Parse file into typed directives.
 ///
@@ -13,6 +13,6 @@ pub fn parse_directives_with_meta<'a>(
   root: tree_sitter::Node,
   source: &'a str,
   filename: String,
-) -> Result<Vec<ast::Directive<'a>>, parse::ParseError> {
-  parse::parse_directives(root, source, filename)
+) -> Result<Vec<ast::Directive<'a>>, ParseError> {
+  beancount_parser::parse_directives_with_meta(root, source, filename)
 }
