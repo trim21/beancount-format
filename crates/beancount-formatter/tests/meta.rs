@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
-use beancount_parser::ast::Directive;
 use beancount_formatter::parse_directives_with_meta;
+use beancount_parser::ast::Directive;
 use tree_sitter::Parser;
 
 #[test]
