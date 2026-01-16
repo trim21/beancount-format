@@ -1,0 +1,7 @@
+;; -*- mode: beancount -*-
+**** C:\Users\trim21\projects\beancount-format.bean
+
+2025-11-22 * "a" "b"
+  time: "20:41:51"
+  Expenses:Sports
+  Liabilities:Card                                         -17.37 USD

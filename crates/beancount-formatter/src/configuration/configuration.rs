@@ -1,7 +1,7 @@
 use super::NewLineKind;
 use serde::{Deserialize, Serialize};
 
-pub const DEFAULT_LINE_WIDTH: u32 = 88;
+pub const DEFAULT_LINE_WIDTH: u32 = 70;
 pub const DEFAULT_INDENT_WIDTH: u8 = 2;
 pub const DEFAULT_NEW_LINE_KIND: NewLineKind = NewLineKind::LF;
 

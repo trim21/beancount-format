@@ -49,6 +49,7 @@ tasks:
     desc: Run clippy lints
     cmds:
       - cargo clippy --allow-dirty --fix --workspace --all-targets --all-features -- -D warnings
+      - cargo fmt --all
 
   fmt:
     desc: Run Rust formatter

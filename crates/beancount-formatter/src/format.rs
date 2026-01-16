@@ -275,6 +275,7 @@ impl<'a> FormatterContext<'a> {
       Directive::PopTag(d) => format_poptag(&mut self.writer, d),
       Directive::PushMeta(d) => format_pushmeta(&mut self.writer, d),
       Directive::PopMeta(d) => format_popmeta(&mut self.writer, d),
+      Directive::Headline(d) => self.format_span(d.span, full_source),
       Directive::Comment(d) => self.format_span(d.span, full_source),
     }
   }
@@ -558,6 +559,7 @@ fn directive_span(dir: &Directive<'_>) -> ast::Span {
     Directive::PopTag(d) => d.span,
     Directive::PushMeta(d) => d.span,
     Directive::PopMeta(d) => d.span,
+    Directive::Headline(d) => d.span,
     Directive::Comment(d) => d.span,
   }
 }
