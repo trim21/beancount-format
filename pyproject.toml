@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "bean-format"
-version = "0.1.7"
+version = "0.1.8"
 description = "Beancount formatter powered by dprint-plugin-beancount"
 authors = [{ name = "David Sherret", email = "dsherret@gmail.com" }]
 readme = "python/README.md"
@@ -28,4 +28,4 @@ python-source = "python/src"
 package = false
 
 [dependency-groups]
-dev = ["maturin>=1.11.5", "pytest>=9.0.2", "ruff>=0.14.13"]
+dev = ["maturin==1.11.5", "pytest==9.0.2", "ruff==0.14.13"]

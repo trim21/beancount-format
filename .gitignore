@@ -4,3 +4,4 @@ target
 plugin.wasm
 node_modules
 *.py[cod]
+uv.lock
