@@ -1,8 +1,8 @@
 use anyhow::Result;
 
-use beancount_parser::ast::{self, Directive, PriceOperator};
 use crate::configuration::{Configuration, NewLineKind};
 use crate::parse::parse_source;
+use beancount_parser::ast::{self, Directive, PriceOperator};
 
 /// Simple string writer to avoid building large intermediate vectors before concatenation.
 struct Writer {
@@ -12,9 +12,9 @@ struct Writer {
 fn format_open(writer: &mut Writer, d: &ast::Open<'_>, config: &Configuration) {
   let comment_col = config.line_width as usize;
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("open".to_string()),
-    Some(to_part(d.account.as_ref())),
+    Some(to_part(d.account)),
   ]);
   line = align_trailing(line, format_currencies(&d.currencies), comment_col);
   if let Some(comment) = &d.comment {
@@ -25,9 +25,9 @@ fn format_open(writer: &mut Writer, d: &ast::Open<'_>, config: &Configuration) {
 
 fn format_close(writer: &mut Writer, d: &ast::Close<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("close".to_string()),
-    Some(to_part(d.account.as_ref())),
+    Some(to_part(d.account)),
   ]);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
@@ -38,9 +38,9 @@ fn format_close(writer: &mut Writer, d: &ast::Close<'_>, config: &Configuration)
 fn format_balance(writer: &mut Writer, d: &ast::Balance<'_>, config: &Configuration) {
   let comment_col = config.line_width as usize;
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("balance".to_string()),
-    Some(to_part(d.account.as_ref())),
+    Some(to_part(d.account)),
   ]);
   let trailing = split_amount(d.amount.raw)
     .map(|(num, cur)| format!("{} {}", compact_ws(&num), cur))
@@ -54,10 +54,10 @@ fn format_balance(writer: &mut Writer, d: &ast::Balance<'_>, config: &Configurat
 
 fn format_pad(writer: &mut Writer, d: &ast::Pad<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("pad".to_string()),
-    Some(to_part(d.account.as_ref())),
-    Some(to_part(d.from_account.as_ref())),
+    Some(to_part(d.account)),
+    Some(to_part(d.from_account)),
   ]);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
@@ -67,8 +67,8 @@ fn format_pad(writer: &mut Writer, d: &ast::Pad<'_>, config: &Configuration) {
 
 fn format_commodity(writer: &mut Writer, d: &ast::Commodity<'_>, config: &Configuration) {
   let comment_col = config.line_width as usize;
-  let mut line = join_parts([Some(to_part(d.date.as_ref())), Some("commodity".to_string())]);
-  line = align_trailing(line, Some(to_part(d.currency.as_ref())), comment_col);
+  let mut line = join_parts([Some(to_part(d.date)), Some("commodity".to_string())]);
+  line = align_trailing(line, Some(to_part(d.currency)), comment_col);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, true);
   }
@@ -78,9 +78,9 @@ fn format_commodity(writer: &mut Writer, d: &ast::Commodity<'_>, config: &Config
 fn format_price(writer: &mut Writer, d: &ast::Price<'_>, config: &Configuration) {
   let comment_col = config.line_width as usize;
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("price".to_string()),
-    Some(to_part(d.currency.as_ref())),
+    Some(to_part(d.currency)),
   ]);
   let trailing = split_amount(d.amount.raw)
     .map(|(num, cur)| format!("{} {}", compact_ws(&num), cur))
@@ -94,10 +94,10 @@ fn format_price(writer: &mut Writer, d: &ast::Price<'_>, config: &Configuration)
 
 fn format_event(writer: &mut Writer, d: &ast::Event<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("event".to_string()),
-    Some(to_part(d.event_type.as_ref())),
-    Some(to_part(d.desc.as_ref())),
+    Some(to_part(d.event_type)),
+    Some(to_part(d.desc)),
   ]);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
@@ -107,10 +107,10 @@ fn format_event(writer: &mut Writer, d: &ast::Event<'_>, config: &Configuration)
 
 fn format_query(writer: &mut Writer, d: &ast::Query<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("query".to_string()),
-    Some(to_part(d.name.as_ref())),
-    Some(to_part(d.query.as_ref())),
+    Some(to_part(d.name)),
+    Some(to_part(d.query)),
   ]);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
@@ -120,10 +120,10 @@ fn format_query(writer: &mut Writer, d: &ast::Query<'_>, config: &Configuration)
 
 fn format_note(writer: &mut Writer, d: &ast::Note<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("note".to_string()),
-    Some(to_part(d.account.as_ref())),
-    Some(to_part(d.note.as_ref())),
+    Some(to_part(d.account)),
+    Some(to_part(d.note)),
   ]);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
@@ -133,10 +133,10 @@ fn format_note(writer: &mut Writer, d: &ast::Note<'_>, config: &Configuration) {
 
 fn format_document(writer: &mut Writer, d: &ast::Document<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("document".to_string()),
-    Some(to_part(d.account.as_ref())),
-    Some(to_part(d.filename.as_ref())),
+    Some(to_part(d.account)),
+    Some(to_part(d.filename)),
     d.tags_links.as_ref().map(|t| t.trim().to_string()),
   ]);
   if let Some(comment) = &d.comment {
@@ -147,19 +147,13 @@ fn format_document(writer: &mut Writer, d: &ast::Document<'_>, config: &Configur
 
 fn format_custom(writer: &mut Writer, d: &ast::Custom<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date.as_ref())),
+    Some(to_part(d.date)),
     Some("custom".to_string()),
-    Some(to_part(d.name.as_ref())),
+    Some(to_part(d.name)),
     if d.values.is_empty() {
       None
     } else {
-      Some(
-        d.values
-          .iter()
-          .map(|v| v.raw.trim())
-          .collect::<Vec<_>>()
-          .join(" "),
-      )
+      Some(d.values.iter().map(|v| v.raw.trim()).collect::<Vec<_>>().join(" "))
     },
   ]);
   if let Some(comment) = &d.comment {
@@ -171,34 +165,34 @@ fn format_custom(writer: &mut Writer, d: &ast::Custom<'_>, config: &Configuratio
 fn format_option(writer: &mut Writer, d: &ast::OptionDirective<'_>) {
   let line = join_parts([
     Some("option".to_string()),
-    Some(to_part(d.key.as_ref())),
-    Some(to_part(d.value.as_ref())),
+    Some(to_part(d.key)),
+    Some(to_part(d.value)),
   ]);
   writer.write_str(&line);
 }
 
 fn format_include(writer: &mut Writer, d: &ast::Include<'_>) {
-  let line = join_parts([Some("include".to_string()), Some(to_part(d.filename.as_ref()))]);
+  let line = join_parts([Some("include".to_string()), Some(to_part(d.filename))]);
   writer.write_str(&line);
 }
 
 fn format_plugin(writer: &mut Writer, d: &ast::Plugin<'_>) {
   let line = join_parts([
     Some("plugin".to_string()),
-    Some(to_part(d.name.as_ref())),
+    Some(to_part(d.name)),
     d.config.as_ref().map(|c| c.trim().to_string()),
   ]);
   writer.write_str(&line);
 }
 
 fn format_pushtag(writer: &mut Writer, d: &ast::TagDirective<'_>) {
-  let tag = format!("#{}", to_part(d.tag.as_ref()));
+  let tag = format!("#{}", to_part(d.tag));
   let line = join_parts([Some("pushtag".to_string()), Some(tag)]);
   writer.write_str(&line);
 }
 
 fn format_poptag(writer: &mut Writer, d: &ast::TagDirective<'_>) {
-  let tag = format!("#{}", to_part(d.tag.as_ref()));
+  let tag = format!("#{}", to_part(d.tag));
   let line = join_parts([Some("poptag".to_string()), Some(tag)]);
   writer.write_str(&line);
 }
@@ -216,7 +210,7 @@ fn format_pushmeta(writer: &mut Writer, d: &ast::PushMeta<'_>) {
 fn format_popmeta(writer: &mut Writer, d: &ast::PopMeta<'_>) {
   let line = join_parts([
     Some("popmeta".to_string()),
-    Some(format!("{}:", to_part(d.key.as_ref()))),
+    Some(format!("{}:", to_part(d.key))),
   ]);
   writer.write_str(&line);
 }
@@ -334,7 +328,7 @@ impl<'a> FormatterContext<'a> {
     }
 
     for (posting, &line_idx) in txn.postings.iter().zip(posting_line_indices.iter()) {
-      let flag = posting.opt_flag.as_deref().map(str::trim);
+      let flag = posting.opt_flag.map(str::trim);
       let account = posting.account.trim();
       let amount = posting.amount.as_ref().and_then(|a| split_amount(a.raw));
       let trailing = if let Some((num, cur)) = amount {

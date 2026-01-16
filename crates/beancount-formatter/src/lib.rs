@@ -3,8 +3,8 @@ pub mod configuration;
 mod format;
 mod parse;
 
-pub use format::format;
 pub use beancount_parser::ParseError;
+pub use format::format;
 
 /// Parse file into typed directives.
 ///
