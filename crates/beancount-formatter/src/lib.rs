@@ -1,4 +1,3 @@
-pub mod ast;
 pub mod configuration;
 mod format;
 mod parse;
@@ -13,6 +12,6 @@ pub fn parse_directives_with_meta<'a>(
   root: tree_sitter::Node,
   source: &'a str,
   filename: String,
-) -> Result<Vec<ast::Directive<'a>>, ParseError> {
+) -> Result<Vec<beancount_parser::ast::Directive<'a>>, ParseError> {
   beancount_parser::parse_directives_with_meta(root, source, filename)
 }
