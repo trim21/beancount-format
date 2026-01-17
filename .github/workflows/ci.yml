@@ -35,3 +35,10 @@ jobs:
 
       - name: CLI e2e
         run: cargo test -p beancount-formatter-cli --test cli_e2e
+
+  pre-commit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: trim21/actions/prek@master

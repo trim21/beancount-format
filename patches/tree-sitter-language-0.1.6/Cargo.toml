@@ -10,36 +10,36 @@
 # See Cargo.toml.orig for the original contents.
 
 [package]
-edition = "2021"
-rust-version = "1.77"
 name = "tree-sitter-language"
 version = "0.1.6"
 authors = [
-    "Max Brunsfeld <maxbrunsfeld@gmail.com>",
-    "Amaan Qureshi <amaanq12@gmail.com>",
+  "Max Brunsfeld <maxbrunsfeld@gmail.com>",
+  "Amaan Qureshi <amaanq12@gmail.com>",
 ]
-build = "build.rs"
-links = "tree-sitter-language"
-autolib = false
+autobenches = false
 autobins = false
 autoexamples = false
+autolib = false
 autotests = false
-autobenches = false
-description = "The tree-sitter Language type, used by the library and by language implementations"
-homepage = "https://tree-sitter.github.io/tree-sitter"
-documentation = "https://docs.rs/tree-sitter-language"
-readme = "README.md"
-keywords = [
-    "incremental",
-    "parsing",
-]
+build = "build.rs"
 categories = [
-    "api-bindings",
-    "development-tools::ffi",
-    "parsing",
+  "api-bindings",
+  "development-tools::ffi",
+  "parsing",
+]
+documentation = "https://docs.rs/tree-sitter-language"
+edition = "2021"
+homepage = "https://tree-sitter.github.io/tree-sitter"
+keywords = [
+  "incremental",
+  "parsing",
 ]
 license = "MIT"
+links = "tree-sitter-language"
+readme = "README.md"
 repository = "https://github.com/tree-sitter/tree-sitter"
+rust-version = "1.77"
+description = "The tree-sitter Language type, used by the library and by language implementations"
 
 [lib]
 name = "tree_sitter_language"

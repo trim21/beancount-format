@@ -1,4 +1,4 @@
-version: "3"
+version: '3'
 
 tasks:
   default:
@@ -9,7 +9,7 @@ tasks:
   build:wasm:
     desc: Build the dprint beancount plugin wasm artifact
     env:
-      RUSTFLAGS: "-C link-args=--max-memory=4294967296 -C link-arg=--initial-heap=104857600"
+      RUSTFLAGS: '-C link-args=--max-memory=4294967296 -C link-arg=--initial-heap=104857600'
     cmds:
       - cargo build -p dprint-plugin-beancount --target wasm32-unknown-unknown --release --no-default-features
       - cp ./target/wasm32-unknown-unknown/release/dprint_plugin_beancount.wasm ./plugin.wasm
@@ -31,7 +31,7 @@ tasks:
 
   test:update:
     env:
-      TEST_UPDATE_EXPECTED: "1"
+      TEST_UPDATE_EXPECTED: '1'
     cmds:
       - cargo test --workspace
 
