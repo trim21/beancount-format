@@ -9,7 +9,7 @@ homepage.workspace = true
 description = "Core beancount formatter logic."
 
 [dependencies]
-beancount-parser = { git = "https://github.com/trim21/beancount.git", rev = "44c4df3c" }
+beancount-parser = { git = "https://github.com/trim21/beancount.git", rev = "249238e2" }
 # beancount-parser = { path = "../../../beancount/beancount/" }
 # beancount-parser = { path = "../../../beancount/beancount/crates/beancount-parser/" }
 tree-sitter = { version = "0.26.3" }

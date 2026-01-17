@@ -164,7 +164,7 @@ dependencies = [
 [[package]]
 name = "beancount-parser"
 version = "3.3.0-alpha.0"
-source = "git+https://github.com/trim21/beancount.git?rev=44c4df3c#44c4df3ccca2e44612d274ffceb111a6bbaaecd2"
+source = "git+https://github.com/trim21/beancount.git?rev=249238e2#249238e283ff85ddd40eb952b7481d7ec72aa29c"
 dependencies = [
  "anyhow",
  "beancount-tree-sitter",
@@ -180,7 +180,7 @@ dependencies = [
 [[package]]
 name = "beancount-tree-sitter"
 version = "2.4.2"
-source = "git+https://github.com/trim21/beancount.git?rev=44c4df3c#44c4df3ccca2e44612d274ffceb111a6bbaaecd2"
+source = "git+https://github.com/trim21/beancount.git?rev=249238e2#249238e283ff85ddd40eb952b7481d7ec72aa29c"
 dependencies = [
  "cc",
  "tree-sitter",
