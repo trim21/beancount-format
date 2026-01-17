@@ -45,7 +45,7 @@ def main() -> None:
     latest: dict[str, Any] = {
         "schemaVersion": 1,
         "version": version,
-        "url": f"https://cdn.jsdelivr.net/gh/{REPO}@gh-pages/{PLUGIN_DIR}/{version}/plugin.wasm",
+        "url": f"https://cdn.jsdelivr.net/npm/@trim21/dprint-plugin-beancount@{version}/plugin.wasm",
     }
 
     write_json(plugin_root / "latest.json", latest)
