@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "bean-format"
-version = "0.1.9"
+version = "0.1.10"
 description = "Beancount formatter powered by dprint-plugin-beancount"
 authors = [{ name = "David Sherret", email = "dsherret@gmail.com" }]
 readme = "python/README.md"
