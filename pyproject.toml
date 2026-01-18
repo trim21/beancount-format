@@ -23,7 +23,6 @@ beancount-format = "beancount_format:main"
 [tool.maturin]
 manifest-path = "crates/beancount-formatter-py/Cargo.toml"
 module-name = "beancount_format"
-features = ["python"]
 strip = true
 python-source = "python/src"
 
