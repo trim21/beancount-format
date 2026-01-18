@@ -56,17 +56,21 @@ fn execute(args: Cli) -> Result<RunOutcome> {
   for path in files {
     let content = fs::read_to_string(&path).with_context(|| format!("Failed to read {}", path.display()))?;
     let path_str = path.to_string_lossy();
+    let path_display = to_posix_path(&path);
     let formatted = format(Some(&path_str), &content, &config)?;
     let changed = formatted != content;
 
     if args.check {
       if changed {
         any_changed = true;
+        eprintln!("checking failed: {}", path_display);
       }
       continue;
     }
 
     if changed {
+      eprintln!("formatting: {}", path_display);
+
       fs::write(&path, &formatted).with_context(|| format!("Failed to write {}", path.display()))?;
       any_changed = true;
     }
@@ -227,6 +231,10 @@ impl PartialConfiguration {
 
 fn parse_pyproject(content: &str) -> Result<Pyproject, TomlError> {
   toml::from_str(content)
+}
+
+fn to_posix_path(path: &Path) -> String {
+  path.to_string_lossy().replace('\\', "/")
 }
 
 #[cfg(test)]
