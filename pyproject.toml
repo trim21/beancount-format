@@ -20,6 +20,9 @@ classifiers = [
 [project.scripts]
 beancount-format = "beancount_format:main"
 
+[dependency-groups]
+dev = ["maturin==1.11.5", "pytest==9.0.2", "ruff==0.14.13"]
+
 [tool.maturin]
 manifest-path = "crates/beancount-formatter-py/Cargo.toml"
 module-name = "beancount_format"
@@ -29,5 +32,5 @@ python-source = "python/src"
 [tool.uv]
 package = false
 
-[dependency-groups]
-dev = ["maturin==1.11.5", "pytest==9.0.2", "ruff==0.14.13"]
+[tool.pyright]
+extraPaths = ["python/src/"]
