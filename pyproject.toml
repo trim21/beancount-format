@@ -17,6 +17,9 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
 ]
 
+[project.scripts]
+beancount-format = "beancount_format:main"
+
 [tool.maturin]
 manifest-path = "crates/beancount-formatter-py/Cargo.toml"
 module-name = "beancount_format"
