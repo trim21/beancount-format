@@ -1,17 +1,17 @@
-# dprint-beancount
+# beancount-format
 
 Python package wrapping the Rust `dprint-plugin-beancount` formatter.
 
 ## Install
 
 ```bash
-pip install dprint-beancount
+pip install beancount-format
 ```
 
 ## Usage
 
 ```python
-from dprint_beancount import format_text
+from bean_format import format_text
 
 source = "2010-01-01 open Assets:Cash\n"
 formatted = format_text(source)

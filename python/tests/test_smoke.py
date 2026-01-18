@@ -1,4 +1,4 @@
-from bean_format import format_text
+from beancount_format import format_text
 
 
 def test_round_trip_open_account() -> None:

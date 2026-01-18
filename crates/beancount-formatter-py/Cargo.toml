@@ -10,7 +10,7 @@ repository.workspace = true
 description = "Python bindings for the beancount formatter."
 
 [lib]
-name = "bean_format"
+name = "beancount_format"
 crate-type = ["cdylib"]
 
 [features]

@@ -5,6 +5,7 @@ repos:
     rev: 'v0.51.1.0'
     hooks:
       - id: dprint
+        pass_filenames: false
 
   - repo: https://github.com/abravalheri/validate-pyproject
     rev: v0.24.1
@@ -48,14 +49,9 @@ repos:
         types_or: [c++, c, cuda]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    # Ruff version.
     rev: v0.14.13
     hooks:
       # Run the linter.
-      - id: ruff
+      - id: ruff-check
         args: [--fix]
-
-  - repo: https://github.com/psf/black
-    rev: '26.1.0'
-    hooks:
-      - id: black
+      - id: ruff-format

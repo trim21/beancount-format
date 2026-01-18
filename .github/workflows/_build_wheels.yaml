@@ -1,0 +1,83 @@
+name: Build Python Wheels
+
+on:
+  workflow_call:
+
+jobs:
+  sdist:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - name: Build sdist
+        uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist
+      - name: Upload sdist
+        uses: actions/upload-artifact@v6
+        with:
+          name: wheels-sdist
+          path: dist
+
+  wheel:
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - runner: macos-15
+            target: aarch64
+
+          - runner: macos-15-intel
+            target: x64
+
+          - runner: windows-latest
+            target: x64
+
+          - runner: ubuntu-24.04
+            target: x86_64
+
+          - runner: ubuntu-24.04-arm
+            target: aarch64
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        if: ${{ runner.os != 'Linux' }}
+
+      - uses: actions/setup-python@v6
+        if: ${{ runner.os != 'Linux' }}
+        with:
+          python-version: '3.14'
+
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.platform.target }}
+          args: --release --out dist
+          # https://github.com/tree-sitter/tree-sitter/issues/4186
+          manylinux: '2_28'
+
+      - run: ls -ahl dist
+        shell: bash
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v6
+        with:
+          name: wheels-${{ runner.os }}-${{ matrix.platform.target }}
+          path: dist
+
+  merge-wheel-artifact:
+    runs-on: ubuntu-24.04
+    needs: ['sdist', 'wheel']
+    steps:
+      - name: Merge Artifacts
+        uses: actions/upload-artifact/merge@v6
+        with:
+          name: wheel
+          pattern: wheels-*
