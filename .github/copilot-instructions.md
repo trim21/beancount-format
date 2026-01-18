@@ -1,8 +1,4 @@
-this project provide language tools for a text format beancount.
-
-It's based on a tree-sitter parser that generated from `./grammar.js`, `./grammer.json` and `./node-types.js` which you can find from project root directory.
-
-this project is a cargo workspace that contains multiple creates.
+This project is a cargo workspace that contains multiple creates.
 
 - `./crates/beancount-formatter/` is the core formatting crate, it provide a function that take raw content, filename and config, then return the formatted result.
 - `./crates/beancount-formatter-cli/` is a cli bin crate that users can use to format beancount files.
