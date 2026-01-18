@@ -20,7 +20,7 @@
       "enabled": false
     },
     {
-      "matchPackageNames": [
+      "matchDepNames": [
         "beancount-parser"
       ],
       "enabled": false
