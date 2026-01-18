@@ -426,7 +426,6 @@ dependencies = [
  "beancount-formatter",
  "dlmalloc",
  "dprint-core",
- "once_cell",
  "serde_json",
 ]
 
