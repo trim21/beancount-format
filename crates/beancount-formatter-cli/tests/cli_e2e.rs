@@ -7,7 +7,7 @@ const UNFORMATTED: &str = "2010-01-01 open\tAssets:Cash   \n";
 const FORMATTED: &str = "2010-01-01 open Assets:Cash\n";
 
 #[test]
-fn exits_zero_and_echoes_when_already_formatted() -> Result<()> {
+fn exits_zero_when_already_formatted() -> Result<()> {
   let temp = assert_fs::TempDir::new()?;
   let file = temp.child("already.bean");
   file.write_str(FORMATTED)?;
@@ -18,7 +18,7 @@ fn exits_zero_and_echoes_when_already_formatted() -> Result<()> {
   cmd
     .assert()
     .success()
-    .stdout(eq(FORMATTED))
+    .stdout(predicate::str::is_empty())
     .stderr(predicate::str::is_empty());
 
   file.assert(eq(FORMATTED));
@@ -26,7 +26,7 @@ fn exits_zero_and_echoes_when_already_formatted() -> Result<()> {
 }
 
 #[test]
-fn prints_formatted_output_and_nonzero_when_changes() -> Result<()> {
+fn rewrites_and_nonzero_when_changes() -> Result<()> {
   let temp = assert_fs::TempDir::new()?;
   let file = temp.child("needs-format.beancount");
   file.write_str(UNFORMATTED)?;
@@ -37,21 +37,21 @@ fn prints_formatted_output_and_nonzero_when_changes() -> Result<()> {
   cmd
     .assert()
     .failure()
-    .stdout(eq(FORMATTED))
+    .stdout(predicate::str::is_empty())
     .stderr(predicate::str::is_empty());
 
-  file.assert(eq(UNFORMATTED));
+  file.assert(eq(FORMATTED));
   Ok(())
 }
 
 #[test]
-fn rewrites_file_in_place_when_requested() -> Result<()> {
+fn check_mode_reports_without_writing() -> Result<()> {
   let temp = assert_fs::TempDir::new()?;
   let file = temp.child("rewrite.beancount");
   file.write_str(UNFORMATTED)?;
 
   let mut cmd: Command = cargo_bin_cmd!("beancount-formatter");
-  cmd.arg("--in-place").arg(file.path());
+  cmd.arg("--check").arg(file.path());
 
   cmd
     .assert()
@@ -59,7 +59,7 @@ fn rewrites_file_in_place_when_requested() -> Result<()> {
     .stdout(predicate::str::is_empty())
     .stderr(predicate::str::is_empty());
 
-  file.assert(eq(FORMATTED));
+  file.assert(eq(UNFORMATTED));
   Ok(())
 }
 
@@ -83,9 +83,9 @@ new_line_kind = "crlf"
   cmd
     .assert()
     .failure()
-    .stdout(eq("2010-01-01 open Assets:Cash\r\n"))
+    .stdout(predicate::str::is_empty())
     .stderr(predicate::str::is_empty());
 
-  file.assert(eq("2010-01-01 open Assets:Cash\n"));
+  file.assert(eq("2010-01-01 open Assets:Cash\r\n"));
   Ok(())
 }

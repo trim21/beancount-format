@@ -2,7 +2,6 @@
 
 use beancount_formatter::configuration::{Configuration, NewLineKind};
 use beancount_formatter::format;
-use beancount_formatter_cli;
 use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
 

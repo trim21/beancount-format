@@ -18,9 +18,6 @@ pub struct Cli {
   /// Paths to beancount files or directories containing them.
   #[arg(value_name = "PATH", num_args = 1..)]
   pub input: Vec<PathBuf>,
-  /// Write changes back to the file instead of printing to stdout.
-  #[arg(short, long)]
-  pub in_place: bool,
   /// Check if files are formatted without modifying them.
   #[arg(long)]
   pub check: bool,
@@ -62,10 +59,6 @@ pub struct RunOutcome {
 }
 
 fn execute(args: Cli) -> Result<RunOutcome> {
-  if args.check && args.in_place {
-    anyhow::bail!("--check cannot be combined with --in-place");
-  }
-
   let cli_overrides = args.overrides();
   let config = load_configuration(&args.input, &cli_overrides)?;
   let files = collect_files(&args.input)?;
@@ -84,17 +77,8 @@ fn execute(args: Cli) -> Result<RunOutcome> {
       continue;
     }
 
-    if !changed {
-      if !args.in_place {
-        print!("{}", content);
-      }
-    } else if args.in_place {
-      fs::write(&path, &formatted).with_context(|| format!("Failed to write {}", path.display()))?;
-    } else {
-      print!("{}", formatted);
-    }
-
     if changed {
+      fs::write(&path, &formatted).with_context(|| format!("Failed to write {}", path.display()))?;
       any_changed = true;
     }
   }
