@@ -19,4 +19,5 @@ python = ["pyo3"]
 
 [dependencies]
 beancount-formatter = { workspace = true }
+beancount-formatter-cli = { path = "../beancount-formatter-cli/" }
 pyo3 = { version = "0.27.2", optional = true, features = ["abi3", "abi3-py310", "extension-module"] }

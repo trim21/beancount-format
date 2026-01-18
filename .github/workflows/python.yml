@@ -59,5 +59,7 @@ jobs:
       - name: Install wheel
         run: uv pip install beancount-format --find-links ./dist/
 
+      - run: beancount-format --help
+
       - name: Python smoke test
         run: python python/tests/test_smoke.py

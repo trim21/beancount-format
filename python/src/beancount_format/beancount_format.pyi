@@ -1,6 +1,6 @@
-from typing import Optional
+from typing import Optional, Sequence
 
-__all__ = ["format_text"]
+__all__ = ["format_text", "main"]
 
 def format_text(
     text: str,
@@ -10,3 +10,4 @@ def format_text(
     indent_width: Optional[int] = ...,
     new_line: Optional[str] = ...,
 ) -> str: ...
+def main(argv: Optional[Sequence[str]] = ...) -> int: ...
