@@ -210,11 +210,12 @@ struct Pyproject {
 
 #[derive(Debug, Default, serde::Deserialize)]
 struct ToolSection {
-  #[serde(rename = "beancount-formatter")]
+  #[serde(rename = "beancount-format")]
   beancount_formatter: Option<PartialConfiguration>,
 }
 
 #[derive(Debug, Default, Clone, serde::Deserialize)]
+#[serde(rename_all = "kebab-case")]
 struct PartialConfiguration {
   line_width: Option<u32>,
   indent_width: Option<u8>,
@@ -246,8 +247,71 @@ where
       .map(|first| first.to_string_lossy().starts_with('-'))
       .unwrap_or(true)
   {
-    values.insert(0, OsString::from("beancount-formatter"));
+    values.insert(0, OsString::from("beancount-format"));
   }
 
   values
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn parses_pyproject_tool_section() {
+    let content = r#"
+[tool.beancount-format]
+  line-width = 88
+  indent-width = 3
+  new-line-kind = "crlf"
+"#;
+
+    let parsed = parse_pyproject(content).expect("pyproject should parse");
+    let cfg = parsed
+      .tool
+      .expect("tool table missing")
+      .beancount_formatter
+      .expect("beancount-format table missing");
+
+    assert_eq!(cfg.line_width, Some(88));
+    assert_eq!(cfg.indent_width, Some(3));
+    assert_eq!(cfg.new_line_kind, Some(NewLineKind::CRLF));
+  }
+  #[test]
+  fn parses_partial_pyproject_tool_section() {
+    let content = r#"
+[tool.beancount-format]
+  line-width = 88
+  indent-width = 3
+"#;
+
+    let parsed = parse_pyproject(content).expect("pyproject should parse");
+    let cfg = parsed
+      .tool
+      .expect("tool table missing")
+      .beancount_formatter
+      .expect("beancount-format table missing");
+
+    assert_eq!(cfg.line_width, Some(88));
+    assert_eq!(cfg.indent_width, Some(3));
+    assert_eq!(cfg.new_line_kind, None);
+  }
+
+  #[test]
+  fn parses_without_tool_section() {
+    let content = r#"
+[project]
+name = "example"
+"#;
+
+    let parsed = parse_pyproject(content).expect("pyproject should parse");
+    assert!(parsed.tool.is_none());
+  }
+
+  #[test]
+  fn rejects_invalid_toml() {
+    let content = "not = [valid";
+    let err = parse_pyproject(content).expect_err("parse should fail");
+    assert!(err.to_string().contains("expected"));
+  }
 }

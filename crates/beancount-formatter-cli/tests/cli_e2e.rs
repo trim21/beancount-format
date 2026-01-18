@@ -68,8 +68,8 @@ fn respects_pyproject_configuration() -> Result<()> {
   let temp = assert_fs::TempDir::new()?;
   temp.child("pyproject.toml").write_str(
     r#"
-[tool.beancount-formatter]
-new_line_kind = "crlf"
+[tool.beancount-format]
+new-line-kind = "crlf"
 "#,
   )?;
 
