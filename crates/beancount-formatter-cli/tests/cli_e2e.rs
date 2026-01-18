@@ -12,7 +12,7 @@ fn exits_zero_when_already_formatted() -> Result<()> {
   let file = temp.child("already.bean");
   file.write_str(FORMATTED)?;
 
-  let mut cmd: Command = cargo_bin_cmd!("beancount-formatter");
+  let mut cmd: Command = cargo_bin_cmd!("beancount-format");
   cmd.arg(file.path());
 
   cmd
@@ -31,7 +31,7 @@ fn rewrites_and_nonzero_when_changes() -> Result<()> {
   let file = temp.child("needs-format.beancount");
   file.write_str(UNFORMATTED)?;
 
-  let mut cmd: Command = cargo_bin_cmd!("beancount-formatter");
+  let mut cmd: Command = cargo_bin_cmd!("beancount-format");
   cmd.arg(file.path());
 
   cmd
@@ -50,7 +50,7 @@ fn check_mode_reports_without_writing() -> Result<()> {
   let file = temp.child("rewrite.beancount");
   file.write_str(UNFORMATTED)?;
 
-  let mut cmd: Command = cargo_bin_cmd!("beancount-formatter");
+  let mut cmd: Command = cargo_bin_cmd!("beancount-format");
   cmd.arg("--check").arg(file.path());
 
   cmd
@@ -76,7 +76,7 @@ new-line-kind = "crlf"
   let file = temp.child("configurable.beancount");
   file.write_str("2010-01-01 open Assets:Cash\n")?;
 
-  let mut cmd: Command = cargo_bin_cmd!("beancount-formatter");
+  let mut cmd: Command = cargo_bin_cmd!("beancount-format");
   cmd.current_dir(temp.path());
   cmd.arg(file.path());
 
