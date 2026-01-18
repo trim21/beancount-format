@@ -1,5 +1,3 @@
-#![cfg(feature = "python")]
-
 use beancount_formatter::configuration::{Configuration, NewLineKind};
 use beancount_formatter::format;
 use pyo3::exceptions::{PyRuntimeError, PyValueError};

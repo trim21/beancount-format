@@ -27,7 +27,7 @@ tasks:
   test:
     desc: Run Rust tests
     cmds:
-      - cargo test --workspace
+      - cargo test --exclude beancount-formatter-py --exclude dprint-plugin-beancount --workspace
 
   test:update:
     env:
