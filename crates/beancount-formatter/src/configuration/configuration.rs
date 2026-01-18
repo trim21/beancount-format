@@ -11,10 +11,6 @@ pub struct Configuration {
   pub indent_width: u8,
   #[serde(rename = "new_line")]
   pub new_line: NewLineKind,
-  #[serde(default)]
-  pub prefix_width: Option<usize>,
-  #[serde(default)]
-  pub num_width: Option<usize>,
 }
 
 impl Default for Configuration {
@@ -23,8 +19,6 @@ impl Default for Configuration {
       line_width: DEFAULT_LINE_WIDTH,
       indent_width: DEFAULT_INDENT_WIDTH,
       new_line: DEFAULT_NEW_LINE_KIND,
-      prefix_width: None,
-      num_width: None,
     }
   }
 }

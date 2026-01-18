@@ -14,8 +14,6 @@ fn format_and_check_fixtures() {
     line_width: Option<u32>,
     indent_width: Option<u8>,
     new_line: Option<NewLineKind>,
-    prefix_width: Option<usize>,
-    num_width: Option<usize>,
   }
 
   impl PartialConfiguration {
@@ -23,8 +21,6 @@ fn format_and_check_fixtures() {
       config.line_width = self.line_width.unwrap_or(config.line_width);
       config.indent_width = self.indent_width.unwrap_or(config.indent_width);
       config.new_line = self.new_line.unwrap_or(config.new_line);
-      config.prefix_width = self.prefix_width.or(config.prefix_width);
-      config.num_width = self.num_width.or(config.num_width);
 
       config
     }

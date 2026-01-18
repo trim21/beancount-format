@@ -89,10 +89,11 @@ fn resolve_config_dprint(
   config: ConfigKeyMap,
   global_config: &GlobalConfiguration,
 ) -> dprint_core::configuration::ResolveConfigurationResult<Configuration> {
-  use dprint_core::configuration::RECOMMENDED_GLOBAL_CONFIGURATION;
   use dprint_core::configuration::ResolveConfigurationResult;
   use dprint_core::configuration::get_unknown_property_diagnostics;
   use dprint_core::configuration::get_value;
+
+  let default = Configuration::default();
 
   let mut diagnostics = Vec::new();
   let mut config = config;
@@ -101,26 +102,24 @@ fn resolve_config_dprint(
     line_width: get_value(
       &mut config,
       "line_width",
-      global_config
-        .line_width
-        .unwrap_or(RECOMMENDED_GLOBAL_CONFIGURATION.line_width),
+      global_config.line_width.unwrap_or(default.line_width),
       &mut diagnostics,
     ),
     indent_width: get_value(
       &mut config,
       "indent_width",
-      global_config.indent_width.unwrap_or(2),
+      global_config.indent_width.unwrap_or(default.indent_width),
       &mut diagnostics,
     ),
     new_line: map_new_line_kind(get_value(
       &mut config,
       "new_line",
-      global_config
-        .new_line_kind
-        .unwrap_or(RECOMMENDED_GLOBAL_CONFIGURATION.new_line_kind),
+      global_config.new_line_kind.unwrap_or(match default.new_line {
+        NewLineKind::LF => DprintNewLineKind::LineFeed,
+        NewLineKind::CRLF => DprintNewLineKind::CarriageReturnLineFeed,
+      }),
       &mut diagnostics,
     )),
-    ..Configuration::default()
   };
 
   diagnostics.extend(get_unknown_property_diagnostics(config));
