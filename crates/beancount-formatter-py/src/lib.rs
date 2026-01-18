@@ -42,8 +42,8 @@ fn format_text_py(
 
 #[pyfunction(name = "main")]
 fn main_py(args: Vec<String>) -> PyResult<bool> {
-  let outcome = beancount_formatter_cli::main_with_args(args)
-    .map_err(|err| PyRuntimeError::new_err(err.to_string()))?;
+  let outcome =
+    beancount_formatter_cli::main_with_args(args).map_err(|err| PyRuntimeError::new_err(err.to_string()))?;
 
   Ok(outcome.any_changed)
 }
