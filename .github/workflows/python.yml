@@ -19,66 +19,20 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  lint:
-    name: Lint (ruff)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.12'
-
-      - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          activate-environment: 'true'
-
-      - run: uv sync --group dev
-
-      - name: Format (ruff)
-        run: ruff format --check python
-
-      - name: Lint (ruff)
-        run: ruff check python
-
   build-wheel:
-    name: Build wheel (abi3)
-    needs: lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.12'
-
-      - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          activate-environment: 'true'
-
-      - run: uv sync --group dev
-
-      - run: maturin build --release --out dist
-
-      - name: Upload wheel artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: bean-format-wheel
-          path: dist/*.whl
-          if-no-files-found: error
+    uses: ./.github/workflows/_build_wheels.yaml
 
   tests:
     name: Tests (wheel install)
     needs:
-      - lint
       - build-wheel
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
         python-version:
           - '3.10'
           - '3.11'
@@ -87,6 +41,11 @@ jobs:
           - '3.14'
     steps:
       - uses: actions/checkout@v6
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: wheel
+          path: dist
 
       - uses: actions/setup-python@v6
         with:
@@ -97,15 +56,8 @@ jobs:
         with:
           activate-environment: 'true'
 
-      - name: Download wheel artifact
-        uses: actions/download-artifact@v7
-        with:
-          name: bean-format-wheel
-          path: dist
-
       - name: Install wheel
-        run: |
-          uv pip install dist/*.whl
+        run: uv pip install beancount-format --find-links ./dist/
 
       - name: Python smoke test
         run: python python/tests/test_smoke.py

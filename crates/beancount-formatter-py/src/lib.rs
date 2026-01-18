@@ -40,7 +40,7 @@ fn format_text_py(
 }
 
 #[pymodule]
-fn bean_format(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn beancount_format(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
   m.add_function(wrap_pyfunction!(format_text_py, m)?)?;
   Ok(())
 }
