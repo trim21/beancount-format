@@ -30,12 +30,6 @@ pub struct Cli {
   /// Override newline style (lf or crlf).
   #[arg(long, value_name = "STYLE", value_parser = NewLineKind::parse)]
   pub new_line: Option<NewLineKind>,
-  /// Override prefix width for account names.
-  #[arg(long, value_name = "WIDTH")]
-  pub prefix_width: Option<usize>,
-  /// Override numeric column width.
-  #[arg(long, value_name = "WIDTH")]
-  pub num_width: Option<usize>,
 }
 
 /// Run the formatter CLI using environment arguments.
@@ -92,8 +86,6 @@ impl Cli {
       line_width: self.line_width,
       indent_width: self.indent_width,
       new_line_kind: self.new_line,
-      prefix_width: self.prefix_width,
-      num_width: self.num_width,
     }
   }
 }
@@ -227,8 +219,6 @@ struct PartialConfiguration {
   line_width: Option<u32>,
   indent_width: Option<u8>,
   new_line_kind: Option<beancount_formatter::configuration::NewLineKind>,
-  prefix_width: Option<usize>,
-  num_width: Option<usize>,
 }
 
 impl PartialConfiguration {
@@ -236,8 +226,6 @@ impl PartialConfiguration {
     config.line_width = self.line_width.unwrap_or(config.line_width);
     config.indent_width = self.indent_width.unwrap_or(config.indent_width);
     config.new_line = self.new_line_kind.unwrap_or(config.new_line);
-    config.prefix_width = self.prefix_width.or(config.prefix_width);
-    config.num_width = self.num_width.or(config.num_width);
   }
 }
 
