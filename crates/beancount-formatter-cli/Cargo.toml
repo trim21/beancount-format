@@ -22,5 +22,5 @@ assert_fs = "1.1.3"
 predicates = "3.1.3"
 
 [[bin]]
-name = "beancount-formatter"
+name = "beancount-format"
 path = "src/main.rs"
