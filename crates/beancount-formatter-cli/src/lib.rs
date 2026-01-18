@@ -32,18 +32,13 @@ pub struct Cli {
   pub new_line: Option<NewLineKind>,
 }
 
-/// Run the formatter CLI using environment arguments.
-pub fn main() -> Result<RunOutcome> {
-  main_with_args(env::args_os())
-}
-
 /// Run the formatter CLI with a custom argument iterator.
 pub fn main_with_args<I, T>(args: I) -> Result<RunOutcome>
 where
   I: IntoIterator<Item = T>,
   T: Into<OsString> + Clone,
 {
-  let parsed = Cli::parse_from(normalize_args(args));
+  let parsed = Cli::parse_from(args);
   execute(parsed)
 }
 
@@ -232,25 +227,6 @@ impl PartialConfiguration {
 
 fn parse_pyproject(content: &str) -> Result<Pyproject, TomlError> {
   toml::from_str(content)
-}
-
-fn normalize_args<I, T>(args: I) -> Vec<OsString>
-where
-  I: IntoIterator<Item = T>,
-  T: Into<OsString>,
-{
-  let mut values: Vec<OsString> = args.into_iter().map(Into::into).collect();
-
-  if values.is_empty()
-    || values
-      .first()
-      .map(|first| first.to_string_lossy().starts_with('-'))
-      .unwrap_or(true)
-  {
-    values.insert(0, OsString::from("beancount-format"));
-  }
-
-  values
 }
 
 #[cfg(test)]
