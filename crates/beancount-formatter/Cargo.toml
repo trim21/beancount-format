@@ -10,7 +10,7 @@ description = "Core beancount formatter logic."
 
 [dependencies]
 anyhow = { workspace = true }
-beancount-parser = { git = "https://github.com/trim21/beancount.git", rev = "249238e2" }
+beancount-parser = { git = "https://github.com/trim21/beancount.git", rev = "8b4e3311258194fe3127862dd4132028e97cc01d" }
 ropey = '1.6.1'
 serde = { workspace = true }
 # beancount-parser = { path = "../../../beancount/beancount/" }
