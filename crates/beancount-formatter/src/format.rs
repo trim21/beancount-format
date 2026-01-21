@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use crate::configuration::{Configuration, NewLineKind};
 use crate::parse::parse_source;
-use beancount_parser::ast::{self, Directive, PriceOperator};
+use beancount_parser::ast::{self, Directive, PriceOperator, WithSpan};
 
 /// Simple string writer to avoid building large intermediate vectors before concatenation.
 struct Writer {
@@ -12,9 +12,9 @@ struct Writer {
 fn format_open(writer: &mut Writer, d: &ast::Open<'_>, config: &Configuration) {
   let comment_col = config.line_width as usize;
   let mut line = join_parts([
-    Some(to_part(d.date)),
+    Some(to_part(&d.date)),
     Some("open".to_string()),
-    Some(to_part(d.account)),
+    Some(to_part(&d.account)),
   ]);
   line = align_trailing(line, format_currencies(&d.currencies), comment_col);
   if let Some(comment) = &d.comment {
@@ -25,9 +25,9 @@ fn format_open(writer: &mut Writer, d: &ast::Open<'_>, config: &Configuration) {
 
 fn format_close(writer: &mut Writer, d: &ast::Close<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date)),
+    Some(to_part(&d.date)),
     Some("close".to_string()),
-    Some(to_part(d.account)),
+    Some(to_part(&d.account)),
   ]);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
@@ -38,13 +38,11 @@ fn format_close(writer: &mut Writer, d: &ast::Close<'_>, config: &Configuration)
 fn format_balance(writer: &mut Writer, d: &ast::Balance<'_>, config: &Configuration) {
   let comment_col = config.line_width as usize;
   let mut line = join_parts([
-    Some(to_part(d.date)),
+    Some(to_part(&d.date)),
     Some("balance".to_string()),
-    Some(to_part(d.account)),
+    Some(to_part(&d.account)),
   ]);
-  let trailing = split_amount(d.amount.raw)
-    .map(|(num, cur)| format!("{} {}", compact_ws(&num), cur))
-    .or_else(|| Some(compact_ws(d.amount.raw)));
+  let trailing = format_amount(&d.amount);
   line = align_trailing(line, trailing, comment_col);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, true);
@@ -54,10 +52,10 @@ fn format_balance(writer: &mut Writer, d: &ast::Balance<'_>, config: &Configurat
 
 fn format_pad(writer: &mut Writer, d: &ast::Pad<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date)),
+    Some(to_part(&d.date)),
     Some("pad".to_string()),
-    Some(to_part(d.account)),
-    Some(to_part(d.from_account)),
+    Some(to_part(&d.account)),
+    Some(to_part(&d.from_account)),
   ]);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
@@ -67,8 +65,8 @@ fn format_pad(writer: &mut Writer, d: &ast::Pad<'_>, config: &Configuration) {
 
 fn format_commodity(writer: &mut Writer, d: &ast::Commodity<'_>, config: &Configuration) {
   let comment_col = config.line_width as usize;
-  let mut line = join_parts([Some(to_part(d.date)), Some("commodity".to_string())]);
-  line = align_trailing(line, Some(to_part(d.currency)), comment_col);
+  let mut line = join_parts([Some(to_part(&d.date)), Some("commodity".to_string())]);
+  line = align_trailing(line, Some(to_part(&d.currency)), comment_col);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, true);
   }
@@ -78,13 +76,11 @@ fn format_commodity(writer: &mut Writer, d: &ast::Commodity<'_>, config: &Config
 fn format_price(writer: &mut Writer, d: &ast::Price<'_>, config: &Configuration) {
   let comment_col = config.line_width as usize;
   let mut line = join_parts([
-    Some(to_part(d.date)),
+    Some(to_part(&d.date)),
     Some("price".to_string()),
-    Some(to_part(d.currency)),
+    Some(to_part(&d.currency)),
   ]);
-  let trailing = split_amount(d.amount.raw)
-    .map(|(num, cur)| format!("{} {}", compact_ws(&num), cur))
-    .or_else(|| Some(compact_ws(d.amount.raw)));
+  let trailing = format_amount(&d.amount);
   line = align_trailing(line, trailing, comment_col);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, true);
@@ -94,10 +90,10 @@ fn format_price(writer: &mut Writer, d: &ast::Price<'_>, config: &Configuration)
 
 fn format_event(writer: &mut Writer, d: &ast::Event<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date)),
+    Some(to_part(&d.date)),
     Some("event".to_string()),
-    Some(to_part(d.event_type)),
-    Some(to_part(d.desc)),
+    Some(to_part(&d.event_type)),
+    Some(to_part(&d.desc)),
   ]);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
@@ -107,10 +103,10 @@ fn format_event(writer: &mut Writer, d: &ast::Event<'_>, config: &Configuration)
 
 fn format_query(writer: &mut Writer, d: &ast::Query<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date)),
+    Some(to_part(&d.date)),
     Some("query".to_string()),
-    Some(to_part(d.name)),
-    Some(to_part(d.query)),
+    Some(to_part(&d.name)),
+    Some(to_part(&d.query)),
   ]);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
@@ -120,10 +116,10 @@ fn format_query(writer: &mut Writer, d: &ast::Query<'_>, config: &Configuration)
 
 fn format_note(writer: &mut Writer, d: &ast::Note<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date)),
+    Some(to_part(&d.date)),
     Some("note".to_string()),
-    Some(to_part(d.account)),
-    Some(to_part(d.note)),
+    Some(to_part(&d.account)),
+    Some(to_part(&d.note)),
   ]);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
@@ -133,11 +129,11 @@ fn format_note(writer: &mut Writer, d: &ast::Note<'_>, config: &Configuration) {
 
 fn format_document(writer: &mut Writer, d: &ast::Document<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date)),
+    Some(to_part(&d.date)),
     Some("document".to_string()),
-    Some(to_part(d.account)),
-    Some(to_part(d.filename)),
-    d.tags_links.as_ref().map(|t| t.trim().to_string()),
+    Some(to_part(&d.account)),
+    Some(to_part(&d.filename)),
+    d.tags_links.as_ref().map(|t| t.content.trim().to_string()),
   ]);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
@@ -147,13 +143,19 @@ fn format_document(writer: &mut Writer, d: &ast::Document<'_>, config: &Configur
 
 fn format_custom(writer: &mut Writer, d: &ast::Custom<'_>, config: &Configuration) {
   let mut line = join_parts([
-    Some(to_part(d.date)),
+    Some(to_part(&d.date)),
     Some("custom".to_string()),
-    Some(to_part(d.name)),
+    Some(to_part(&d.name)),
     if d.values.is_empty() {
       None
     } else {
-      Some(d.values.iter().map(|v| v.raw.trim()).collect::<Vec<_>>().join(" "))
+      Some(
+        d.values
+          .iter()
+          .map(|v| v.raw.content.trim())
+          .collect::<Vec<_>>()
+          .join(" "),
+      )
     },
   ]);
   if let Some(comment) = &d.comment {
@@ -163,48 +165,52 @@ fn format_custom(writer: &mut Writer, d: &ast::Custom<'_>, config: &Configuratio
 }
 
 fn format_option(writer: &mut Writer, d: &ast::OptionDirective<'_>) {
-  let line = join_parts([Some("option".to_string()), Some(to_part(d.key)), Some(to_part(d.value))]);
+  let line = join_parts([
+    Some("option".to_string()),
+    Some(to_part(&d.key)),
+    Some(to_part(&d.value)),
+  ]);
   writer.write_str(&line);
 }
 
 fn format_include(writer: &mut Writer, d: &ast::Include<'_>) {
-  let line = join_parts([Some("include".to_string()), Some(to_part(d.filename))]);
+  let line = join_parts([Some("include".to_string()), Some(to_part(&d.filename))]);
   writer.write_str(&line);
 }
 
 fn format_plugin(writer: &mut Writer, d: &ast::Plugin<'_>) {
   let line = join_parts([
     Some("plugin".to_string()),
-    Some(to_part(d.name)),
-    d.config.as_ref().map(|c| c.trim().to_string()),
+    Some(to_part(&d.name)),
+    d.config.as_ref().map(|c| c.content.trim().to_string()),
   ]);
   writer.write_str(&line);
 }
 
 fn format_pushtag(writer: &mut Writer, d: &ast::TagDirective<'_>) {
-  let tag = format!("#{}", to_part(d.tag));
+  let tag = format!("#{}", to_part(&d.tag));
   let line = join_parts([Some("pushtag".to_string()), Some(tag)]);
   writer.write_str(&line);
 }
 
 fn format_poptag(writer: &mut Writer, d: &ast::TagDirective<'_>) {
-  let tag = format!("#{}", to_part(d.tag));
+  let tag = format!("#{}", to_part(&d.tag));
   let line = join_parts([Some("poptag".to_string()), Some(tag)]);
   writer.write_str(&line);
 }
 
 fn format_pushmeta(writer: &mut Writer, d: &ast::PushMeta<'_>) {
   let key_value = if let Some(value) = d.value.as_ref() {
-    format!("{}: {}", d.key, value.as_str())
+    format!("{}: {}", d.key.content, value.content.as_str())
   } else {
-    format!("{}:", d.key)
+    format!("{}:", d.key.content)
   };
   let line = join_parts([Some("pushmeta".to_string()), Some(normalize_key_value(&key_value))]);
   writer.write_str(&line);
 }
 
 fn format_popmeta(writer: &mut Writer, d: &ast::PopMeta<'_>) {
-  let line = join_parts([Some("popmeta".to_string()), Some(format!("{}:", to_part(d.key)))]);
+  let line = join_parts([Some("popmeta".to_string()), Some(format!("{}:", to_part(&d.key)))]);
   writer.write_str(&line);
 }
 
@@ -285,18 +291,18 @@ impl<'a> FormatterContext<'a> {
     let mut lines: Vec<String> = txn_text.replace("\r\n", "\n").lines().map(|l| l.to_string()).collect();
 
     let mut header_parts: Vec<String> = Vec::new();
-    header_parts.push(txn.date.trim().to_string());
+    header_parts.push(txn.date.content.trim().to_string());
     if let Some(flag) = &txn.txn {
-      header_parts.push(flag.trim().to_string());
+      header_parts.push(flag.content.trim().to_string());
     }
     if let Some(payee) = &txn.payee {
-      header_parts.push(payee.trim().to_string());
+      header_parts.push(payee.content.trim().to_string());
     }
     if let Some(narration) = &txn.narration {
-      header_parts.push(narration.trim().to_string());
+      header_parts.push(narration.content.trim().to_string());
     }
     if let Some(tags) = &txn.tags_links {
-      header_parts.push(tags.trim().to_string());
+      header_parts.push(tags.content.trim().to_string());
     }
     let mut header_line = header_parts.join(" ");
     if let Some(comment) = &txn.comment {
@@ -322,22 +328,21 @@ impl<'a> FormatterContext<'a> {
     }
 
     for (posting, &line_idx) in txn.postings.iter().zip(posting_line_indices.iter()) {
-      let flag = posting.opt_flag.map(str::trim);
-      let account = posting.account.trim();
-      let amount = posting.amount.as_ref().and_then(|a| split_amount(a.raw));
-      let trailing = if let Some((num, cur)) = amount {
-        let mut parts = vec![format!("{} {}", compact_ws(&num), cur)];
+      let flag = posting.opt_flag.as_ref().map(|f| f.content.trim());
+      let account = posting.account.content.trim();
+      let trailing = if let Some(amount) = posting.amount.as_ref().and_then(format_amount) {
+        let mut parts = vec![amount];
         if let Some(cost) = posting.cost_spec.as_ref() {
-          parts.push(compact_ws(cost.raw));
+          parts.push(compact_ws(cost.raw.content));
         }
-        if let Some(price_op) = posting.price_operator {
-          parts.push(match price_op {
+        if let Some(price_op) = posting.price_operator.as_ref() {
+          parts.push(match price_op.content {
             PriceOperator::PerUnit => "@".to_string(),
             PriceOperator::Total => "@@".to_string(),
           });
         }
         if let Some(price_ann) = posting.price_annotation.as_ref() {
-          parts.push(compact_ws(price_ann.raw));
+          parts.push(compact_ws(price_ann.raw.content));
         }
         Some(parts.join(" "))
       } else {
@@ -601,8 +606,8 @@ fn join_parts(parts: impl IntoIterator<Item = Option<String>>) -> String {
   out.join(" ")
 }
 
-fn to_part(text: &str) -> String {
-  text.trim().to_string()
+fn to_part(text: &WithSpan<&str>) -> String {
+  text.content.trim().to_string()
 }
 
 fn compact_ws(text: &str) -> String {
@@ -652,28 +657,37 @@ fn align_trailing(mut base: String, trailing: Option<String>, comment_col: usize
   base
 }
 
-fn split_amount(text: &str) -> Option<(String, String)> {
-  let parts: Vec<&str> = text.split_whitespace().collect();
-  if parts.len() < 2 {
-    return None;
+fn format_amount(amount: &ast::Amount<'_>) -> Option<String> {
+  if let Some(currency) = &amount.currency {
+    let raw = amount.raw.content;
+    let start = currency.span.start.saturating_sub(amount.raw.span.start);
+    if start <= raw.len() {
+      let number = compact_ws(&raw[..start]);
+      let cur = currency.content.trim();
+      if !number.is_empty() && !cur.is_empty() {
+        return Some(format!("{} {}", number, cur));
+      }
+    }
   }
-  let currency = parts.last().unwrap().to_string();
-  let number = parts[..parts.len() - 1].join(" ");
-  if currency.is_empty() || number.is_empty() {
-    return None;
-  }
-  Some((number, currency))
+
+  Some(compact_ws(amount.raw.content))
 }
 
-fn format_currencies(currencies: &[&str]) -> Option<String> {
+fn format_currencies(currencies: &[WithSpan<&str>]) -> Option<String> {
   if currencies.is_empty() {
     return None;
   }
-  Some(currencies.iter().map(|c| c.trim()).collect::<Vec<_>>().join(" "))
+  Some(
+    currencies
+      .iter()
+      .map(|c| c.content.trim())
+      .collect::<Vec<_>>()
+      .join(" "),
+  )
 }
 
-fn format_comment(raw: &str) -> String {
-  let trimmed = raw.trim();
+fn format_comment(raw: &WithSpan<&str>) -> String {
+  let trimmed = raw.content.trim();
   let without_semicolon = trimmed.strip_prefix(';').unwrap_or(trimmed).trim_start();
   if without_semicolon.is_empty() {
     ";".to_string()
