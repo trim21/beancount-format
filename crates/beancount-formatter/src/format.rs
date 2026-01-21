@@ -149,7 +149,13 @@ fn format_custom(writer: &mut Writer, d: &ast::Custom<'_>, config: &Configuratio
     if d.values.is_empty() {
       None
     } else {
-      Some(d.values.iter().map(|v| v.raw.content.trim()).collect::<Vec<_>>().join(" "))
+      Some(
+        d.values
+          .iter()
+          .map(|v| v.raw.content.trim())
+          .collect::<Vec<_>>()
+          .join(" "),
+      )
     },
   ]);
   if let Some(comment) = &d.comment {
@@ -159,7 +165,11 @@ fn format_custom(writer: &mut Writer, d: &ast::Custom<'_>, config: &Configuratio
 }
 
 fn format_option(writer: &mut Writer, d: &ast::OptionDirective<'_>) {
-  let line = join_parts([Some("option".to_string()), Some(to_part(&d.key)), Some(to_part(&d.value))]);
+  let line = join_parts([
+    Some("option".to_string()),
+    Some(to_part(&d.key)),
+    Some(to_part(&d.value)),
+  ]);
   writer.write_str(&line);
 }
 
@@ -667,7 +677,13 @@ fn format_currencies(currencies: &[WithSpan<&str>]) -> Option<String> {
   if currencies.is_empty() {
     return None;
   }
-  Some(currencies.iter().map(|c| c.content.trim()).collect::<Vec<_>>().join(" "))
+  Some(
+    currencies
+      .iter()
+      .map(|c| c.content.trim())
+      .collect::<Vec<_>>()
+      .join(" "),
+  )
 }
 
 fn format_comment(raw: &WithSpan<&str>) -> String {
