@@ -4,9 +4,10 @@ build-backend = "maturin"
 
 [project]
 name = "beancount-format"
-version = "0.1.14"
+version = "0.1.15"
 description = "Beancount formatter powered by dprint-plugin-beancount"
-authors = [{ name = "David Sherret", email = "dsherret@gmail.com" }]
+authors = [{ name = "trim21", email = "trim21.me@gmail.com" }]
+license = { file = "LICENSE" }
 readme = "python/README.md"
 requires-python = ">=3.10"
 classifiers = [
