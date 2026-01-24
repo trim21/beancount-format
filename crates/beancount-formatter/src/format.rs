@@ -262,18 +262,51 @@ impl<'a> FormatterContext<'a> {
 
   fn format_directive(&mut self, dir: &Directive<'a>, full_source: &str) {
     match dir {
-      Directive::Open(d) => format_open(&mut self.writer, d, self.config),
-      Directive::Close(d) => format_close(&mut self.writer, d, self.config),
-      Directive::Balance(d) => format_balance(&mut self.writer, d, self.config),
-      Directive::Pad(d) => format_pad(&mut self.writer, d, self.config),
+      Directive::Open(d) => {
+        format_open(&mut self.writer, d, self.config);
+        self.format_key_values(&d.key_values, full_source);
+      }
+      Directive::Close(d) => {
+        format_close(&mut self.writer, d, self.config);
+        self.format_key_values(&d.key_values, full_source);
+      }
+      Directive::Balance(d) => {
+        format_balance(&mut self.writer, d, self.config);
+        self.format_key_values(&d.key_values, full_source);
+      }
+      Directive::Pad(d) => {
+        format_pad(&mut self.writer, d, self.config);
+        self.format_key_values(&d.key_values, full_source);
+      }
       Directive::Transaction(d) => self.format_transaction(d, full_source),
-      Directive::Commodity(d) => format_commodity(&mut self.writer, d, self.config),
-      Directive::Price(d) => format_price(&mut self.writer, d, self.config),
-      Directive::Event(d) => format_event(&mut self.writer, d, self.config),
-      Directive::Query(d) => format_query(&mut self.writer, d, self.config),
-      Directive::Note(d) => format_note(&mut self.writer, d, self.config),
-      Directive::Document(d) => format_document(&mut self.writer, d, self.config),
-      Directive::Custom(d) => format_custom(&mut self.writer, d, self.config),
+      Directive::Commodity(d) => {
+        format_commodity(&mut self.writer, d, self.config);
+        self.format_key_values(&d.key_values, full_source);
+      }
+      Directive::Price(d) => {
+        format_price(&mut self.writer, d, self.config);
+        self.format_key_values(&d.key_values, full_source);
+      }
+      Directive::Event(d) => {
+        format_event(&mut self.writer, d, self.config);
+        self.format_key_values(&d.key_values, full_source);
+      }
+      Directive::Query(d) => {
+        format_query(&mut self.writer, d, self.config);
+        self.format_key_values(&d.key_values, full_source);
+      }
+      Directive::Note(d) => {
+        format_note(&mut self.writer, d, self.config);
+        self.format_key_values(&d.key_values, full_source);
+      }
+      Directive::Document(d) => {
+        format_document(&mut self.writer, d, self.config);
+        self.format_key_values(&d.key_values, full_source);
+      }
+      Directive::Custom(d) => {
+        format_custom(&mut self.writer, d, self.config);
+        self.format_key_values(&d.key_values, full_source);
+      }
       Directive::Option(d) => format_option(&mut self.writer, d),
       Directive::Include(d) => format_include(&mut self.writer, d),
       Directive::Plugin(d) => format_plugin(&mut self.writer, d),
@@ -376,6 +409,31 @@ impl<'a> FormatterContext<'a> {
     }
 
     self.write(&lines.join("\n"));
+  }
+
+  fn format_key_values(&mut self, key_values: &[ast::KeyValue<'a>], full_source: &str) {
+    if key_values.is_empty() {
+      return;
+    }
+
+    let indent = " ".repeat(self.config.indent_width as usize);
+
+    for kv in key_values {
+      self.write("\n");
+
+      let slice = &full_source[kv.span.start..kv.span.end];
+      let mut text = normalize_indentation(slice, self.config.indent_width);
+      if text.ends_with('\n') {
+        text.pop();
+      }
+
+      if text.starts_with(char::is_whitespace) {
+        self.write(&text);
+      } else {
+        self.write(&indent);
+        self.write(&text);
+      }
+    }
   }
 }
 
