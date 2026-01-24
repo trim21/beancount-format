@@ -1,6 +1,6 @@
 # beancount-format
 
-Python package wrapping the Rust `dprint-plugin-beancount` formatter.
+beancount formatter.
 
 ## Install
 
@@ -9,6 +9,14 @@ pip install beancount-format
 ```
 
 ## Usage
+
+### as CLI
+
+```bash
+beancount-format ./
+```
+
+### as library
 
 ```python
 from bean_format import format_text
