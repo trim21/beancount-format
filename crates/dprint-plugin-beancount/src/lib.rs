@@ -16,9 +16,6 @@ use dprint_core::plugins::PluginResolveConfigurationResult;
 use dprint_core::plugins::SyncFormatRequest;
 use dprint_core::plugins::SyncHostFormatRequest;
 use dprint_core::plugins::SyncPluginHandler;
-use std::alloc::Layout;
-use std::mem::{align_of, size_of};
-use std::ptr;
 
 struct BeancountPluginHandler;
 
