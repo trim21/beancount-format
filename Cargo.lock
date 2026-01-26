@@ -1244,7 +1244,8 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-language"
-version = "0.1.6"
+version = "0.1.7"
+source = "git+https://github.com/trim21/tree-sitter.git?rev=b714e2a7c01e8d5abab526f23e40b77c33babcb4#b714e2a7c01e8d5abab526f23e40b77c33babcb4"
 
 [[package]]
 name = "unicode-ident"
