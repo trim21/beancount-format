@@ -445,10 +445,7 @@ fn format_content(path: Option<&str>, content: &str, formatting_config: &Configu
   let path = path.unwrap_or("<memory>");
 
   if content.trim().is_empty() {
-    return Ok(match formatting_config.new_line {
-      NewLineKind::LF => "\n".to_string(),
-      NewLineKind::CRLF => "\r\n".to_string(),
-    });
+    return Ok(String::new());
   }
 
   // The parser expects a trailing newline; append one if it's missing.

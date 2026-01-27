@@ -24,6 +24,12 @@ function runTests() {
   });
 
   assert.strictEqual(result, "2010-01-01 open Assets:Cash\n");
+
+
+  assert.strictEqual(formatter.formatText({
+    filePath: "file.beancount",
+    fileText: "\n\n\n",
+  }), '');
 }
 
 runTests()
