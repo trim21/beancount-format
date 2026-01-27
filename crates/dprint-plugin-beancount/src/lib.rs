@@ -134,6 +134,3 @@ fn map_new_line_kind(value: DprintNewLineKind) -> NewLineKind {
     _ => NewLineKind::LF,
   }
 }
-
-#[global_allocator]
-static ALLOCATOR: dlmalloc::GlobalDlmalloc = dlmalloc::GlobalDlmalloc;
