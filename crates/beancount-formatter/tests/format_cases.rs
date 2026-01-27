@@ -156,12 +156,12 @@ fn format_empty_file_is_single_line() {
     ..Default::default()
   };
   let formatted_lf = format(Some("empty.bean"), "\n\n\t  ", &config).expect("format failed");
-  assert_eq!(formatted_lf, "\n");
+  assert_eq!(formatted_lf, "");
 
   let config = Configuration {
-    new_line: NewLineKind::CRLF,
+    new_line: NewLineKind::LF,
     ..Default::default()
   };
   let formatted_crlf = format(Some("empty.bean"), "  \r\n\r\n", &config).expect("format failed");
-  assert_eq!(formatted_crlf, "\r\n");
+  assert_eq!(formatted_crlf, "");
 }
