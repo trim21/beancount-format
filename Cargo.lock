@@ -132,7 +132,6 @@ version = "0.1.16"
 dependencies = [
  "anyhow",
  "beancount-parser",
- "ropey",
  "serde",
  "serde_json",
  "similar",
