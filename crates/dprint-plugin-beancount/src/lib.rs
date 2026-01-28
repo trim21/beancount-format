@@ -1,4 +1,4 @@
-#![cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+#![allow(dead_code)]
 
 use beancount_formatter::configuration::Configuration;
 use beancount_formatter::configuration::NewLineKind;
@@ -6,7 +6,7 @@ use beancount_formatter::format as format_beancount;
 use dprint_core::configuration::ConfigKeyMap;
 use dprint_core::configuration::GlobalConfiguration;
 use dprint_core::configuration::NewLineKind as DprintNewLineKind;
-use dprint_core::generate_plugin_code;
+
 use dprint_core::plugins::CheckConfigUpdatesMessage;
 use dprint_core::plugins::ConfigChange;
 use dprint_core::plugins::FileMatchingInfo;
@@ -16,6 +16,11 @@ use dprint_core::plugins::PluginResolveConfigurationResult;
 use dprint_core::plugins::SyncFormatRequest;
 use dprint_core::plugins::SyncHostFormatRequest;
 use dprint_core::plugins::SyncPluginHandler;
+
+#[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+use dprint_core::generate_plugin_code;
+#[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+generate_plugin_code!(BeancountPluginHandler, BeancountPluginHandler);
 
 struct BeancountPluginHandler;
 
@@ -79,8 +84,6 @@ impl SyncPluginHandler<Configuration> for BeancountPluginHandler {
     }
   }
 }
-
-generate_plugin_code!(BeancountPluginHandler, BeancountPluginHandler);
 
 fn resolve_config_dprint(
   config: ConfigKeyMap,
