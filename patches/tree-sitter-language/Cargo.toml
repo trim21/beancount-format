@@ -1,0 +1,19 @@
+[package]
+name = "tree-sitter-language"
+version = "0.1.6"
+authors = [
+  "Max Brunsfeld <maxbrunsfeld@gmail.com>",
+  "Amaan Qureshi <amaanq12@gmail.com>",
+]
+categories = ["api-bindings", "development-tools::ffi", "parsing"]
+documentation = "https://docs.rs/tree-sitter-language"
+edition = "2021"
+readme = "README.md"
+rust-version = "1.77"
+description = "The tree-sitter Language type, used by the library and by language implementations"
+
+build = "build.rs"
+links = "tree-sitter-language"
+
+[lib]
+path = "src/language.rs"
