@@ -29,6 +29,7 @@ manifest-path = "crates/beancount-formatter-py/Cargo.toml"
 module-name = "beancount_format"
 strip = true
 python-source = "python/src"
+include = [{ path = "patches/**/*", format = "sdist" }]
 
 [tool.uv]
 package = false
