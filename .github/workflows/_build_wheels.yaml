@@ -37,6 +37,8 @@ jobs:
 
           - runner: windows-latest
             target: x64
+          - runner: windows-11-arm
+            target: aarch64
 
           - runner: ubuntu-24.04
             target: x86_64
