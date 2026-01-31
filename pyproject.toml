@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "beancount-format"
-version = "0.1.18"
+version = "0.1.19"
 description = "Beancount formatter powered by dprint-plugin-beancount"
 authors = [{ name = "trim21", email = "trim21.me@gmail.com" }]
 license = { file = "LICENSE" }
