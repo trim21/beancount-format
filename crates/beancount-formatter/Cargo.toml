@@ -14,7 +14,7 @@ beancount-parser = { git = "https://github.com/trim21/beancount.git", rev = "8b4
 serde = { workspace = true }
 # beancount-parser = { path = "../../../beancount/beancount/" }
 # beancount-parser = { path = "../../../beancount/beancount/crates/beancount-parser/" }
-tree-sitter = { version = "0.26.3" }
+tree-sitter = { version = "0.26.5" }
 
 [dev-dependencies]
 serde_json = "1.0.149"
