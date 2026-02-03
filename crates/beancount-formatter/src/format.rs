@@ -472,11 +472,8 @@ fn format_content(path: Option<&str>, content: &str, formatting_config: &Configu
     if let Some(prev_end) = prev_end_line {
       let start_line = directive_start_line(dir, &content);
       let mut blank_lines = start_line.saturating_sub(prev_end + 1).min(2);
-      let txn_min = if (prev_is_txn && is_txn) || (prev_is_txn && !is_txn) || (!prev_is_txn && is_txn) {
-        1
-      } else {
-        0
-      };
+      // preserve at least one and at most 2 empty lines whenever a transaction is involved
+      let txn_min = if prev_is_txn || is_txn { 1 } else { 0 };
       if blank_lines < txn_min {
         blank_lines = txn_min;
       }
