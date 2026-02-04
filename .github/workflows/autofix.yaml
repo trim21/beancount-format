@@ -23,6 +23,4 @@ jobs:
       - run: cargo clippy --fix --allow-dirty || true
       - run: cargo fmt || true
 
-      - uses: trim21/actions/prek@master
-
       - uses: autofix-ci/action@v1
