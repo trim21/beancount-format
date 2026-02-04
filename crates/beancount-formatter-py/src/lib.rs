@@ -7,14 +7,12 @@ use pyo3::prelude::*;
 #[pyo3(signature = (
   text,
   *,
-  path = None,
   line_width = None,
   indent_width = None,
   new_line = None
 ))]
 fn format_text_py(
   text: &str,
-  path: Option<&str>,
   line_width: Option<u32>,
   indent_width: Option<u8>,
   new_line: Option<&str>,
@@ -33,7 +31,7 @@ fn format_text_py(
     config.new_line = NewLineKind::parse(value).map_err(PyValueError::new_err)?;
   }
 
-  let formatted = format(path, text, &config).map_err(|err| PyRuntimeError::new_err(err.to_string()))?;
+  let formatted = format(text, &config).map_err(|err| PyRuntimeError::new_err(err.to_string()))?;
   Ok(formatted)
 }
 

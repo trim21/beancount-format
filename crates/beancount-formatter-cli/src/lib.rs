@@ -55,9 +55,8 @@ fn execute(args: Cli) -> Result<RunOutcome> {
 
   for path in files {
     let content = fs::read_to_string(&path).with_context(|| format!("Failed to read {}", path.display()))?;
-    let path_str = path.to_string_lossy();
     let path_display = to_posix_path(&path);
-    let formatted = format(Some(&path_str), &content, &config)?;
+    let formatted = format(&content, &config)?;
     let changed = formatted != content;
 
     if args.check {
