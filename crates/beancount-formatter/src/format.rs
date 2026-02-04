@@ -260,7 +260,7 @@ impl<'a> FormatterContext<'a> {
     }
   }
 
-  fn format_directive(&mut self, dir: &Directive<'_>, full_source: &str) {
+  fn format_directive(&mut self, dir: &Directive<'a>, full_source: &str) {
     match dir {
       Directive::Open(d) => {
         format_open(&mut self.writer, d, self.config);
@@ -320,7 +320,7 @@ impl<'a> FormatterContext<'a> {
     }
   }
 
-  fn format_transaction(&mut self, txn: &ast::Transaction<'_>, full_source: &str) {
+  fn format_transaction(&mut self, txn: &ast::Transaction<'a>, full_source: &str) {
     let txn_text = &full_source[txn.span.start..txn.span.end];
     let mut lines: Vec<String> = txn_text.replace("\r\n", "\n").lines().map(|l| l.to_string()).collect();
 
