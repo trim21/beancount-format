@@ -133,7 +133,7 @@ fn format_document(writer: &mut Writer, d: &ast::Document<'_>, config: &Configur
     Some("document".to_string()),
     Some(to_part(&d.account)),
     Some(to_part(&d.filename)),
-    d.tags_links.as_ref().map(|t| t.content.trim().to_string()),
+    format_tags_links(&d.tags_links),
   ]);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
@@ -260,7 +260,7 @@ impl<'a> FormatterContext<'a> {
     }
   }
 
-  fn format_directive(&mut self, dir: &Directive<'a>, full_source: &str) {
+  fn format_directive(&mut self, dir: &Directive<'_>, full_source: &str) {
     match dir {
       Directive::Open(d) => {
         format_open(&mut self.writer, d, self.config);
@@ -320,7 +320,7 @@ impl<'a> FormatterContext<'a> {
     }
   }
 
-  fn format_transaction(&mut self, txn: &ast::Transaction<'a>, full_source: &str) {
+  fn format_transaction(&mut self, txn: &ast::Transaction<'_>, full_source: &str) {
     let txn_text = &full_source[txn.span.start..txn.span.end];
     let mut lines: Vec<String> = txn_text.replace("\r\n", "\n").lines().map(|l| l.to_string()).collect();
 
@@ -335,8 +335,8 @@ impl<'a> FormatterContext<'a> {
     if let Some(narration) = &txn.narration {
       header_parts.push(narration.content.trim().to_string());
     }
-    if let Some(tags) = &txn.tags_links {
-      header_parts.push(tags.content.trim().to_string());
+    if let Some(tags) = format_tags_links(&txn.tags_links) {
+      header_parts.push(tags);
     }
     let mut header_line = header_parts.join(" ");
     if let Some(comment) = &txn.comment {
@@ -739,6 +739,19 @@ fn format_currencies(currencies: &[WithSpan<&str>]) -> Option<String> {
       .join(" "),
   )
 }
+
+fn format_tags_links(tags_links: &Option<Vec<WithSpan<&str>>>) -> Option<String> {
+  tags_links.as_ref().and_then(|tags| {
+    let joined = tags
+      .iter()
+      .map(|tag| tag.content.trim())
+      .filter(|tag| !tag.is_empty())
+      .collect::<Vec<_>>()
+      .join(" ");
+    if joined.is_empty() { None } else { Some(joined) }
+  })
+}
+
 
 fn format_comment(raw: &WithSpan<&str>) -> String {
   let trimmed = raw.content.trim();
