@@ -133,7 +133,7 @@ fn format_document(writer: &mut Writer, d: &ast::Document<'_>, config: &Configur
     Some("document".to_string()),
     Some(to_part(&d.account)),
     Some(to_part(&d.filename)),
-    d.tags_links.as_ref().map(|t| t.content.trim().to_string()),
+    format_tags_links(&d.tags_links),
   ]);
   if let Some(comment) = &d.comment {
     line = append_comment(line, &format_comment(comment), config, false);
@@ -316,6 +316,7 @@ impl<'a> FormatterContext<'a> {
       Directive::PopMeta(d) => format_popmeta(&mut self.writer, d),
       Directive::Headline(d) => self.format_span(d.span, full_source),
       Directive::Comment(d) => self.format_span(d.span, full_source),
+      Directive::Raw(d) => self.format_span(d.span, full_source),
     }
   }
 
@@ -334,8 +335,8 @@ impl<'a> FormatterContext<'a> {
     if let Some(narration) = &txn.narration {
       header_parts.push(narration.content.trim().to_string());
     }
-    if let Some(tags) = &txn.tags_links {
-      header_parts.push(tags.content.trim().to_string());
+    if let Some(tags) = format_tags_links(&txn.tags_links) {
+      header_parts.push(tags);
     }
     let mut header_line = header_parts.join(" ");
     if let Some(comment) = &txn.comment {
@@ -471,11 +472,8 @@ fn format_content(path: Option<&str>, content: &str, formatting_config: &Configu
     if let Some(prev_end) = prev_end_line {
       let start_line = directive_start_line(dir, &content);
       let mut blank_lines = start_line.saturating_sub(prev_end + 1).min(2);
-      let txn_min = if (prev_is_txn && is_txn) || (prev_is_txn && !is_txn) || (!prev_is_txn && is_txn) {
-        1
-      } else {
-        0
-      };
+      // preserve at least one and at most 2 empty lines whenever a transaction is involved
+      let txn_min = if prev_is_txn || is_txn { 1 } else { 0 };
       if blank_lines < txn_min {
         blank_lines = txn_min;
       }
@@ -621,6 +619,7 @@ fn directive_span(dir: &Directive<'_>) -> ast::Span {
     Directive::PopMeta(d) => d.span,
     Directive::Headline(d) => d.span,
     Directive::Comment(d) => d.span,
+    Directive::Raw(d) => d.span,
   }
 }
 
@@ -739,6 +738,18 @@ fn format_currencies(currencies: &[WithSpan<&str>]) -> Option<String> {
       .collect::<Vec<_>>()
       .join(" "),
   )
+}
+
+fn format_tags_links(tags_links: &Option<Vec<WithSpan<&str>>>) -> Option<String> {
+  tags_links.as_ref().and_then(|tags| {
+    let joined = tags
+      .iter()
+      .map(|tag| tag.content.trim())
+      .filter(|tag| !tag.is_empty())
+      .collect::<Vec<_>>()
+      .join(" ");
+    if joined.is_empty() { None } else { Some(joined) }
+  })
 }
 
 fn format_comment(raw: &WithSpan<&str>) -> String {

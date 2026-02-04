@@ -10,11 +10,8 @@ description = "Core beancount formatter logic."
 
 [dependencies]
 anyhow = { workspace = true }
-beancount-parser = { git = "https://github.com/trim21/beancount.git", rev = "8b4e3311258194fe3127862dd4132028e97cc01d" }
+beancount-parser = { workspace = true }
 serde = { workspace = true }
-# beancount-parser = { path = "../../../beancount/beancount/" }
-# beancount-parser = { path = "../../../beancount/beancount/crates/beancount-parser/" }
-tree-sitter = { version = "0.26.3" }
 
 [dev-dependencies]
 serde_json = "1.0.149"

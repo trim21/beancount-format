@@ -19,8 +19,8 @@ jobs:
         with:
           components: rustfmt,clippy
 
-      - run: cargo fmt
-
-      - run: cargo clippy --fix --allow-dirty
+      - run: cargo fmt || true
+      - run: cargo clippy --fix --allow-dirty || true
+      - run: cargo fmt || true
 
       - uses: autofix-ci/action@v1
