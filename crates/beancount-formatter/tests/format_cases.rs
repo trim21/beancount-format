@@ -74,8 +74,7 @@ fn format_and_check_fixtures() {
     };
 
     // Use case name as the filename for nicer error messages and meta handling.
-    let formatted = format(Some(&format!("{case_name}.bean")), &input, &config)
-      .unwrap_or_else(|e| panic!("format() failed for {case_name}: {e:?}"));
+    let formatted = format(&input, &config).unwrap_or_else(|e| panic!("format() failed for {case_name}: {e:?}"));
 
     if !expected_path.exists() {
       fs::write(&expected_path, &formatted)
@@ -155,13 +154,13 @@ fn format_empty_file_is_single_line() {
     new_line: NewLineKind::LF,
     ..Default::default()
   };
-  let formatted_lf = format(Some("empty.bean"), "\n\n\t  ", &config).expect("format failed");
+  let formatted_lf = format("\n\n\t  ", &config).expect("format failed");
   assert_eq!(formatted_lf, "");
 
   let config = Configuration {
     new_line: NewLineKind::LF,
     ..Default::default()
   };
-  let formatted_crlf = format(Some("empty.bean"), "  \r\n\r\n", &config).expect("format failed");
+  let formatted_crlf = format("  \r\n\r\n", &config).expect("format failed");
   assert_eq!(formatted_crlf, "");
 }

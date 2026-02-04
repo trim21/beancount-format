@@ -75,7 +75,7 @@ impl SyncPluginHandler<Configuration> for BeancountPluginHandler {
     if file_text.trim().is_empty() {
       return Ok(Some(Vec::new()));
     }
-    let formatted = format_beancount(request.file_path.to_str(), &file_text, request.config)?;
+    let formatted = format_beancount(&file_text, request.config)?;
 
     if formatted == file_text {
       Ok(None)

@@ -438,13 +438,11 @@ impl<'a> FormatterContext<'a> {
   }
 }
 
-pub fn format(path: Option<&str>, source_text: &str, config: &Configuration) -> Result<String> {
-  format_content(path, source_text, config)
+pub fn format(source_text: &str, config: &Configuration) -> Result<String> {
+  format_content(source_text, config)
 }
 
-fn format_content(path: Option<&str>, content: &str, formatting_config: &Configuration) -> Result<String> {
-  let path = path.unwrap_or("<memory>");
-
+fn format_content(content: &str, formatting_config: &Configuration) -> Result<String> {
   if content.trim().is_empty() {
     return Ok(String::new());
   }
@@ -456,7 +454,7 @@ fn format_content(path: Option<&str>, content: &str, formatting_config: &Configu
     format!("{}\n", content)
   };
 
-  let directives = parse_source(&content, path).map_err(anyhow::Error::new)?;
+  let directives = parse_source(&content);
 
   let newline = match formatting_config.new_line {
     NewLineKind::LF => "\n",
