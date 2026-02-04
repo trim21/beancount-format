@@ -10,8 +10,8 @@ description = "Core beancount formatter logic."
 
 [dependencies]
 anyhow = { workspace = true }
-serde = { workspace = true }
 beancount-parser = { workspace = true }
+serde = { workspace = true }
 
 [dev-dependencies]
 serde_json = "1.0.149"

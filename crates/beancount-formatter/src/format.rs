@@ -752,7 +752,6 @@ fn format_tags_links(tags_links: &Option<Vec<WithSpan<&str>>>) -> Option<String>
   })
 }
 
-
 fn format_comment(raw: &WithSpan<&str>) -> String {
   let trimmed = raw.content.trim();
   let without_semicolon = trimmed.strip_prefix(';').unwrap_or(trimmed).trim_start();

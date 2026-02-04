@@ -19,8 +19,10 @@ jobs:
         with:
           components: rustfmt,clippy
 
-      - run: cargo fmt
+      - run: cargo fmt || true
+      - run: cargo clippy --fix --allow-dirty || true
+      - run: cargo fmt || true
 
-      - run: cargo clippy --fix --allow-dirty
+      - uses: trim21/actions/prek@master
 
       - uses: autofix-ci/action@v1
