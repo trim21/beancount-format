@@ -18,12 +18,6 @@
         "requires-python"
       ],
       "enabled": false
-    },
-    {
-      "matchDepNames": [
-        "beancount-parser"
-      ],
-      "enabled": false
     }
   ]
 }
