@@ -31,27 +31,31 @@ jobs:
         platform:
           - runner: macos-15
             target: aarch64
+            zig_args: ''
           - runner: macos-15-intel
             target: x64
+            zig_args: ''
 
           - runner: windows-latest
             target: x64
+            zig_args: ''
           - runner: windows-11-arm
             target: aarch64
+            zig_args: ''
 
           - runner: ubuntu-24.04
             target: x64
+            zig_args: '--zig'
           - runner: ubuntu-24.04-arm
             target: aarch64
+            zig_args: '--zig'
 
     steps:
       - uses: actions/checkout@v6
 
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-        if: ${{ runner.os != 'Linux' }}
 
       - uses: actions/setup-python@v6
-        if: ${{ runner.os != 'Linux' }}
         with:
           python-version: '3.14'
 
@@ -59,8 +63,8 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist
-          # https://github.com/tree-sitter/tree-sitter/issues/4186
+          args: --release --out dist ${{ matrix.platform.zig_args }}
+          container: 'off'
           manylinux: '2_28'
 
       - run: ls -ahl dist
