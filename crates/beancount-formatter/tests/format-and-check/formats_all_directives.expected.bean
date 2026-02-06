@@ -19,5 +19,5 @@ popmeta foo:
 
 2010-01-12 * "Payee" "Narration" #tag1 ; headercmt
     Assets:Cash                                                                 -10 USD ; comment1
-    Assets:Cash2                                                               - 10 USD ; comment1
+    Assets:Cash2                                                                -10 USD ; comment1
     Expenses:Food                                                                10 USD ; comment2

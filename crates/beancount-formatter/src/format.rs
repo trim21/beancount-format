@@ -666,6 +666,16 @@ fn compact_ws(text: &str) -> String {
   text.split_whitespace().collect::<Vec<_>>().join(" ")
 }
 
+fn normalize_sign_spacing(number: &str) -> String {
+  if let Some(rest) = number.strip_prefix('-') {
+    format!("-{}", rest.trim_start())
+  } else if let Some(rest) = number.strip_prefix('+') {
+    format!("+{}", rest.trim_start())
+  } else {
+    number.to_string()
+  }
+}
+
 fn normalize_key_value(text: &str) -> String {
   let mut parts = text.splitn(2, ':');
   let key = parts.next().unwrap_or("").trim();
@@ -714,7 +724,7 @@ fn format_amount(amount: &ast::Amount<'_>) -> Option<String> {
     let raw = amount.raw.content;
     let start = currency.span.start.saturating_sub(amount.raw.span.start);
     if start <= raw.len() {
-      let number = compact_ws(&raw[..start]);
+      let number = normalize_sign_spacing(&compact_ws(&raw[..start]));
       let cur = currency.content.trim();
       if !number.is_empty() && !cur.is_empty() {
         return Some(format!("{} {}", number, cur));
@@ -722,7 +732,7 @@ fn format_amount(amount: &ast::Amount<'_>) -> Option<String> {
     }
   }
 
-  Some(compact_ws(amount.raw.content))
+  Some(normalize_sign_spacing(&compact_ws(amount.raw.content)))
 }
 
 fn format_currencies(currencies: &[WithSpan<&str>]) -> Option<String> {
