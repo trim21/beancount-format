@@ -172,7 +172,7 @@ dependencies = [
 [[package]]
 name = "beancount-parser"
 version = "3.3.0-alpha.0"
-source = "git+https://github.com/trim21/beancount.git?rev=c926d61a#c926d61a1ad4ec93a43f2a0a2e67fa56903ff291"
+source = "git+https://github.com/trim21/beancount.git?rev=e084af487707717c638aafebdc28ef6c4c7ba378#e084af487707717c638aafebdc28ef6c4c7ba378"
 dependencies = [
  "anyhow",
  "chrono",
