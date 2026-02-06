@@ -65,7 +65,7 @@ jobs:
   upload_all:
     name: Upload wheels to PyPI
     needs: [build]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-slim
     permissions:
       contents: write
       id-token: write
@@ -75,4 +75,5 @@ jobs:
           name: wheel
           path: dist
 
-      - uses: pypa/gh-action-pypi-publish@v1.13.0
+      - uses: astral-sh/setup-uv@v7
+      - run: uv publish
