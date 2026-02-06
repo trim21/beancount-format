@@ -85,7 +85,10 @@ fn check_mode_reports_without_writing() -> Result<()> {
     .assert()
     .failure()
     .stdout(predicate::str::is_empty())
-    .stderr(predicate::str::contains(format!("checking failed: {}", path_display)));
+    .stderr(predicate::str::contains(format!(
+      "checking failed: {}",
+      path_display
+    )));
 
   file.assert(eq(UNFORMATTED));
   Ok(())
@@ -102,11 +105,20 @@ fn check_mode_reports_all_unformatted_files() -> Result<()> {
   let mut cmd: Command = cargo_bin_cmd!("beancount-format");
   cmd.arg("--check").arg(temp.path());
 
-  cmd.assert().failure().stdout(predicate::str::is_empty()).stderr(
-    predicate::str::contains(format!("checking failed: {}", to_posix_path(first.path()))).and(
-      predicate::str::contains(format!("checking failed: {}", to_posix_path(second.path()))),
-    ),
-  );
+  cmd
+    .assert()
+    .failure()
+    .stdout(predicate::str::is_empty())
+    .stderr(
+      predicate::str::contains(format!(
+        "checking failed: {}",
+        to_posix_path(first.path())
+      ))
+      .and(predicate::str::contains(format!(
+        "checking failed: {}",
+        to_posix_path(second.path())
+      ))),
+    );
 
   first.assert(eq(UNFORMATTED));
   second.assert(eq(UNFORMATTED));

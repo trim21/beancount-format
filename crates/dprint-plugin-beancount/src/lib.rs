@@ -41,7 +41,10 @@ impl SyncPluginHandler<Configuration> for BeancountPluginHandler {
     }
   }
 
-  fn check_config_updates(&self, _message: CheckConfigUpdatesMessage) -> Result<Vec<ConfigChange>, anyhow::Error> {
+  fn check_config_updates(
+    &self,
+    _message: CheckConfigUpdatesMessage,
+  ) -> Result<Vec<ConfigChange>, anyhow::Error> {
     Ok(Vec::new())
   }
 
@@ -63,7 +66,9 @@ impl SyncPluginHandler<Configuration> for BeancountPluginHandler {
   }
 
   fn license_text(&mut self) -> String {
-    std::str::from_utf8(include_bytes!("../../../LICENSE")).unwrap().into()
+    std::str::from_utf8(include_bytes!("../../../LICENSE"))
+      .unwrap()
+      .into()
   }
 
   fn format(
@@ -114,10 +119,12 @@ fn resolve_config_dprint(
     new_line: map_new_line_kind(get_value(
       &mut config,
       "new_line",
-      global_config.new_line_kind.unwrap_or(match default.new_line {
-        NewLineKind::LF => DprintNewLineKind::LineFeed,
-        NewLineKind::CRLF => DprintNewLineKind::CarriageReturnLineFeed,
-      }),
+      global_config
+        .new_line_kind
+        .unwrap_or(match default.new_line {
+          NewLineKind::LF => DprintNewLineKind::LineFeed,
+          NewLineKind::CRLF => DprintNewLineKind::CarriageReturnLineFeed,
+        }),
       &mut diagnostics,
     )),
   };

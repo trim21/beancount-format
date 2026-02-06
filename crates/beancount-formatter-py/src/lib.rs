@@ -31,14 +31,15 @@ fn format_text_py(
     config.new_line = NewLineKind::parse(value).map_err(PyValueError::new_err)?;
   }
 
-  let formatted = format(text, &config).map_err(|err| PyRuntimeError::new_err(err.to_string()))?;
+  let formatted =
+    format(text, &config).map_err(|err| PyRuntimeError::new_err(err.to_string()))?;
   Ok(formatted)
 }
 
 #[pyfunction(name = "main")]
 fn main_py(args: Vec<String>) -> PyResult<bool> {
-  let outcome =
-    beancount_formatter_cli::main_with_args(args).map_err(|err| PyRuntimeError::new_err(err.to_string()))?;
+  let outcome = beancount_formatter_cli::main_with_args(args)
+    .map_err(|err| PyRuntimeError::new_err(err.to_string()))?;
 
   Ok(outcome.any_changed)
 }

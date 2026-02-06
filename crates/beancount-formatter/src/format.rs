@@ -63,7 +63,11 @@ fn format_pad(writer: &mut Writer, d: &ast::Pad<'_>, config: &Configuration) {
   writer.write_str(&line);
 }
 
-fn format_commodity(writer: &mut Writer, d: &ast::Commodity<'_>, config: &Configuration) {
+fn format_commodity(
+  writer: &mut Writer,
+  d: &ast::Commodity<'_>,
+  config: &Configuration,
+) {
   let comment_col = config.line_width as usize;
   let mut line = join_parts([Some(to_part(&d.date)), Some("commodity".to_string())]);
   line = align_trailing(line, Some(to_part(&d.currency)), comment_col);
@@ -205,12 +209,18 @@ fn format_pushmeta(writer: &mut Writer, d: &ast::PushMeta<'_>) {
   } else {
     format!("{}:", d.key.content)
   };
-  let line = join_parts([Some("pushmeta".to_string()), Some(normalize_key_value(&key_value))]);
+  let line = join_parts([
+    Some("pushmeta".to_string()),
+    Some(normalize_key_value(&key_value)),
+  ]);
   writer.write_str(&line);
 }
 
 fn format_popmeta(writer: &mut Writer, d: &ast::PopMeta<'_>) {
-  let line = join_parts([Some("popmeta".to_string()), Some(format!("{}:", to_part(&d.key)))]);
+  let line = join_parts([
+    Some("popmeta".to_string()),
+    Some(format!("{}:", to_part(&d.key))),
+  ]);
   writer.write_str(&line);
 }
 
@@ -322,7 +332,11 @@ impl<'a> FormatterContext<'a> {
 
   fn format_transaction(&mut self, txn: &ast::Transaction<'a>, full_source: &str) {
     let txn_text = &full_source[txn.span.start..txn.span.end];
-    let mut lines: Vec<String> = txn_text.replace("\r\n", "\n").lines().map(|l| l.to_string()).collect();
+    let mut lines: Vec<String> = txn_text
+      .replace("\r\n", "\n")
+      .lines()
+      .map(|l| l.to_string())
+      .collect();
 
     let mut header_parts: Vec<String> = Vec::new();
     header_parts.push(txn.date.content.trim().to_string());
@@ -340,7 +354,8 @@ impl<'a> FormatterContext<'a> {
     }
     let mut header_line = header_parts.join(" ");
     if let Some(comment) = &txn.comment {
-      header_line = append_comment(header_line, &format_comment(comment), self.config, false);
+      header_line =
+        append_comment(header_line, &format_comment(comment), self.config, false);
     }
     lines[0] = header_line;
 
@@ -364,24 +379,25 @@ impl<'a> FormatterContext<'a> {
     for (posting, &line_idx) in txn.postings.iter().zip(posting_line_indices.iter()) {
       let flag = posting.opt_flag.as_ref().map(|f| f.content.trim());
       let account = posting.account.content.trim();
-      let trailing = if let Some(amount) = posting.amount.as_ref().and_then(format_amount) {
-        let mut parts = vec![amount];
-        if let Some(cost) = posting.cost_spec.as_ref() {
-          parts.push(compact_ws(cost.raw.content));
-        }
-        if let Some(price_op) = posting.price_operator.as_ref() {
-          parts.push(match price_op.content {
-            PriceOperator::PerUnit => "@".to_string(),
-            PriceOperator::Total => "@@".to_string(),
-          });
-        }
-        if let Some(price_ann) = posting.price_annotation.as_ref() {
-          parts.push(compact_ws(price_ann.raw.content));
-        }
-        Some(parts.join(" "))
-      } else {
-        None
-      };
+      let trailing =
+        if let Some(amount) = posting.amount.as_ref().and_then(format_amount) {
+          let mut parts = vec![amount];
+          if let Some(cost) = posting.cost_spec.as_ref() {
+            parts.push(compact_ws(cost.raw.content));
+          }
+          if let Some(price_op) = posting.price_operator.as_ref() {
+            parts.push(match price_op.content {
+              PriceOperator::PerUnit => "@".to_string(),
+              PriceOperator::Total => "@@".to_string(),
+            });
+          }
+          if let Some(price_ann) = posting.price_annotation.as_ref() {
+            parts.push(compact_ws(price_ann.raw.content));
+          }
+          Some(parts.join(" "))
+        } else {
+          None
+        };
 
       let mut line = String::new();
       line.push_str(&" ".repeat(min_indent));
@@ -685,7 +701,9 @@ fn normalize_sign_spacing(number: &str) -> String {
 
 fn number_text_from_amount(amount: &ast::Amount<'_>) -> String {
   match &amount.number {
-    ast::NumberExpr::Literal(value) => normalize_sign_spacing(&compact_ws(value.content)),
+    ast::NumberExpr::Literal(value) => {
+      normalize_sign_spacing(&compact_ws(value.content))
+    }
     ast::NumberExpr::Binary { span, .. } | ast::NumberExpr::Missing { span } => {
       let raw = amount.raw.content;
       let start = span.start.saturating_sub(amount.raw.span.start);
@@ -710,7 +728,12 @@ fn normalize_key_value(text: &str) -> String {
   }
 }
 
-fn append_comment(mut line: String, comment: &str, config: &Configuration, align: bool) -> String {
+fn append_comment(
+  mut line: String,
+  comment: &str,
+  config: &Configuration,
+  align: bool,
+) -> String {
   let trimmed = line.trim_end().to_string();
   let base_len = trimmed.len();
   let target = config.line_width as usize;
@@ -726,7 +749,11 @@ fn append_comment(mut line: String, comment: &str, config: &Configuration, align
   line
 }
 
-fn align_trailing(mut base: String, trailing: Option<String>, comment_col: usize) -> String {
+fn align_trailing(
+  mut base: String,
+  trailing: Option<String>,
+  comment_col: usize,
+) -> String {
   if let Some(value) = trailing {
     let value_len = value.len();
     let target_end = comment_col.saturating_sub(2);
@@ -779,7 +806,11 @@ fn format_tags_links(tags_links: &Option<Vec<WithSpan<&str>>>) -> Option<String>
       .filter(|tag| !tag.is_empty())
       .collect::<Vec<_>>()
       .join(" ");
-    if joined.is_empty() { None } else { Some(joined) }
+    if joined.is_empty() {
+      None
+    } else {
+      Some(joined)
+    }
   })
 }
 

@@ -54,7 +54,8 @@ fn execute(args: Cli) -> Result<RunOutcome> {
   let mut any_changed = false;
 
   for path in files {
-    let content = fs::read_to_string(&path).with_context(|| format!("Failed to read {}", path.display()))?;
+    let content = fs::read_to_string(&path)
+      .with_context(|| format!("Failed to read {}", path.display()))?;
     let path_display = to_posix_path(&path);
     let formatted = format(&content, &config)?;
     let changed = formatted != content;
@@ -70,7 +71,8 @@ fn execute(args: Cli) -> Result<RunOutcome> {
     if changed {
       eprintln!("formatting: {}", path_display);
 
-      fs::write(&path, &formatted).with_context(|| format!("Failed to write {}", path.display()))?;
+      fs::write(&path, &formatted)
+        .with_context(|| format!("Failed to write {}", path.display()))?;
       any_changed = true;
     }
   }
@@ -88,14 +90,18 @@ impl Cli {
   }
 }
 
-fn load_configuration(inputs: &[PathBuf], overrides: &PartialConfiguration) -> Result<Configuration> {
+fn load_configuration(
+  inputs: &[PathBuf],
+  overrides: &PartialConfiguration,
+) -> Result<Configuration> {
   let mut config = Configuration::default();
 
   if let Some(pyproject_path) = find_pyproject(inputs) {
-    let content =
-      fs::read_to_string(&pyproject_path).with_context(|| format!("Failed to read {}", pyproject_path.display()))?;
+    let content = fs::read_to_string(&pyproject_path)
+      .with_context(|| format!("Failed to read {}", pyproject_path.display()))?;
 
-    let parsed = parse_pyproject(&content).with_context(|| format!("Failed to parse {}", pyproject_path.display()))?;
+    let parsed = parse_pyproject(&content)
+      .with_context(|| format!("Failed to parse {}", pyproject_path.display()))?;
 
     if let Some(tool) = parsed.tool
       && let Some(cfg) = tool.beancount_formatter
@@ -159,7 +165,8 @@ fn find_pyproject(inputs: &[PathBuf]) -> Option<PathBuf> {
 }
 
 fn collect_path(path: &Path, files: &mut Vec<PathBuf>) -> Result<()> {
-  let metadata = fs::metadata(path).with_context(|| format!("Failed to access {}", path.display()))?;
+  let metadata = fs::metadata(path)
+    .with_context(|| format!("Failed to access {}", path.display()))?;
 
   if metadata.is_dir() {
     collect_dir(path, files)?;
