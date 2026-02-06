@@ -676,6 +676,22 @@ fn normalize_sign_spacing(number: &str) -> String {
   }
 }
 
+fn number_text_from_amount(amount: &ast::Amount<'_>) -> String {
+  match &amount.number {
+    ast::NumberExpr::Literal(value) => normalize_sign_spacing(&compact_ws(value.content)),
+    ast::NumberExpr::Binary { span, .. } | ast::NumberExpr::Missing { span } => {
+      let raw = amount.raw.content;
+      let start = span.start.saturating_sub(amount.raw.span.start);
+      let end = span.end.saturating_sub(amount.raw.span.start);
+      if start <= end && end <= raw.len() {
+        raw[start..end].to_string()
+      } else {
+        raw.to_string()
+      }
+    }
+  }
+}
+
 fn normalize_key_value(text: &str) -> String {
   let mut parts = text.splitn(2, ':');
   let key = parts.next().unwrap_or("").trim();
@@ -720,19 +736,19 @@ fn align_trailing(mut base: String, trailing: Option<String>, comment_col: usize
 }
 
 fn format_amount(amount: &ast::Amount<'_>) -> Option<String> {
+  let number_text = number_text_from_amount(amount);
   if let Some(currency) = &amount.currency {
-    let raw = amount.raw.content;
-    let start = currency.span.start.saturating_sub(amount.raw.span.start);
-    if start <= raw.len() {
-      let number = normalize_sign_spacing(&compact_ws(&raw[..start]));
-      let cur = currency.content.trim();
-      if !number.is_empty() && !cur.is_empty() {
-        return Some(format!("{} {}", number, cur));
-      }
+    let cur = currency.content.trim();
+    if !number_text.trim().is_empty() && !cur.is_empty() {
+      return Some(format!("{} {}", number_text, cur));
     }
   }
 
-  Some(normalize_sign_spacing(&compact_ws(amount.raw.content)))
+  if number_text.is_empty() {
+    Some(normalize_sign_spacing(&compact_ws(amount.raw.content)))
+  } else {
+    Some(number_text)
+  }
 }
 
 fn format_currencies(currencies: &[WithSpan<&str>]) -> Option<String> {
