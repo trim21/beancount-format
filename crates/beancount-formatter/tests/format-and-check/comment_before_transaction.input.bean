@@ -1,0 +1,5 @@
+; comment
+2024-01-01 * "Payee"
+  Assets:Cash
+  Expenses:Food
+2024-01-02 note Assets:Cash "Note"
