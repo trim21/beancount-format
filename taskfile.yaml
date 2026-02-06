@@ -59,10 +59,10 @@ tasks:
   bump:
     vars:
       VERSION:
-        sh: tomlq '.workspace.package.version' Cargo.toml
+        sh: tomlq -r '.workspace.package.version' Cargo.toml
     cmds:
       - python scripts/update_versions.py
       - cargo generate-lockfile
       - git add pyproject.toml package.json Cargo.toml Cargo.lock
       - 'git commit -m "bump: {{.VERSION}}"'
-      - 'git tag "v{{.VERSION}}" -m "v{{.VERSION}}"'
+      - 'git tag "v{{.VERSION}}" -m "v{{.VERSION}}" -a'
