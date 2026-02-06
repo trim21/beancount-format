@@ -59,7 +59,7 @@ tasks:
   bump:
     vars:
       VERSION:
-        sh: tomlq -r '.workspace.package.version' Cargo.toml
+        sh: yq -r '.workspace.package.version' Cargo.toml
     cmds:
       - python scripts/update_versions.py
       - cargo generate-lockfile
