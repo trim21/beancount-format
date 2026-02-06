@@ -5,11 +5,11 @@ build-backend = "maturin"
 [project]
 name = "beancount-format"
 version = "0.1.25"
+requires-python = ">=3.10"
 description = "Beancount formatter powered by dprint-plugin-beancount"
 authors = [{ name = "trim21", email = "trim21.me@gmail.com" }]
-license = { file = "LICENSE" }
 readme = "python/README.md"
-requires-python = ">=3.10"
+license = { file = "LICENSE" }
 classifiers = [
   "Programming Language :: Rust",
   "Programming Language :: Python",
@@ -17,6 +17,8 @@ classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "License :: OSI Approved :: MIT License",
 ]
+
+dependencies = []
 
 [project.scripts]
 beancount-format = "beancount_format:main"
