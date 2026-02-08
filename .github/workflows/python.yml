@@ -22,7 +22,7 @@ jobs:
   build-wheel:
     uses: ./.github/workflows/_build_wheels.yaml
 
-  tests:
+  python-test-matrix:
     name: Tests (wheel install)
     needs:
       - build-wheel
@@ -64,3 +64,10 @@ jobs:
 
       - name: Python smoke test
         run: python python/tests/test_smoke.py
+
+  python-test:
+    needs:
+      - python-test-matrix
+    runs-on: ubuntu-slim
+    steps:
+      - run: echo 1
