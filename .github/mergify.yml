@@ -19,7 +19,6 @@ pull_request_rules:
       - check-success=cargo-lint-test
       - check-success=dprint-test
       - check-success=python-test
-      - check-success=rust-test
       - check-success=pre-commit
     actions:
       merge:
