@@ -24,7 +24,7 @@
     "url": "https://github.com/trim21/beancount-format/issues"
   },
   "homepage": "https://github.com/trim21/beancount-format#readme",
-  "packageManager": "pnpm@10.29.1",
+  "packageManager": "pnpm@10.29.2",
   "files": [
     "index.js",
     "index.d.ts",
