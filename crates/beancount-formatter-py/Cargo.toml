@@ -15,4 +15,4 @@ crate-type = ["cdylib"]
 [dependencies]
 beancount-formatter = { workspace = true }
 beancount-formatter-cli = { path = "../beancount-formatter-cli/" }
-pyo3 = { version = "0.28.1", features = ["abi3", "abi3-py310", "generate-import-lib"] }
+pyo3 = { version = "0.28.2", features = ["abi3", "abi3-py310", "generate-import-lib"] }
