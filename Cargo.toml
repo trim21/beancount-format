@@ -12,7 +12,7 @@ repository = "https://github.com/trim21/beancount-format"
 description = "Beancount formatter library and tooling."
 
 [workspace.dependencies]
-anyhow = "1.0.101"
+anyhow = "1.0.102"
 beancount-formatter = { path = "./crates/beancount-formatter/" }
 beancount-parser = { git = "https://github.com/trim21/beancount.git", rev = "50f898fe1636efa1a59222c70fa0e288f442cc08" }
 serde = { version = "1.0.228", features = ["derive"] }
