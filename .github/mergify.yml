@@ -15,8 +15,7 @@ pull_request_rules:
           - label=ci:auto-merge
       - or:
           - not:
-              and:
-                - head*=renovate/lockfile-maintenance-*
+              - head*=renovate/lockfile-maintenance-*
           - 'created-at<=24h ago'
       - base=master
       - check-success=cargo-lint-test
