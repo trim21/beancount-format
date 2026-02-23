@@ -103,30 +103,43 @@ fn resolve_config_dprint(
   let mut diagnostics = Vec::new();
   let mut config = config;
 
+  let global_line_width = global_config.line_width.unwrap_or(default.line_width);
+  let global_indent_width = global_config.indent_width.unwrap_or(default.indent_width);
+  let global_new_line = map_new_line_kind(global_config.new_line_kind.unwrap_or(
+    match default.new_line {
+      NewLineKind::LF => DprintNewLineKind::LineFeed,
+      NewLineKind::CRLF => DprintNewLineKind::CarriageReturnLineFeed,
+    },
+  ));
+
   let resolved_config = Configuration {
     line_width: get_value(
       &mut config,
       "line_width",
-      global_config.line_width.unwrap_or(default.line_width),
+      global_line_width,
       &mut diagnostics,
     ),
     indent_width: get_value(
       &mut config,
       "indent_width",
-      global_config.indent_width.unwrap_or(default.indent_width),
+      global_indent_width,
       &mut diagnostics,
     ),
     new_line: map_new_line_kind(get_value(
       &mut config,
       "new_line",
-      global_config
-        .new_line_kind
-        .unwrap_or(match default.new_line {
-          NewLineKind::LF => DprintNewLineKind::LineFeed,
-          NewLineKind::CRLF => DprintNewLineKind::CarriageReturnLineFeed,
-        }),
+      match global_new_line {
+        NewLineKind::LF => DprintNewLineKind::LineFeed,
+        NewLineKind::CRLF => DprintNewLineKind::CarriageReturnLineFeed,
+      },
       &mut diagnostics,
     )),
+    compact_balance_spacing: get_value(
+      &mut config,
+      "compact_balance_spacing",
+      default.compact_balance_spacing,
+      &mut diagnostics,
+    ),
   };
 
   diagnostics.extend(get_unknown_property_diagnostics(config));

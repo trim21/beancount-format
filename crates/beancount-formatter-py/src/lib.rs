@@ -1,4 +1,4 @@
-use beancount_formatter::configuration::{Configuration, NewLineKind};
+use beancount_formatter::configuration::{NewLineKind, PartialConfiguration};
 use beancount_formatter::format;
 use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
@@ -9,27 +9,28 @@ use pyo3::prelude::*;
   *,
   line_width = None,
   indent_width = None,
-  new_line = None
+  new_line = None,
+  compact_balance_spacing = None
 ))]
 fn format_text_py(
   text: &str,
   line_width: Option<u32>,
   indent_width: Option<u8>,
   new_line: Option<&str>,
+  compact_balance_spacing: Option<bool>,
 ) -> PyResult<String> {
-  let mut config = Configuration::default();
+  let new_line_opt: Option<NewLineKind> = match new_line {
+    Some(value) => Some(NewLineKind::parse(value).map_err(PyValueError::new_err)?),
+    None => None,
+  };
 
-  if let Some(value) = line_width {
-    config.line_width = value;
+  let config = PartialConfiguration {
+    line_width,
+    indent_width,
+    new_line: new_line_opt,
+    compact_balance_spacing,
   }
-
-  if let Some(value) = indent_width {
-    config.indent_width = value;
-  }
-
-  if let Some(value) = new_line {
-    config.new_line = NewLineKind::parse(value).map_err(PyValueError::new_err)?;
-  }
+  .resolve();
 
   let formatted =
     format(text, &config).map_err(|err| PyRuntimeError::new_err(err.to_string()))?;

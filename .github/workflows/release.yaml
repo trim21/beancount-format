@@ -49,6 +49,12 @@ jobs:
         with:
           python-version: '3.11'
 
+      - uses: astral-sh/setup-uv@v7
+        with:
+          activate-environment: true
+
+      - run: uv sync --frozen
+
       - name: Generate plugin metadata
         run: python scripts/generate_plugin_assets.py --out-dir dist
 
