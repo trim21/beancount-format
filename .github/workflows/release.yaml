@@ -83,3 +83,32 @@ jobs:
 
       - uses: astral-sh/setup-uv@v7
       - run: uv publish
+
+  github:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Get Previous Tag
+        id: tag
+        uses: trim21/changelog-previous-tag@master
+        with:
+          token: ${{ github.token }}
+          version-spec: pep440
+
+      - name: Update CHANGELOG
+        id: changelog
+        uses: requarks/changelog-action@v1
+        with:
+          token: ${{ github.token }}
+          fromTag: ${{ github.ref_name }}
+          toTag: ${{ env.previousTag }}
+          restrictToTypes: feat,fix,revert
+
+      - name: Upload Github Release
+        run: gh release create "${GITHUB_REF}" --notes "${CHANGELOG}" $EXTRA_OPTS
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CHANGELOG: '${{ steps.changelog.outputs.changes }}'
+          EXTRA_OPTS: "${{ env.preRelease == 'true' && '-p' || '' }}"
