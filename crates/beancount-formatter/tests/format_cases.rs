@@ -4,7 +4,11 @@ fn format_and_check_fixtures() {
   use std::fs;
   use std::path::Path;
 
-  use beancount_formatter::configuration::{Configuration, NewLineKind};
+  use beancount_formatter::configuration::{
+    Configuration,
+    NewLineKind,
+    PartialConfiguration as CorePartialConfiguration,
+  };
   use beancount_formatter::format;
   use serde::Deserialize;
 
@@ -18,15 +22,13 @@ fn format_and_check_fixtures() {
   }
 
   impl PartialConfiguration {
-    fn apply_to(self, mut config: Configuration) -> Configuration {
-      config.line_width = self.line_width.unwrap_or(config.line_width);
-      config.indent_width = self.indent_width.unwrap_or(config.indent_width);
-      config.new_line = self.new_line.unwrap_or(config.new_line);
-      config.compact_balance_spacing = self
-        .compact_balance_spacing
-        .unwrap_or(config.compact_balance_spacing);
-
-      config
+    fn to_core_partial(&self) -> CorePartialConfiguration {
+      CorePartialConfiguration {
+        line_width: self.line_width,
+        indent_width: self.indent_width,
+        new_line: self.new_line,
+        compact_balance_spacing: self.compact_balance_spacing,
+      }
     }
   }
 
@@ -73,7 +75,7 @@ fn format_and_check_fixtures() {
       });
       let partial: PartialConfiguration = serde_json::from_str(&json)
         .unwrap_or_else(|e| panic!("Invalid JSON in {}: {e}", config_path.display()));
-      partial.apply_to(Configuration::default())
+      partial.to_core_partial().resolve()
     } else {
       Configuration::default()
     };
