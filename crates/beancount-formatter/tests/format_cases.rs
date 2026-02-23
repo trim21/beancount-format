@@ -5,9 +5,7 @@ fn format_and_check_fixtures() {
   use std::path::Path;
 
   use beancount_formatter::configuration::{
-    Configuration,
-    NewLineKind,
-    PartialConfiguration as CorePartialConfiguration,
+    Configuration, NewLineKind, PartialConfiguration as CorePartialConfiguration,
   };
   use beancount_formatter::format;
   use serde::Deserialize;

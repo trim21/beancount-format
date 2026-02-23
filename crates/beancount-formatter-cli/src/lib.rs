@@ -1,7 +1,7 @@
+use std::env;
 use std::ffi::OsString;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::{env, option};
 
 use anyhow::{Context, Result};
 use beancount_formatter::configuration::{
