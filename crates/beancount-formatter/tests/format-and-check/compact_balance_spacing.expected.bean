@@ -1,0 +1,6 @@
+2000-01-01 open Assets:Cash
+
+2000-01-02 balance Assets:Cash                                  1 CNY
+2000-01-03 balance Assets:Cash                                  2 CNY
+
+2000-01-04 close Assets:Cash

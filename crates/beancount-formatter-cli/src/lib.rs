@@ -30,6 +30,9 @@ pub struct Cli {
   /// Override newline style (lf or crlf).
   #[arg(long, value_name = "STYLE", value_parser = NewLineKind::parse)]
   pub new_line: Option<NewLineKind>,
+  /// Remove empty lines between consecutive balance directives.
+  #[arg(long)]
+  pub compact_balance_spacing: bool,
 }
 
 /// Run the formatter CLI with a custom argument iterator.
@@ -86,6 +89,7 @@ impl Cli {
       line_width: self.line_width,
       indent_width: self.indent_width,
       new_line_kind: self.new_line,
+      compact_balance_spacing: self.compact_balance_spacing.then_some(true),
     }
   }
 }
@@ -225,6 +229,7 @@ struct PartialConfiguration {
   line_width: Option<u32>,
   indent_width: Option<u8>,
   new_line_kind: Option<beancount_formatter::configuration::NewLineKind>,
+  compact_balance_spacing: Option<bool>,
 }
 
 impl PartialConfiguration {
@@ -232,6 +237,9 @@ impl PartialConfiguration {
     config.line_width = self.line_width.unwrap_or(config.line_width);
     config.indent_width = self.indent_width.unwrap_or(config.indent_width);
     config.new_line = self.new_line_kind.unwrap_or(config.new_line);
+    config.compact_balance_spacing = self
+      .compact_balance_spacing
+      .unwrap_or(config.compact_balance_spacing);
   }
 }
 
@@ -254,6 +262,7 @@ mod tests {
   line-width = 88
   indent-width = 3
   new-line-kind = "crlf"
+  compact-balance-spacing = true
 "#;
 
     let parsed = parse_pyproject(content).expect("pyproject should parse");
@@ -266,6 +275,7 @@ mod tests {
     assert_eq!(cfg.line_width, Some(88));
     assert_eq!(cfg.indent_width, Some(3));
     assert_eq!(cfg.new_line_kind, Some(NewLineKind::CRLF));
+    assert_eq!(cfg.compact_balance_spacing, Some(true));
   }
   #[test]
   fn parses_partial_pyproject_tool_section() {
@@ -285,6 +295,7 @@ mod tests {
     assert_eq!(cfg.line_width, Some(88));
     assert_eq!(cfg.indent_width, Some(3));
     assert_eq!(cfg.new_line_kind, None);
+    assert_eq!(cfg.compact_balance_spacing, None);
   }
 
   #[test]

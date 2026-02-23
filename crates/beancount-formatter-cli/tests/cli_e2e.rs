@@ -6,6 +6,7 @@ use std::path::Path;
 
 const UNFORMATTED: &str = "2010-01-01 open\tAssets:Cash   \n";
 const FORMATTED: &str = "2010-01-01 open Assets:Cash\n";
+const BALANCE_WITH_BLANKS: &str = "2000-01-01 open Assets:Cash\n\n2000-01-02 balance Assets:Cash 1 CNY\n\n\n2000-01-03 balance Assets:Cash 2 CNY\n";
 
 fn to_posix_path(path: &Path) -> String {
   path.to_string_lossy().replace('\\', "/")
@@ -152,5 +153,43 @@ new-line-kind = "crlf"
     )));
 
   file.assert(eq("2010-01-01 open Assets:Cash\r\n"));
+  Ok(())
+}
+
+#[test]
+fn respects_pyproject_compact_balance_spacing() -> Result<()> {
+  let temp = assert_fs::TempDir::new()?;
+  temp.child("pyproject.toml").write_str(
+    r#"
+[tool.beancount-format]
+compact-balance-spacing = true
+"#,
+  )?;
+
+  let file = temp.child("balances.beancount");
+  file.write_str(BALANCE_WITH_BLANKS)?;
+
+  let mut cmd: Command = cargo_bin_cmd!("beancount-format");
+  cmd.current_dir(temp.path());
+  cmd.arg(file.path());
+
+  cmd
+    .assert()
+    .failure()
+    .stdout(predicate::str::is_empty())
+    .stderr(predicate::str::contains(format!(
+      "formatting: {}",
+      to_posix_path(file.path())
+    )));
+
+  let formatted = std::fs::read_to_string(file.path())?;
+  assert!(formatted.contains("2000-01-02 balance Assets:Cash"));
+  assert!(!formatted.contains(
+    "2000-01-02 balance Assets:Cash 1 CNY\n\n2000-01-03 balance Assets:Cash 2 CNY"
+  ));
+  assert!(formatted.contains(
+    "2000-01-02 balance Assets:Cash 1 CNY\n2000-01-03 balance Assets:Cash 2 CNY"
+  ));
+
   Ok(())
 }

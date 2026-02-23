@@ -32,6 +32,7 @@ formatted = format_text(
     line_width=88,
     indent_width=2,
     new_line="lf",  # "lf" or "crlf"
+    compact_balance_spacing=True,
 )
 print(formatted)
 ```

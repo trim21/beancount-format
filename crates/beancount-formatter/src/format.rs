@@ -480,14 +480,19 @@ fn format_content(content: &str, formatting_config: &Configuration) -> Result<St
   let mut ctx = FormatterContext::new(formatting_config, content.len());
   let mut prev_end_line: Option<usize> = None;
   let mut prev_is_txn = false;
+  let mut prev_is_balance = false;
   let mut prev_is_comment = false;
 
   for dir in directives.iter() {
     let is_txn = matches!(dir, Directive::Transaction(_));
+    let is_balance = matches!(dir, Directive::Balance(_));
     let is_comment = matches!(dir, Directive::Comment(_));
     if let Some(prev_end) = prev_end_line {
       let start_line = directive_start_line(dir, &content);
       let mut blank_lines = start_line.saturating_sub(prev_end + 1).min(2);
+      if formatting_config.compact_balance_spacing && prev_is_balance && is_balance {
+        blank_lines = 0;
+      }
       // preserve at least one and at most 2 empty lines whenever a transaction is involved
       let txn_min = if (prev_is_txn || is_txn) && !(prev_is_comment && is_txn) {
         1
@@ -507,6 +512,7 @@ fn format_content(content: &str, formatting_config: &Configuration) -> Result<St
 
     prev_end_line = Some(directive_end_line(dir, &content));
     prev_is_txn = is_txn;
+    prev_is_balance = is_balance;
     prev_is_comment = is_comment;
   }
 

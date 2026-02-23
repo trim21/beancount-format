@@ -9,13 +9,15 @@ use pyo3::prelude::*;
   *,
   line_width = None,
   indent_width = None,
-  new_line = None
+  new_line = None,
+  compact_balance_spacing = None
 ))]
 fn format_text_py(
   text: &str,
   line_width: Option<u32>,
   indent_width: Option<u8>,
   new_line: Option<&str>,
+  compact_balance_spacing: Option<bool>,
 ) -> PyResult<String> {
   let mut config = Configuration::default();
 
@@ -29,6 +31,10 @@ fn format_text_py(
 
   if let Some(value) = new_line {
     config.new_line = NewLineKind::parse(value).map_err(PyValueError::new_err)?;
+  }
+
+  if let Some(value) = compact_balance_spacing {
+    config.compact_balance_spacing = value;
   }
 
   let formatted =

@@ -8,5 +8,6 @@ def format_text(
     line_width: Optional[int] = ...,
     indent_width: Optional[int] = ...,
     new_line: Optional[str] = ...,
+    compact_balance_spacing: Optional[bool] = ...,
 ) -> str: ...
 def main(argv: Sequence[str]) -> int: ...

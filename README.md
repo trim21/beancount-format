@@ -18,9 +18,10 @@ The CLI auto-detects `pyproject.toml` from the working directory or provided pat
 line-width = 70
 indent-width = 2
 new-line-kind = "lf"
+compact-balance-spacing = false
 ```
 
-- Can be overridden from args: `--line-width 80 --indent-width 4 --new-line lf`
+- Can be overridden from args: `--line-width 80 --indent-width 4 --new-line lf --compact-balance-spacing`
 
 ### dprint
 
