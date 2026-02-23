@@ -1,9 +1,6 @@
 version = 1
 revision = 3
 requires-python = ">=3.10"
-required-markers = [
-    "(platform_machine == 'x86_64' and sys_platform == 'linux') or (platform_machine == 'AMD64' and sys_platform == 'win32')",
-]
 
 [[package]]
 name = "annotated-types"
@@ -16,7 +13,7 @@ wheels = [
 
 [[package]]
 name = "beancount-format"
-version = "0.1.26"
+version = "0.2.1"
 source = { virtual = "." }
 
 [package.dev-dependencies]
