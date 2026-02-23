@@ -256,34 +256,12 @@ struct PyprojectPartialConfiguration {
   compact_balance_spacing: Option<bool>,
 }
 
-impl PyprojectPartialConfiguration {
-  fn to_core_partial(&self) -> CorePartialConfiguration {
-    CorePartialConfiguration {
-      line_width: self.line_width,
-      indent_width: self.indent_width,
-      new_line: self.new_line,
-      compact_balance_spacing: self.compact_balance_spacing,
-    }
-  }
-}
-
 #[derive(Debug, Default, Clone)]
 struct CliPartialConfiguration {
   line_width: Option<u32>,
   indent_width: Option<u8>,
   new_line: Option<beancount_formatter::configuration::NewLineKind>,
   compact_balance_spacing: Option<bool>,
-}
-
-impl CliPartialConfiguration {
-  fn to_core_partial(&self) -> CorePartialConfiguration {
-    CorePartialConfiguration {
-      line_width: self.line_width,
-      indent_width: self.indent_width,
-      new_line: self.new_line,
-      compact_balance_spacing: self.compact_balance_spacing,
-    }
-  }
 }
 
 fn parse_pyproject(content: &str) -> Result<Pyproject, TomlError> {
