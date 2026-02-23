@@ -23,17 +23,6 @@ pub struct PartialConfiguration {
 }
 
 impl PartialConfiguration {
-  pub fn merge(self, other: Self) -> Self {
-    Self {
-      line_width: other.line_width.or(self.line_width),
-      indent_width: other.indent_width.or(self.indent_width),
-      new_line: other.new_line.or(self.new_line),
-      compact_balance_spacing: other
-        .compact_balance_spacing
-        .or(self.compact_balance_spacing),
-    }
-  }
-
   pub fn resolve(self) -> Configuration {
     Configuration {
       line_width: self.line_width.unwrap_or(DEFAULT_LINE_WIDTH),
