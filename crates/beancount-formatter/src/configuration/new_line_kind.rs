@@ -25,6 +25,8 @@ impl NewLineKind {
   /// Parse a newline kind from a string. Accepts case-insensitive "lf" or "crlf".
   pub fn parse(text: &str) -> Result<Self, String> {
     match text.to_ascii_lowercase().as_str().trim() {
+      "\n" => Ok(NewLineKind::LF),
+      "\r\n" => Ok(NewLineKind::CRLF),
       "lf" => Ok(NewLineKind::LF),
       "crlf" => Ok(NewLineKind::CRLF),
       other => Err(format!("Unsupported new_line: {}", other)),
