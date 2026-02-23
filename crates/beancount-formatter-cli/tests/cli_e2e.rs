@@ -183,13 +183,17 @@ compact-balance-spacing = true
     )));
 
   let formatted = std::fs::read_to_string(file.path())?;
-  assert!(formatted.contains("2000-01-02 balance Assets:Cash"));
-  assert!(!formatted.contains(
-    "2000-01-02 balance Assets:Cash 1 CNY\n\n2000-01-03 balance Assets:Cash 2 CNY"
-  ));
-  assert!(formatted.contains(
-    "2000-01-02 balance Assets:Cash 1 CNY\n2000-01-03 balance Assets:Cash 2 CNY"
-  ));
+  let normalized = formatted.replace("\r\n", "\n");
+  let lines: Vec<&str> = normalized.lines().collect();
+  let first_balance = lines
+    .iter()
+    .position(|line| line.starts_with("2000-01-02 balance Assets:Cash"))
+    .expect("first balance line missing");
+  let second_balance = lines
+    .iter()
+    .position(|line| line.starts_with("2000-01-03 balance Assets:Cash"))
+    .expect("second balance line missing");
+  assert_eq!(second_balance, first_balance + 1);
 
   Ok(())
 }
