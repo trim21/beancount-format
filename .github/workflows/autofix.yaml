@@ -25,3 +25,4 @@ jobs:
       - uses: trim21/actions/prek@master
 
       - uses: autofix-ci/action@v1
+        if: ${{ always() }}
