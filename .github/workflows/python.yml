@@ -45,7 +45,8 @@ jobs:
 
       - uses: actions/download-artifact@v8
         with:
-          name: wheel
+          pattern: pypi-wheel-*
+          merge-multiple: true
           path: dist
 
       - uses: actions/setup-python@v6
