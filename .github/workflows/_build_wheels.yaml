@@ -65,7 +65,6 @@ jobs:
           target: ${{ matrix.platform.target }}
           args: --release --out dist ${{ matrix.platform.zig_args }}
           container: 'off'
-          manylinux: '2_28'
 
       - run: ls -ahl dist
         shell: bash
