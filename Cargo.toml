@@ -14,7 +14,7 @@ description = "Beancount formatter library and tooling."
 [workspace.dependencies]
 anyhow = "1.0.102"
 beancount-formatter = { path = "./crates/beancount-formatter/" }
-beancount-parser = { git = "https://github.com/trim21/beancount.git", rev = "741ff872aafa02c44bf45059af68a743ceeaf255" }
+beancount-parser = { git = "https://github.com/trim21/beancount.git", rev = "e90dca2dcad866d2ab3130c905752da09fa07de1" }
 serde = { version = "1.0.228", features = ["derive"] }
 
 [profile.release]
