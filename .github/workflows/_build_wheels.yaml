@@ -20,7 +20,7 @@ jobs:
       - name: Upload sdist
         uses: actions/upload-artifact@v7
         with:
-          name: wheels-sdist
+          name: pypi-sdist
           path: dist
 
   wheel:
@@ -73,15 +73,5 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v7
         with:
-          name: wheels-${{ runner.os }}-${{ matrix.platform.target }}
+          name: pypi-wheel-${{ runner.os }}-${{ matrix.platform.target }}
           path: dist
-
-  merge-wheel-artifact:
-    runs-on: ubuntu-24.04
-    needs: ['sdist', 'wheel']
-    steps:
-      - name: Merge Artifacts
-        uses: actions/upload-artifact/merge@v7
-        with:
-          name: wheel
-          pattern: wheels-*
