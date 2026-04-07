@@ -25,7 +25,7 @@ beancount-format = "beancount_format:main"
 [dependency-groups]
 dev = [
   "maturin==1.12.6",
-  "pytest==9.0.2",
+  "pytest==9.0.3",
   "ruff==0.15.9",
   "pydantic>=2.12.5,<3",
 ]
