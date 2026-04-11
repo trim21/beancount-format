@@ -27,7 +27,7 @@ jobs:
         run: cargo build -p dprint-plugin-beancount --target wasm32-unknown-unknown --release
 
       - name: Setup | pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@v6
         with:
           package_json_file: package.json
 
