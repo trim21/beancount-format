@@ -1,5 +1,5 @@
 [build-system]
-requires = ["maturin==1.13.3"]
+requires = ["maturin==1.14.0"]
 build-backend = "maturin"
 
 [project]
@@ -24,7 +24,7 @@ beancount-format = "beancount_format:main"
 
 [dependency-groups]
 dev = [
-  "maturin==1.13.3",
+  "maturin==1.14.0",
   "pytest==9.0.3",
   "ruff==0.15.17",
   "pydantic>=2.13.4,<3",
