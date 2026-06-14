@@ -44,7 +44,7 @@ impl SyncPluginHandler<Configuration> for BeancountPluginHandler {
   fn check_config_updates(
     &self,
     _message: CheckConfigUpdatesMessage,
-  ) -> Result<Vec<ConfigChange>, anyhow::Error> {
+  ) -> Result<Vec<ConfigChange>, dprint_core::plugins::FormatError> {
     Ok(Vec::new())
   }
 
@@ -80,7 +80,8 @@ impl SyncPluginHandler<Configuration> for BeancountPluginHandler {
     if file_text.trim().is_empty() {
       return Ok(Some(Vec::new()));
     }
-    let formatted = format_beancount(&file_text, request.config)?;
+    let formatted = format_beancount(&file_text, request.config)
+      .map_err(dprint_core::plugins::FormatError::new)?;
 
     if formatted == file_text {
       Ok(None)
