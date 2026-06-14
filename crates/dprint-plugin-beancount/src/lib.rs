@@ -80,7 +80,8 @@ impl SyncPluginHandler<Configuration> for BeancountPluginHandler {
     if file_text.trim().is_empty() {
       return Ok(Some(Vec::new()));
     }
-    let formatted = format_beancount(&file_text, request.config).map_err(dprint_core::plugins::FormatError::new)?;
+    let formatted = format_beancount(&file_text, request.config)
+      .map_err(dprint_core::plugins::FormatError::new)?;
 
     if formatted == file_text {
       Ok(None)
