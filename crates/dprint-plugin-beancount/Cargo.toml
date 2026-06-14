@@ -13,7 +13,6 @@ description = "Beancount formatter for dprint."
 crate-type = ["cdylib"]
 
 [dependencies]
-anyhow = { workspace = true }
 beancount-formatter = { path = "../beancount-formatter" }
 dprint-core = { version = "0.68.1", features = ["formatting", "wasm"] }
 serde_json = "1.0.150"

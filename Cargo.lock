@@ -416,7 +416,6 @@ dependencies = [
 name = "dprint-plugin-beancount"
 version = "0.2.1"
 dependencies = [
- "anyhow",
  "beancount-formatter",
  "dprint-core",
  "serde_json",
