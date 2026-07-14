@@ -24,7 +24,7 @@ jobs:
       - name: Update plugin.wasm
         run: cp target/wasm32-unknown-unknown/release/dprint_plugin_beancount.wasm plugin.wasm
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache-dependency-path: pnpm-lock.yaml
