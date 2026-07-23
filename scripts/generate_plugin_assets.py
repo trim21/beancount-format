@@ -3,11 +3,11 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
-import tomllib as toml
 from enum import Enum
+from pathlib import Path
 from typing import Any
 
+import tomllib as toml
 from pydantic import BaseModel, ConfigDict, Field
 
 REPO = "trim21/beancount-format"

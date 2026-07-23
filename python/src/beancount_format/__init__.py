@@ -4,6 +4,8 @@ import sys
 
 from .beancount_format import (  # pyright: ignore[reportMissingModuleSource]
     format_text,
+)
+from .beancount_format import (
     main as _main,
 )
 
