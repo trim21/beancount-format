@@ -37,8 +37,14 @@ strip = true
 python-source = "python/src"
 include = [{ path = "patches/**/*", format = "sdist" }]
 
+[tool.ruff.lint.isort]
+known-first-party = ["beancount_format"]
+extra-standard-library = ["tomllib"]
+combine-as-imports = true
+
 [tool.uv]
 package = false
 
 [tool.pyright]
 extraPaths = ["python/src/"]
+reportMissingModuleSource = "none"

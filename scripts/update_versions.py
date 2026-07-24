@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import tomllib as toml
+from pathlib import Path
 
 
 def read_workspace_version(cargo_toml: Path) -> str:
