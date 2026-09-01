@@ -181,7 +181,7 @@ dependencies = [
 [[package]]
 name = "beancount-parser"
 version = "3.3.0-alpha.0"
-source = "git+https://github.com/trim21/beancount.git?rev=2a7467908ae5adad09ff4473273a08d202e87511#2a7467908ae5adad09ff4473273a08d202e87511"
+source = "git+https://github.com/trim21/beancount.git?rev=079bd1db77e09ad030329c6ec30744ed42a938d3#079bd1db77e09ad030329c6ec30744ed42a938d3"
 dependencies = [
  "anyhow",
  "ariadne",
