@@ -86,6 +86,9 @@ def main() -> None:
         "schemaVersion": 1,
         "version": version,
         "url": f"https://cdn.jsdelivr.net/npm/@trim21/dprint-plugin-beancount@{version}/plugin.wasm",
+        # lets `dprint add` / `dprint up` resolve the latest version from the
+        # npm registry and write an `npm:` specifier into config files
+        "npm": {"name": "@trim21/dprint-plugin-beancount"},
     }
 
     write_json(plugin_root / "latest.json", latest)
