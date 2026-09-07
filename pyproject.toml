@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "beancount-format"
-version = "0.2.1"
+version = "0.2.2"
 requires-python = ">=3.10"
 description = "Beancount formatter powered by dprint-plugin-beancount"
 authors = [{ name = "trim21", email = "trim21.me@gmail.com" }]

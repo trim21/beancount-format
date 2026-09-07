@@ -135,7 +135,7 @@ checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
 
 [[package]]
 name = "beancount-formatter"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "anyhow",
  "beancount-parser",
@@ -146,7 +146,7 @@ dependencies = [
 
 [[package]]
 name = "beancount-formatter-cli"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -160,7 +160,7 @@ dependencies = [
 
 [[package]]
 name = "beancount-formatter-py"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "beancount-formatter",
  "beancount-formatter-cli",
@@ -406,7 +406,7 @@ dependencies = [
 
 [[package]]
 name = "dprint-plugin-beancount"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "beancount-formatter",
  "dprint-core",
