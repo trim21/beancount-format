@@ -3,5 +3,6 @@ target
 **/*.rs.bk
 plugin.wasm
 node_modules
+dist
 *.py[cod]
 .envrc
