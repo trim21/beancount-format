@@ -1,0 +1,64 @@
+{
+  "$defs": {
+    "NewLineKind": {
+      "enum": [
+        "lf",
+        "crlf"
+      ],
+      "title": "NewLineKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "line_width": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Override maximum line width. Falls back to dprint global `line_width`.",
+      "title": "Line Width"
+    },
+    "indent_width": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Override indentation width. Falls back to dprint global `indent_width`.",
+      "title": "Indent Width"
+    },
+    "new_line": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/NewLineKind"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Override newline style. Falls back to dprint global `new_line`."
+    },
+    "compact_balance_spacing": {
+      "default": false,
+      "description": "When true, removes empty lines between consecutive balance directives.",
+      "title": "Compact Balance Spacing",
+      "type": "boolean"
+    }
+  },
+  "title": "beancount dprint plugin config",
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}
