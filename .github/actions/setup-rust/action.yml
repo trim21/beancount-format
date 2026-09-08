@@ -1,0 +1,30 @@
+name: Setup Rust
+description: Install the Rust toolchain pinned in rust-toolchain.toml and configure cargo caching
+
+inputs:
+  components:
+    description: Comma-separated extra components to install on top of rust-toolchain.toml
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - id: toolchain
+      shell: bash
+      run: |
+        channel=$(sed -n 's/^channel[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' rust-toolchain.toml)
+        if [[ -z "$channel" ]]; then
+          echo "failed to read channel from rust-toolchain.toml" >&2
+          exit 1
+        fi
+        echo "toolchain=$channel" >> "$GITHUB_OUTPUT"
+
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ steps.toolchain.outputs.toolchain }}
+        components: ${{ inputs.components }}
+
+    - uses: Swatinem/rust-cache@v2
+      with:
+        cache-on-failure: true
