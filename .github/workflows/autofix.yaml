@@ -15,7 +15,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
 
-      - uses: trim21/setup-rust@v0.0.1
+      - uses: trim21/setup-rust@v0.0.2
 
       - run: cargo clippy --fix --allow-dirty || true
       - run: cargo fmt || true
