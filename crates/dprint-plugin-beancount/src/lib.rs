@@ -37,6 +37,7 @@ impl SyncPluginHandler<Configuration> for BeancountPluginHandler {
       file_matching: FileMatchingInfo {
         file_extensions: vec!["beancount".to_string(), "bean".to_string()],
         file_names: vec![],
+        additive: false,
       },
     }
   }
