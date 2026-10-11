@@ -36,6 +36,6 @@
     "test": "node index.js && node index.test.js"
   },
   "devDependencies": {
-    "@dprint/formatter": "~0.5.1"
+    "@dprint/formatter": "~0.6.0"
   }
 }
