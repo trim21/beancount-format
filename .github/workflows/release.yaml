@@ -49,7 +49,7 @@ jobs:
         with:
           python-version: '3.11'
 
-      - uses: astral-sh/setup-uv@v10.3.2
+      - uses: astral-sh/setup-uv@v10.3.3
         with:
           activate-environment: true
 
@@ -82,5 +82,5 @@ jobs:
           merge-multiple: true
           path: dist
 
-      - uses: astral-sh/setup-uv@v10.3.2
+      - uses: astral-sh/setup-uv@v10.3.3
       - run: uv publish
