@@ -8,13 +8,13 @@ repos:
         pass_filenames: false
 
   - repo: https://github.com/abravalheri/validate-pyproject
-    rev: 0.26
+    rev: v0.27
     hooks:
       - id: validate-pyproject
         language: python
         # Optional extra validations from SchemaStore:
         additional_dependencies:
-          - 'validate-pyproject-schema-store[all]==2026.10.17'
+          - 'validate-pyproject-schema-store[all]==2026.10.30'
         args:
           - --disable
           - ruff
@@ -42,7 +42,7 @@ repos:
         exclude: '.*\.bin'
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.17.1
+    rev: v0.17.3
     hooks:
       # Run the linter.
       - id: ruff-check
