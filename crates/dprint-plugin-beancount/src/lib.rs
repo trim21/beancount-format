@@ -63,6 +63,7 @@ impl SyncPluginHandler<Configuration> for BeancountPluginHandler {
       update_url: Some(
         "https://cdn.jsdelivr.net/gh/trim21/beancount-format@gh-pages/dprint-plugin-beancount/latest.json".to_string(),
       ),
+      supports_range_formatting: Some(false),
     }
   }
 
