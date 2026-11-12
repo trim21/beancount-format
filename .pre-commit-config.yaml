@@ -14,7 +14,7 @@ repos:
         language: python
         # Optional extra validations from SchemaStore:
         additional_dependencies:
-          - 'validate-pyproject-schema-store[all]==2026.11.10'
+          - 'validate-pyproject-schema-store[all]==2026.11.12'
         args:
           - --disable
           - ruff
@@ -42,7 +42,7 @@ repos:
         exclude: '.*\.bin'
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.17.4
+    rev: v0.17.5
     hooks:
       # Run the linter.
       - id: ruff-check
