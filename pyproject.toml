@@ -26,8 +26,8 @@ beancount-format = "beancount_format:main"
 dev = [
   "maturin==1.16.0",
   "pytest==9.2.0",
-  "ruff==0.17.5",
-  "pydantic>=2.14.3,<3",
+  "ruff==0.17.6",
+  "pydantic>=2.14.4,<3",
 ]
 
 [tool.maturin]
